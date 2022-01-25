@@ -10,7 +10,7 @@ module.exports = {
     return [
       {
         source: '/',
-        destination: '/trade',
+        destination: '/trade[contract]',
         permanent: true,
       },
     ]
