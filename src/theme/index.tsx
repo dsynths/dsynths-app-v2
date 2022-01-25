@@ -8,7 +8,9 @@ import styled, {
 } from 'styled-components'
 
 import { useIsDarkMode } from 'state/user/hooks'
-import { Colors } from './styled'
+import { Colors, Shadows } from './styled'
+import { useRouter } from 'next/router'
+import { SupportedChainId } from 'constants/chains'
 
 type TextProps = Omit<TextPropsOriginal, 'css'>
 
@@ -47,69 +49,274 @@ const mediaWidthTemplates: { [width in keyof typeof MEDIA_WIDTHS]: typeof css } 
 const white = '#FFFFFF'
 const black = '#000000'
 
-function colors(darkMode: boolean): Colors {
-  return {
-    darkMode,
-    // base
-    white,
-    black,
-
-    // text
-    text1: darkMode ? '#FFFFFF' : '#000000',
-    text2: darkMode ? '#C3C5CB' : '#78787B',
-    text3: darkMode ? '#8F96AC' : '#808086',
-    text4: darkMode ? '#B2B9D2' : '#B8B8BE',
-
-    // backgrounds / greys
-    bg0: darkMode ? '#14181E' : '#FFFFFF',
-    bg1: darkMode ? '#262B35' : '#F5F6FC',
-    bg2: darkMode ? '#0F1217' : '#F0F0F7',
-    bg3: darkMode ? '#262B35' : '#E9E9F3',
-
-    // borders
-    border1: '#B8B8BE',
-    border2: 'rgba(99, 126, 161, 0.2)',
-
-    //specialty colors
-    specialBG1: darkMode
-      ? '#0F1217'
-      : 'radial-gradient(95.21% 95.21% at 50% 4.79%, rgba(138, 148, 220, 0.2) 0%, rgba(255, 255, 255, 0.2) 100%)',
-    specialBG2: darkMode
-      ? '#14181E'
-      : 'linear-gradient(90deg, rgba(81, 171, 255, 0.1) 0%, rgba(22, 72, 250, 0.1) 100%), linear-gradient(0deg, #FFFFFF, #FFFFFF)',
-
-    // primary colors
-    primary1: '#FFB463',
-    primary2: '#FFA76A',
-    primary3: 'linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 167, 106, 0) 100%), #FFA76A',
-
-    // color text
-    primaryText1: darkMode ? '#1749FA' : '#FFB463', // TODO check if we want these values
-
-    // secondary colors
-    secondary1: '#1749FA',
-    secondary2: 'rgba(23, 73, 250, 0.2)',
-
-    // other
-    red1: darkMode ? '#FF4343' : '#DA2D2B',
-    red2: darkMode ? '#F82D3A' : '#DF1F38',
-    red3: '#D60000',
-    green1: darkMode ? '#27AE60' : '#007D35',
-    yellow1: '#E3A507',
-    yellow2: '#FF8F00',
-    yellow3: '#F3B71E',
-    blue1: darkMode ? '#2172E5' : '#0068FC',
-    blue2: darkMode ? '#5199FF' : '#0068FC',
-
-    error: darkMode ? '#FD4040' : '#DF1F38',
-    success: darkMode ? '#27AE60' : '#007D35',
-    warning: '#FF8F00',
-  }
+export enum SupportedThemes {
+  LIGHT = 'light',
+  DARK = 'dark',
+  SPIRIT = 'spirit',
+  SPIRIT2 = 'spirit2',
 }
 
-function theme(darkMode: boolean): DefaultTheme {
+function colors(themeName: SupportedThemes): Colors {
+  // define colour scheme for each supported theme
+  const themeColors = {
+    [SupportedThemes.LIGHT]: {
+      themeName: SupportedThemes.LIGHT,
+
+      // base
+      white,
+      black,
+
+      // text
+      text1: '#000000',
+      text2: '#78787B',
+      text3: '#808086',
+      text4: '#B8B8BE',
+
+      // backgrounds / greys
+      bg0: '#FFFFFF',
+      bg1: '#F5F6FC',
+      bg2: '#F0F0F7',
+      bg3: '#E9E9F3',
+
+      // borders
+      border1: '#B8B8BE',
+      border2: 'rgba(99, 126, 161, 0.2)',
+
+      //specialty colors
+      specialBG1:
+        'radial-gradient(95.21% 95.21% at 50% 4.79%, rgba(138, 148, 220, 0.2) 0%, rgba(255, 255, 255, 0.2) 100%)',
+      specialBG2:
+        'linear-gradient(90deg, rgba(81, 171, 255, 0.1) 0%, rgba(22, 72, 250, 0.1) 100%), linear-gradient(0deg, #FFFFFF, #FFFFFF)',
+
+      // primary colors
+      primary1: '#FFB463',
+      primary2: '#FFA76A',
+      primary3: 'linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 167, 106, 0) 100%), #FFA76A',
+
+      // color text
+      primaryText1: '#FFB463', // TODO check if we want these values
+
+      // secondary colors
+      secondary1: '#1749FA',
+      secondary2: 'rgba(23, 73, 250, 0.2)',
+
+      // other
+      red1: '#DA2D2B',
+      red2: '#DF1F38',
+      red3: '#D60000',
+      green1: '#007D35',
+      yellow1: '#E3A507',
+      yellow2: '#FF8F00',
+      yellow3: '#F3B71E',
+      blue1: '#0068FC',
+      blue2: '#0068FC',
+
+      error: '#DF1F38',
+      success: '#007D35',
+      warning: '#FF8F00',
+    },
+    [SupportedThemes.DARK]: {
+      themeName: SupportedThemes.DARK,
+
+      // base
+      white,
+      black,
+
+      // text
+      text1: '#FFFFFF',
+      text2: '#C3C5CB',
+      text3: '#8F96AC',
+      text4: '#B2B9D2',
+
+      // backgrounds / greys
+      bg0: '#14181E',
+      bg1: '#262B35',
+      bg2: '#0F1217',
+      bg3: '#262B35',
+
+      // borders
+      border1: '#B8B8BE',
+      border2: 'rgba(99, 126, 161, 0.2)',
+
+      //specialty colors
+      specialBG1: '#0F1217',
+      specialBG2: '#14181E',
+
+      // primary colors
+      primary1: '#FFB463',
+      primary2: '#FFA76A',
+      primary3: 'linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 167, 106, 0) 100%), #FFA76A',
+
+      // color text
+      primaryText1: '#1749FA', // TODO check if we want these values
+
+      // secondary colors
+      secondary1: '#1749FA',
+      secondary2: 'rgba(23, 73, 250, 0.2)',
+
+      // other
+      red1: '#FF4343',
+      red2: '#F82D3A',
+      red3: '#D60000',
+      green1: '#27AE60',
+      yellow1: '#E3A507',
+      yellow2: '#FF8F00',
+      yellow3: '#F3B71E',
+      blue1: '#2172E5',
+      blue2: '#5199FF',
+
+      error: '#FD4040',
+      success: '#27AE60',
+      warning: '#FF8F00',
+    },
+    [SupportedThemes.SPIRIT]: {
+      themeName: SupportedThemes.SPIRIT,
+
+      // base
+      white,
+      black,
+
+      // text
+      text1: '#45BAE5',
+      text2: '#D9F1F9',
+      text3: '#C7EAF7',
+      text4: '#B4E3F4',
+
+      // backgrounds / greys
+      bg0: '#0D252D',
+      bg1: '#143744',
+      bg2: '#1B4A5B',
+      bg3: '#225D72',
+
+      // borders
+      border1: '#ECF8FC',
+      border2: 'rgba(99, 126, 161, 0.2)',
+
+      //specialty colors
+      specialBG1: '#1B4A5B',
+      specialBG2: '#1B4A5B',
+
+      // primary colors
+      primary1: '#71D887',
+      primary2: '#5AAC6C',
+      primary3: 'linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 167, 106, 0) 100%), #5AAC6C',
+
+      // color text
+      primaryText1: '#1749FA', // TODO check if we want these values
+
+      // secondary colors
+      secondary1: '#1749FA',
+      secondary2: 'rgba(23, 73, 250, 0.2)',
+
+      // other
+      red1: '#FF4343',
+      red2: '#F82D3A',
+      red3: '#D60000',
+      green1: '#27AE60',
+      yellow1: '#E3A507',
+      yellow2: '#FF8F00',
+      yellow3: '#F3B71E',
+      blue1: '#2172E5',
+      blue2: '#5199FF',
+
+      error: '#FD4040',
+      success: '#27AE60',
+      warning: '#FF8F00',
+    },
+    [SupportedThemes.SPIRIT2]: {
+      themeName: SupportedThemes.SPIRIT2,
+
+      // base
+      white,
+      black,
+
+      // text
+      text1: '#45BAE5',
+      text2: '#D9F1F9',
+      text3: '#C7EAF7',
+      text4: '#B4E3F4',
+
+      // backgrounds / greys
+      bg0: 'rgb(13, 15, 34)',
+      bg1: 'rgba(96, 213, 220, 0.25)',
+      bg2: 'rgb(21, 30, 49)',
+      bg3: 'rgba(96, 213, 220, 0.05)',
+
+      // borders
+      border1: '#ECF8FC',
+      border2: 'rgba(99, 126, 161, 0.2)',
+
+      //long short btn colours
+      long: '#71D887',
+      short: '#45BAE5',
+
+      //specialty colors
+      specialBG1: 'rgb(13, 15, 34)',
+      specialBG2: 'rgb(21, 30, 49)',
+
+      // primary colors
+      primary1: '#71D887',
+      primary2: '#5AAC6C',
+      primary3: 'linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 167, 106, 0) 100%), #5AAC6C',
+
+      // color text
+      primaryText1: '#1749FA', // TODO check if we want these values
+
+      // secondary colors
+      secondary1: '#1749FA',
+      secondary2: 'rgba(23, 73, 250, 0.2)',
+
+      // other
+      red1: '#FF4343',
+      red2: '#F82D3A',
+      red3: '#D60000',
+      green1: '#27AE60',
+      yellow1: '#E3A507',
+      yellow2: '#FF8F00',
+      yellow3: '#F3B71E',
+      blue1: '#2172E5',
+      blue2: '#5199FF',
+
+      error: '#FD4040',
+      success: '#27AE60',
+      warning: '#FF8F00',
+    },
+  }
+  // default the theme to light mode
+  return themeName in SupportedThemes ? themeColors[SupportedThemes.LIGHT] : themeColors[themeName]
+}
+
+// define shadow scheme for each supported theme
+function shadows(themeName: SupportedThemes): Shadows {
+  const themeShadows = {
+    [SupportedThemes.LIGHT]: {
+      shadow1: '#2F80ED',
+      boxShadow1: '0px 0px 4px rgba(0, 0, 0, 0.125)',
+      boxShadow2: '0px 5px 5px rgba(0, 0, 0, 0.15)',
+    },
+    [SupportedThemes.DARK]: {
+      shadow1: '#000',
+      boxShadow1: '0px 0px 4px rgba(0, 0, 0, 0.125)',
+      boxShadow2: '0px 5px 5px rgba(0, 0, 0, 0.15)',
+    },
+    [SupportedThemes.SPIRIT]: {
+      shadow1: '#000',
+      boxShadow1: '0px 0px 4px rgba(0, 0, 0, 0.125)',
+      boxShadow2: 'rgb(96 213 220) 0px 4px 30px',
+    },
+    [SupportedThemes.SPIRIT2]: {
+      shadow1: '#000',
+      boxShadow1: '0px 0px 4px rgba(0, 0, 0, 0.125)',
+      boxShadow2: 'rgb(96 213 220) 0px 4px 30px',
+    },
+  }
+  // default the theme to light mode
+  return themeName in SupportedThemes ? themeShadows[SupportedThemes.LIGHT] : themeShadows[themeName]
+}
+
+function theme(themeName: SupportedThemes): DefaultTheme {
   return {
-    ...colors(darkMode),
+    ...colors(themeName),
 
     grids: {
       sm: 8,
@@ -118,9 +325,7 @@ function theme(darkMode: boolean): DefaultTheme {
     },
 
     //shadows
-    shadow1: darkMode ? '#000' : '#2F80ED',
-    boxShadow1: '0px 0px 4px rgba(0, 0, 0, 0.125)',
-    boxShadow2: '0px 5px 5px rgba(0, 0, 0, 0.15)',
+    ...shadows(themeName),
 
     // media queries
     mediaWidth: mediaWidthTemplates,
@@ -128,8 +333,21 @@ function theme(darkMode: boolean): DefaultTheme {
 }
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // get theme name from url if any
+  const router = useRouter()
+  const parsed = router.query?.theme
+  let parsedTheme = parsed && typeof parsed === 'string' ? parsed : undefined
+
   const darkMode = useIsDarkMode()
-  const themeObject = useMemo(() => theme(darkMode), [darkMode])
+
+  let themeName: SupportedThemes
+  if (parsedTheme && Object.values(SupportedThemes).some((theme: string) => theme === parsedTheme)) {
+    themeName = parsedTheme as SupportedThemes
+  } else {
+    themeName = darkMode ? SupportedThemes.DARK : SupportedThemes.LIGHT
+  }
+
+  const themeObject = useMemo(() => theme(themeName), [themeName])
 
   return <StyledComponentsThemeProvider theme={themeObject}>{children}</StyledComponentsThemeProvider>
 }
@@ -211,7 +429,7 @@ export const ThemedGlobalStyle = createGlobalStyle`
 
   body {
     font-family: 'Rubik';
-    background: ${({ theme }) => theme.specialBG1}
+    background: ${({ theme }) => theme.specialBG1};
   }
 
   button {

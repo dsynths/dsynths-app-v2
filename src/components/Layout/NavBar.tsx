@@ -10,6 +10,7 @@ import { useDarkModeManager } from 'state/user/hooks'
 import { Sidebar } from './Sidebar'
 import NavLogo from './NavLogo'
 import { Z_INDEX } from 'theme'
+import { useRouter } from 'next/router'
 
 const Wrapper = styled.div`
   display: flex;
@@ -52,6 +53,11 @@ export default function NavBar() {
   const [, toggleDarkMode] = useDarkModeManager()
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
 
+  // get custom theme name from url, if any
+  // allow the default light/dark theme toggle if there isn't any custom theme defined via url
+  const router = useRouter()
+  const showThemeToggle = !router.query?.theme
+
   const toggleSidebar = (isOpen: boolean) => {
     setSidebarOpen((prev) => isOpen ?? !prev)
   }
@@ -60,9 +66,11 @@ export default function NavBar() {
     <Wrapper>
       <NavLogo />
       <NavItems>
-        <NavButton onClick={() => toggleDarkMode()}>
-          <ThemeToggle size={20} />
-        </NavButton>
+        {showThemeToggle && (
+          <NavButton onClick={() => toggleDarkMode()}>
+            <ThemeToggle size={20} />
+          </NavButton>
+        )}
         <Web3Status />
         <Web3Network />
       </NavItems>
