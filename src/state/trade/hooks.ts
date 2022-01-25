@@ -56,7 +56,7 @@ export default function useDefaultsFromURL(): {
         })
       }
     },
-    [router]
+    [router, theme]
   )
 
   return {

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { useAppDispatch } from 'state'
 import styled from 'styled-components'
 import { darken } from 'polished'
@@ -142,7 +142,6 @@ export default function Trade() {
   const [tradeType, setTradeType] = useState<TradeType>(TradeType.OPEN)
   const [direction, setDirection] = useState(Direction.LONG)
   const { attemptingTxn, showReview, error: tradeStateError } = tradeState
-  const [sibling, setSibling] = useState<string>('')
   const [txHash, setTxHash] = useState<string>('')
   const [awaitingApproveConfirmation, setAwaitingApproveConfirmation] = useState<boolean>(false)
 
@@ -150,7 +149,8 @@ export default function Trade() {
     return tradeType === TradeType.OPEN ? [quoteCurrency, baseCurrency] : [baseCurrency, quoteCurrency]
   }, [tradeType, baseCurrency, quoteCurrency])
 
-  const asset = useAssetByContract(baseCurrency?.wrapped.address ?? sibling)
+  const asset = useAssetByContract(baseCurrency?.wrapped.address ?? undefined)
+
   const { formattedAmounts, parsedAmounts, error } = useTradePage(
     baseCurrency,
     quoteCurrency,
@@ -170,10 +170,13 @@ export default function Trade() {
   }, [chainId, isSupportedChainId])
   const [approvalState, approveCallback1] = useApproveCallback(currencies[0], spender)
 
-  const handleSwitchDirection = useCallback(() => {
-    setDirection((prev) => (prev === Direction.LONG ? Direction.SHORT : Direction.LONG))
-    asset && setURLCurrency(asset.sibling)
-  }, [asset, setURLCurrency])
+  const handleSwitchDirection = useCallback(
+    (newDirection) => {
+      setDirection(newDirection)
+      asset && setURLCurrency(asset.sibling)
+    },
+    [asset, setURLCurrency]
+  )
 
   const handleSwitchCurrencies = useCallback(() => {
     dispatch(setTradeState({ ...tradeState, typedValue: '', typedField: TypedField.A }))
@@ -298,10 +301,18 @@ export default function Trade() {
   return (
     <Wrapper>
       <DirectionWrapper>
-        <DirectionTab isLong active={direction === Direction.LONG} onClick={handleSwitchDirection}>
+        <DirectionTab
+          isLong
+          active={direction === Direction.LONG}
+          onClick={() => direction === Direction.SHORT && handleSwitchDirection(Direction.LONG)}
+        >
           {Direction.LONG}
         </DirectionTab>
-        <DirectionTab isShort active={direction === Direction.SHORT} onClick={handleSwitchDirection}>
+        <DirectionTab
+          isShort
+          active={direction === Direction.SHORT}
+          onClick={() => direction === Direction.LONG && handleSwitchDirection(Direction.SHORT)}
+        >
           {Direction.SHORT}
         </DirectionTab>
       </DirectionWrapper>
