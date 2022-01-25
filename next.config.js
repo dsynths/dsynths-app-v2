@@ -3,7 +3,6 @@ module.exports = {
     return {
       '/trade': {
         page: '/trade',
-        query: { assetId: '', theme: '' },
       },
     }
   },
