@@ -10,6 +10,8 @@ export const INFO_BASE_URL = ORACLE_BASE_URL_MAP[0]
 
 export const ORACLE_NETWORK_NAMES: { [chainId: number]: string } = {
   [SupportedChainId.MAINNET]: 'mainnet',
+  [SupportedChainId.BSC]: 'bsc',
+  [SupportedChainId.HECO]: 'heco',
   [SupportedChainId.POLYGON]: 'polygon',
 }
 
