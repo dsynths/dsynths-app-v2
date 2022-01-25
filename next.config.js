@@ -4,6 +4,9 @@ module.exports = {
       '/trade': {
         page: '/trade',
       },
+      '/portfolio': {
+        page: '/portfolio',
+      },
     }
   },
   async redirects() {
