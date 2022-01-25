@@ -14,15 +14,6 @@ import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import useDefaultsFromURL from 'state/trade/hooks'
 import { Loader } from 'components/Icons'
 
-const OverflowWrapper = styled.div``
-
-// const List = styled(FixedSizeList)`
-//   // height: 100%;
-//   // position: relative;
-//   // overflow: scroll;
-//   // -webkit-overflow-scrolling: touch;
-// `
-
 const Row = styled.div`
   display: flex;
   flex-flow: row nowrap;
@@ -85,7 +76,7 @@ const AssetRow = ({
     >
       <ImageWithFallback src={logo} width={30} height={30} alt={`${asset.symbol}`} />
       <NameWrapper>
-        <div>{asset.symbol}</div>
+        <div>{asset.id}</div>
         <div>{asset.name}</div>
       </NameWrapper>
       {balance ? <div>{balance?.toSignificant(6)}</div> : <Loader size="12px" duration={'3s'} />}
@@ -107,7 +98,7 @@ export default function AssetsModal({
   return (
     <Modal isOpen={isOpen} onBackgroundClick={onDismiss} onEscapeKeydown={onDismiss} width="350px">
       <ModalHeader title="Select an asset" onClose={onDismiss} />
-      <OverflowWrapper>
+      <div>
         <List
           width={350}
           height={400}
@@ -121,7 +112,7 @@ export default function AssetsModal({
             return <AssetRow key={index} asset={asset} onDismiss={onDismiss} style={style} />
           }}
         </List>
-      </OverflowWrapper>
+      </div>
     </Modal>
   )
 }

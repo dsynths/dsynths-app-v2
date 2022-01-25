@@ -19,7 +19,6 @@ import Option from './Option'
 import PendingView from './PendingView'
 import { Modal, ModalHeader } from 'components/Modal'
 import AccountDetails from 'components/AccountDetails'
-import MetamaskIcon from 'assets/img/wallets/metamask.png'
 
 const Wrapper = styled.div`
   display: flex;
@@ -164,7 +163,7 @@ export default function WalletModal({
                 header={'Install Metamask'}
                 subheader={null}
                 link={'https://metamask.io/'}
-                icon={MetamaskIcon}
+                icon={require('/public/static/images/wallets/metamask.png')}
               />
             )
           } else {

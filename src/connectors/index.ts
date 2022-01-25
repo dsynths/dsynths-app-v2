@@ -8,7 +8,6 @@ import { FortmaticConnector } from './Fortmatic'
 import { NetworkConnector } from './NetworkConnector'
 
 import { getLibrary } from 'utils/library'
-import APP_LOGO_URL from 'assets/img/AppLogo.png'
 
 import { INFURA_KEY, FORMATIC_KEY, PORTIS_ID } from 'constants/keys'
 import { NETWORK_URLS, SupportedChainId, SUPPORTED_CHAIN_IDS } from 'constants/chains'
@@ -53,6 +52,6 @@ export const portis = new PortisConnector({
 export const walletlink = new WalletLinkConnector({
   url: NETWORK_URLS[SupportedChainId.MAINNET],
   appName: 'DEUS Finance',
-  appLogoUrl: APP_LOGO_URL.src,
+  appLogoUrl: require('/public/static/images/AppLogo.png'),
   supportedChainIds: SUPPORTED_CHAIN_IDS,
 })

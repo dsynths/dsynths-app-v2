@@ -99,7 +99,7 @@ export default function Option({
         </HeaderText>
         {subheader && <SubHeader>{subheader}</SubHeader>}
       </WrapperLeft>
-      <Image src={icon.src} alt={'Icon'} width={size} height={size} />
+      <Image src={icon} alt={'Icon'} width={size} height={size} />
     </Wrapper>
   )
   if (link) {

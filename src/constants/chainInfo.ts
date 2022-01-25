@@ -1,13 +1,5 @@
 import { SupportedChainId } from './chains'
 
-import MainnetLogo from 'assets/img/networks/mainnet.svg'
-import RinkebyLogo from 'assets/img/networks/mainnet.svg'
-import BinanceLogo from 'assets/img/networks/binance.svg'
-import xDaiLogo from 'assets/img/networks/xdai.svg'
-import HecoLogo from 'assets/img/networks/heco.svg'
-import PolygonLogo from 'assets/img/networks/polygon.svg'
-import FantomLogo from 'assets/img/networks/fantom.svg'
-
 interface Info {
   chainId: string
   chainName: string
@@ -27,7 +19,7 @@ export const ChainInfo: { [chainId in SupportedChainId]: Info } = {
     chainId: '0x1',
     chainName: 'Ethereum Mainnet',
     label: 'Ethereum',
-    logoUrl: MainnetLogo,
+    logoUrl: require('/public/static/images/networks/mainnet.svg'),
     nativeCurrency: {
       name: 'ETH',
       symbol: 'ETH',
@@ -40,7 +32,7 @@ export const ChainInfo: { [chainId in SupportedChainId]: Info } = {
     chainId: '0x4',
     chainName: 'Rinkeby',
     label: 'Rinkeby',
-    logoUrl: RinkebyLogo,
+    logoUrl: require('/public/static/images/networks/mainnet.svg'),
     nativeCurrency: {
       name: 'ETH',
       symbol: 'ETH',
@@ -53,7 +45,7 @@ export const ChainInfo: { [chainId in SupportedChainId]: Info } = {
     chainId: '0x38',
     chainName: 'Binance Smart Chain Mainnet',
     label: 'BSC',
-    logoUrl: BinanceLogo,
+    logoUrl: require('/public/static/images/networks/binance.svg'),
     nativeCurrency: {
       name: 'BNB',
       symbol: 'BNB',
@@ -66,7 +58,7 @@ export const ChainInfo: { [chainId in SupportedChainId]: Info } = {
     chainId: '0x64',
     chainName: 'xDAI Chain',
     label: 'xDAI',
-    logoUrl: xDaiLogo,
+    logoUrl: require('/public/static/images/networks/xdai.svg'),
     nativeCurrency: {
       name: 'xDAI',
       symbol: 'xDAI',
@@ -79,7 +71,7 @@ export const ChainInfo: { [chainId in SupportedChainId]: Info } = {
     chainId: '0x80',
     chainName: 'Huobi ECO Chain Mainnet',
     label: 'HECO',
-    logoUrl: HecoLogo,
+    logoUrl: require('/public/static/images/networks/heco.svg'),
     nativeCurrency: {
       name: 'HT',
       symbol: 'HT',
@@ -92,7 +84,7 @@ export const ChainInfo: { [chainId in SupportedChainId]: Info } = {
     chainId: '0x89',
     chainName: 'Matic Mainnet',
     label: 'Polygon',
-    logoUrl: PolygonLogo,
+    logoUrl: require('/public/static/images/networks/polygon.svg'),
     nativeCurrency: {
       name: 'Matic',
       symbol: 'Matic',
@@ -105,7 +97,7 @@ export const ChainInfo: { [chainId in SupportedChainId]: Info } = {
     chainId: '0xfa',
     chainName: 'Fantom Opera',
     label: 'Fantom',
-    logoUrl: FantomLogo,
+    logoUrl: require('/public/static/images/networks/fantom.svg'),
     nativeCurrency: {
       name: 'FTM',
       symbol: 'FTM',

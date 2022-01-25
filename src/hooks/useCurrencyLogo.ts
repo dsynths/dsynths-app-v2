@@ -5,12 +5,12 @@ export default function useCurrencyLogo(id: string | undefined, symbol: string |
   return useMemo(() => {
     try {
       return id
-        ? require(`assets/img/tickers/${id.toUpperCase()}.png`)
+        ? require(`/public/static/images/tickers/${id.toUpperCase()}.png`)
         : symbol === 'DEI'
-        ? require('assets/img/tokens/dei.svg')
-        : require('assets/img/fallback/ticker.png')
+        ? require('/public/static/images/tokens/dei.svg')
+        : require('/public/static/images/fallback/ticker.png')
     } catch (err) {
-      return require('assets/img/fallback/ticker.png')
+      return require('/public/static/images/fallback/ticker.png')
     }
   }, [id, symbol])
 }

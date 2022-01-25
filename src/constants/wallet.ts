@@ -1,12 +1,5 @@
 import { AbstractConnector } from '@web3-react/abstract-connector'
 
-import INJECTED_ICON_URL from 'assets/img/wallets/injected.svg'
-import COINBASE_ICON_URL from 'assets/img/wallets/coinbaseWalletIcon.png'
-import FORTMATIC_ICON_URL from 'assets/img/wallets/fortmaticIcon.png'
-import METAMASK_ICON_URL from 'assets/img/wallets/metamask.png'
-import PORTIS_ICON_URL from 'assets/img/wallets/portisIcon.png'
-import WALLETCONNECT_ICON_URL from 'assets/img/wallets/walletConnect.png'
-
 import { fortmatic, injected, portis, walletconnect, walletlink } from '../connectors'
 
 interface WalletInfo {
@@ -25,7 +18,7 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
   INJECTED: {
     connector: injected,
     name: 'Injected',
-    iconURL: INJECTED_ICON_URL,
+    iconURL: require('/public/static/images/wallets/injected.svg'),
     description: 'Injected web3 provider.',
     color: '#010101',
     primary: true,
@@ -33,14 +26,14 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
   METAMASK: {
     connector: injected,
     name: 'MetaMask',
-    iconURL: METAMASK_ICON_URL,
+    iconURL: require('/public/static/images/wallets/metamask.png'),
     description: 'Easy-to-use browser extension.',
     color: '#E8831D',
   },
   WALLET_CONNECT: {
     connector: walletconnect,
     name: 'WalletConnect',
-    iconURL: WALLETCONNECT_ICON_URL,
+    iconURL: require('/public/static/images/wallets/walletConnect.png'),
     description: 'Connect to Trust Wallet, Rainbow Wallet and more...',
     color: '#4196FC',
     mobile: true,
@@ -48,14 +41,14 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
   WALLET_LINK: {
     connector: walletlink,
     name: 'Coinbase Wallet',
-    iconURL: COINBASE_ICON_URL,
+    iconURL: require('/public/static/images/wallets/coinbaseWalletIcon.png'),
     description: 'Use Coinbase Wallet app on mobile device',
     color: '#315CF5',
   },
   FORTMATIC: {
     connector: fortmatic,
     name: 'Fortmatic',
-    iconURL: FORTMATIC_ICON_URL,
+    iconURL: require('/public/static/images/wallets/fortmaticIcon.png'),
     description: 'Login using Fortmatic hosted wallet',
     color: '#6748FF',
     mobile: true,
@@ -63,7 +56,7 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
   PORTIS: {
     connector: portis,
     name: 'Portis',
-    iconURL: PORTIS_ICON_URL,
+    iconURL: require('/public/static/images/wallets/portisIcon.png'),
     description: 'Login using Portis hosted wallet',
     color: '#4A6C9B',
     mobile: true,
