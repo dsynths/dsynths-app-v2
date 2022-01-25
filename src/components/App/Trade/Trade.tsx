@@ -159,20 +159,6 @@ export default function Trade() {
     tradeType
   )
 
-  const switchCurrencies = useCallback(() => {
-    setTradeType((prev) => (prev === TradeType.OPEN ? TradeType.CLOSE : TradeType.OPEN))
-  }, [])
-
-  useEffect(() => {
-    if (asset) {
-      setDirection(asset.direction)
-      setSibling(asset.sibling)
-    } else {
-      setDirection(Direction.LONG)
-      setSibling('')
-    }
-  }, [asset])
-
   // Allow user to connect any chain globally, but restrict unsupported ones on this page
   const isSupportedChainId: boolean = useMemo(() => {
     if (!chainId || !account) return false
@@ -191,8 +177,8 @@ export default function Trade() {
 
   const handleSwitchCurrencies = useCallback(() => {
     dispatch(setTradeState({ ...tradeState, typedValue: '', typedField: TypedField.A }))
-    switchCurrencies()
-  }, [dispatch, switchCurrencies, tradeState])
+    setTradeType((prev) => (prev === TradeType.OPEN ? TradeType.CLOSE : TradeType.OPEN))
+  }, [dispatch, tradeState])
 
   const [showApprove, showApproveLoader] = useMemo(() => {
     const show = currencies[0] && approvalState !== ApprovalState.APPROVED
