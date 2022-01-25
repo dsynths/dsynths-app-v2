@@ -2,7 +2,7 @@ import { ThemedCssFunction } from 'styled-components/macro'
 
 export type Color = string
 export interface Colors {
-  darkMode: boolean
+  themeName: string
 
   // base
   white: Color
@@ -52,6 +52,13 @@ export interface Colors {
   error: Color
   success: Color
   warning: Color
+}
+
+export type Shadow = string
+export interface Shadows {
+  shadow1: Shadow
+  boxShadow2: Shadow
+  boxShadow2: Shadow
 }
 
 declare module 'styled-components' {

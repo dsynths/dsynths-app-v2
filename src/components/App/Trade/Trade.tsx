@@ -55,7 +55,7 @@ const DirectionTab = styled.div<{
   height: 35px;
   line-height: 35px;
   text-align: center;
-  color: ${({ theme }) => theme.text1};
+  color: ${({ theme }) => theme.black};
   border-radius: ${({ isLong }) => (isLong ? '10px 0 0 10px' : '0 10px 10px 0')};
   ${({ theme, isLong, isShort, active }) =>
     isLong && active
