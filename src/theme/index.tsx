@@ -10,7 +10,6 @@ import styled, {
 import { useIsDarkMode } from 'state/user/hooks'
 import { Colors, Shadows } from './styled'
 import { useRouter } from 'next/router'
-import { SupportedChainId } from 'constants/chains'
 
 type TextProps = Omit<TextPropsOriginal, 'css'>
 
@@ -336,7 +335,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
   // get theme name from url if any
   const router = useRouter()
   const parsed = router.query?.theme
-  let parsedTheme = parsed && typeof parsed === 'string' ? parsed : undefined
+  const parsedTheme = parsed && typeof parsed === 'string' ? parsed : undefined
 
   const darkMode = useIsDarkMode()
 

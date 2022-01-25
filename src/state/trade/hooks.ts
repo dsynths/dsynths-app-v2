@@ -20,9 +20,12 @@ export default function useDefaultsFromURL(): {
   const contracts = useConductedContracts()
   const router = useRouter()
 
-  const contract = router.query?.contract?.length ? router.query.contract[0] : ''
   const theme = router.query?.theme || undefined
-  const baseCurrency = useCurrency(contracts.includes(contract) ? contract : undefined) || undefined
+  const contract = router.query?.assetId || undefined
+  const parsedContract = typeof contract === 'string' ? contract.toLowerCase() : ''
+
+  const baseCurrency =
+    useCurrency(contracts.some((o) => o.toLowerCase() === parsedContract) ? parsedContract : undefined) || undefined
   const quoteCurrency = useCurrency((chainId && Collateral[chainId]) ?? Collateral[1]) || undefined
 
   function instanceOfCurrency(object: any): object is Currency {
@@ -32,7 +35,7 @@ export default function useDefaultsFromURL(): {
   const setURLCurrency = useCallback(
     async (currencyOrContract: Currency | string) => {
       if (typeof currencyOrContract === 'string' && isAddress(currencyOrContract)) {
-        const query: ParsedUrlQueryInput = { contract: currencyOrContract }
+        const query: ParsedUrlQueryInput = { assetId: currencyOrContract }
         // if there is a custom theme defined via url, preserve it
         if (theme) {
           query.theme = theme
@@ -42,7 +45,7 @@ export default function useDefaultsFromURL(): {
           query,
         })
       } else if (instanceOfCurrency(currencyOrContract) && currencyOrContract?.wrapped?.address) {
-        const query: ParsedUrlQueryInput = { contract: currencyOrContract.wrapped.address }
+        const query: ParsedUrlQueryInput = { assetId: currencyOrContract.wrapped.address }
         // if there is a custom theme defined via url, preserve it
         if (theme) {
           query.theme = theme
@@ -53,7 +56,7 @@ export default function useDefaultsFromURL(): {
         })
       }
     },
-    [router]
+    [router, theme]
   )
 
   return {
