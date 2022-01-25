@@ -76,4 +76,3 @@ out/
 
 # FuseBox cache
 .fusebox/
-*.svg
