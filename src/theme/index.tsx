@@ -8,8 +8,9 @@ import styled, {
 } from 'styled-components'
 
 import { useIsDarkMode } from 'state/user/hooks'
-import { Colors } from './styled'
+import { Colors, Shadows } from './styled'
 import { useRouter } from 'next/router'
+import { SupportedChainId } from 'constants/chains'
 
 type TextProps = Omit<TextPropsOriginal, 'css'>
 
@@ -48,12 +49,19 @@ const mediaWidthTemplates: { [width in keyof typeof MEDIA_WIDTHS]: typeof css } 
 const white = '#FFFFFF'
 const black = '#000000'
 
-function colors(themeName: string): Colors {
-  const supportedThemes = ['light', 'dark', 'spiritswap']
+export enum SupportedThemes {
+  LIGHT = 'light',
+  DARK = 'dark',
+  SPIRIT = 'spirit',
+  SPIRIT2 = 'spirit2',
+}
+
+function colors(themeName: SupportedThemes): Colors {
   // define colour scheme for each supported theme
   const themeColors = {
-    light: {
-      themeName,
+    [SupportedThemes.LIGHT]: {
+      themeName: SupportedThemes.LIGHT,
+
       // base
       white,
       black,
@@ -107,8 +115,9 @@ function colors(themeName: string): Colors {
       success: '#007D35',
       warning: '#FF8F00',
     },
-    dark: {
-      themeName,
+    [SupportedThemes.DARK]: {
+      themeName: SupportedThemes.DARK,
+
       // base
       white,
       black,
@@ -160,8 +169,9 @@ function colors(themeName: string): Colors {
       success: '#27AE60',
       warning: '#FF8F00',
     },
-    spiritswap: {
-      themeName,
+    [SupportedThemes.SPIRIT]: {
+      themeName: SupportedThemes.SPIRIT,
+
       // base
       white,
       black,
@@ -183,8 +193,66 @@ function colors(themeName: string): Colors {
       border2: 'rgba(99, 126, 161, 0.2)',
 
       //specialty colors
-      specialBG1: '#061216',
-      specialBG2: '#061216',
+      specialBG1: '#1B4A5B',
+      specialBG2: '#1B4A5B',
+
+      // primary colors
+      primary1: '#71D887',
+      primary2: '#5AAC6C',
+      primary3: 'linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 167, 106, 0) 100%), #5AAC6C',
+
+      // color text
+      primaryText1: '#1749FA', // TODO check if we want these values
+
+      // secondary colors
+      secondary1: '#1749FA',
+      secondary2: 'rgba(23, 73, 250, 0.2)',
+
+      // other
+      red1: '#FF4343',
+      red2: '#F82D3A',
+      red3: '#D60000',
+      green1: '#27AE60',
+      yellow1: '#E3A507',
+      yellow2: '#FF8F00',
+      yellow3: '#F3B71E',
+      blue1: '#2172E5',
+      blue2: '#5199FF',
+
+      error: '#FD4040',
+      success: '#27AE60',
+      warning: '#FF8F00',
+    },
+    [SupportedThemes.SPIRIT2]: {
+      themeName: SupportedThemes.SPIRIT2,
+
+      // base
+      white,
+      black,
+
+      // text
+      text1: '#45BAE5',
+      text2: '#D9F1F9',
+      text3: '#C7EAF7',
+      text4: '#B4E3F4',
+
+      // backgrounds / greys
+      bg0: 'rgb(13, 15, 34)',
+      bg1: 'rgba(96, 213, 220, 0.25)',
+      bg2: 'rgb(21, 30, 49)',
+      bg3: 'rgba(96, 213, 220, 0.05)',
+
+      // borders
+      border1: '#ECF8FC',
+      border2: 'rgba(99, 126, 161, 0.2)',
+
+      //long short btn colours
+      long: '#71D887',
+      short: '#45BAE5',
+
+      //specialty colors
+      specialBG1: 'rgb(13, 15, 34)',
+      specialBG2: 'rgb(21, 30, 49)',
 
       // primary colors
       primary1: '#71D887',
@@ -215,33 +283,38 @@ function colors(themeName: string): Colors {
     },
   }
   // default the theme to light mode
-  return supportedThemes.includes(themeName) ? themeColors[themeName] : themeColors['light']
+  return themeName in SupportedThemes ? themeColors[SupportedThemes.LIGHT] : themeColors[themeName]
 }
 
-function shadows(themeName: string): Shadows {
-  const supportedThemes = ['light', 'dark', 'spiritswap']
-  // define shadow scheme for each supported theme
+// define shadow scheme for each supported theme
+function shadows(themeName: SupportedThemes): Shadows {
   const themeShadows = {
-    light: {
+    [SupportedThemes.LIGHT]: {
       shadow1: '#2F80ED',
       boxShadow1: '0px 0px 4px rgba(0, 0, 0, 0.125)',
       boxShadow2: '0px 5px 5px rgba(0, 0, 0, 0.15)',
     },
-    dark: {
+    [SupportedThemes.DARK]: {
       shadow1: '#000',
       boxShadow1: '0px 0px 4px rgba(0, 0, 0, 0.125)',
       boxShadow2: '0px 5px 5px rgba(0, 0, 0, 0.15)',
     },
-    spiritswap: {
+    [SupportedThemes.SPIRIT]: {
       shadow1: '#000',
       boxShadow1: '0px 0px 4px rgba(0, 0, 0, 0.125)',
-      boxShadow2: '0px 5px 5px rgba(0, 0, 0, 0.15)',
+      boxShadow2: 'rgb(96 213 220) 0px 4px 30px',
+    },
+    [SupportedThemes.SPIRIT2]: {
+      shadow1: '#000',
+      boxShadow1: '0px 0px 4px rgba(0, 0, 0, 0.125)',
+      boxShadow2: 'rgb(96 213 220) 0px 4px 30px',
     },
   }
-  return themeName in supportedThemes ? themeShadows[themeName] : themeShadows['light']
+  // default the theme to light mode
+  return themeName in SupportedThemes ? themeShadows[SupportedThemes.LIGHT] : themeShadows[themeName]
 }
 
-function theme(themeName: string): DefaultTheme {
+function theme(themeName: SupportedThemes): DefaultTheme {
   return {
     ...colors(themeName),
 
@@ -262,11 +335,18 @@ function theme(themeName: string): DefaultTheme {
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
   // get theme name from url if any
   const router = useRouter()
-  let themeName = router.query?.theme
-  
+  const parsed = router.query?.theme
+  let parsedTheme = parsed && typeof parsed === 'string' ? parsed : undefined
+
   const darkMode = useIsDarkMode()
-  // if url doesn't have theme name, then use standard light/dark themes
-  if (!themeName) themeName = darkMode ? 'dark' : 'light'
+
+  let themeName: SupportedThemes
+  if (parsedTheme && Object.values(SupportedThemes).some((theme: string) => theme === parsedTheme)) {
+    themeName = parsedTheme as SupportedThemes
+  } else {
+    themeName = darkMode ? SupportedThemes.DARK : SupportedThemes.LIGHT
+  }
+
   const themeObject = useMemo(() => theme(themeName), [themeName])
 
   return <StyledComponentsThemeProvider theme={themeObject}>{children}</StyledComponentsThemeProvider>
@@ -349,7 +429,7 @@ export const ThemedGlobalStyle = createGlobalStyle`
 
   body {
     font-family: 'Rubik';
-    background: ${({ theme }) => theme.specialBG1}
+    background: ${({ theme }) => theme.specialBG1};
   }
 
   button {

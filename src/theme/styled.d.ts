@@ -1,8 +1,9 @@
 import { ThemedCssFunction } from 'styled-components/macro'
+import { SupportedThemes } from 'theme'
 
 export type Color = string
 export interface Colors {
-  themeName: string
+  themeName: SupportedThemes
 
   // base
   white: Color
@@ -57,18 +58,13 @@ export interface Colors {
 export type Shadow = string
 export interface Shadows {
   shadow1: Shadow
-  boxShadow2: Shadow
+  boxShadow1: Shadow
   boxShadow2: Shadow
 }
 
 declare module 'styled-components' {
-  export interface DefaultTheme extends Colors {
+  export interface DefaultTheme extends Colors, Shadows {
     grids: Grids
-
-    // shadows
-    shadow1: string
-    boxShadow1: string
-    boxShadow2: string
 
     // media queries
     mediaWidth: {
