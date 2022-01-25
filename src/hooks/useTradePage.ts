@@ -36,7 +36,6 @@ export default function useTradePage(
 
   // Amount typed in either input or output fields
   const typedAmount = useMemo(() => {
-    if (!baseCurrency || !quoteCurrency) return undefined
     return tryParseAmount(typedValue, typedField === TypedField.A ? currencies[0] : currencies[1])
   }, [currencies, typedValue, typedField])
 
@@ -76,7 +75,7 @@ export default function useTradePage(
     if (tradeType === TradeType.CLOSE) {
       return price.quote(typedAmount).divide(ONE_HUNDRED_PERCENT.subtract(fee))
     }
-  }, [typedAmount, typedField, tradeType, price])
+  }, [typedAmount, typedField, tradeType, price, asset])
 
   const parsedAmounts = useMemo(() => {
     return [
@@ -102,7 +101,7 @@ export default function useTradePage(
         : balance && parsedAmounts[0] && maxAmountSpend(balance)?.lessThan(parsedAmounts[0])
         ? PrimaryError.BALANCE
         : PrimaryError.VALID,
-    [account, balance, parsedAmounts]
+    [account, chainId, balance, parsedAmounts]
   )
 
   return useMemo(

@@ -71,13 +71,13 @@ export const fetchQuotes = createAsyncThunk('quotes/fetchQuotes', async () => {
       }, {})
       return {
         chainId: Number(chainId),
-        result: result,
+        result,
       }
     })
   )
 
   // Bind results to according network
-  return results.reduce((acc: { [chainId: number]: Quotes }, res, index) => {
+  return results.reduce((acc: { [chainId: number]: Quotes }, res) => {
     if (res.status !== 'fulfilled') return acc
     acc[res.value.chainId] = res.value.result
     return acc
@@ -97,7 +97,7 @@ const quotesSlice = createSlice({
         state.status = QuotesStatus.OK
         state.quotes = payload
       })
-      .addCase(fetchQuotes.rejected, (state) => {
+      .addCase(fetchQuotes.rejected, () => {
         console.log('Unable to fetch quotes')
         return {
           ...initialState,

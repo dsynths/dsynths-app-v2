@@ -39,7 +39,7 @@ export default function ImageWithFallback({
   }, [src])
 
   return (
-    <Wrapper round>
+    <Wrapper round={round}>
       {loading ? (
         <Image src={LoaderGif} alt={alt} width={width} height={height} onError={() => setImgSrc(NotFound)} {...rest} />
       ) : (

@@ -28,7 +28,6 @@ import { DotFlashing } from 'components/Icons'
 import { useWalletModalToggle } from 'state/application/hooks'
 import ConfirmTradeModal from 'components/TransactionConfirmationModal/ConfirmTrade'
 import { ZERO } from '@sushiswap/core-sdk'
-import { dynamicPrecision } from 'utils/numbers'
 
 const Wrapper = styled(Card)`
   justify-content: flex-start;
@@ -162,7 +161,7 @@ export default function Trade() {
 
   const switchCurrencies = useCallback(() => {
     setTradeType((prev) => (prev === TradeType.OPEN ? TradeType.CLOSE : TradeType.OPEN))
-  }, [tradeType])
+  }, [])
 
   useEffect(() => {
     if (asset) {
@@ -188,7 +187,7 @@ export default function Trade() {
   const handleSwitchDirection = useCallback(() => {
     setDirection((prev) => (prev === Direction.LONG ? Direction.SHORT : Direction.LONG))
     asset && setURLCurrency(asset.sibling)
-  }, [direction, asset])
+  }, [asset, setURLCurrency])
 
   const handleSwitchCurrencies = useCallback(() => {
     dispatch(setTradeState({ ...tradeState, typedValue: '', typedField: TypedField.A }))
@@ -261,7 +260,7 @@ export default function Trade() {
       return null
     }
     return `Oracle Price: ${asset.price.toFixed(2)}$ / ${asset.id}`
-  }, [asset, tradeType])
+  }, [asset])
 
   function getApproveButton(): JSX.Element | null {
     if (!isSupportedChainId || !account || !asset || error || !marketIsOpen) {
@@ -330,7 +329,6 @@ export default function Trade() {
           onChange={(value) =>
             dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.A }))
           }
-          onSelect={(currency) => setURLCurrency(currency)}
         />
         <ArrowWrapper size="25px" onClick={handleSwitchCurrencies}>
           <ArrowBubble size={25} style={{ transform: 'rotate(90deg)' }} />
@@ -342,7 +340,6 @@ export default function Trade() {
           onChange={(value) =>
             dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.B }))
           }
-          onSelect={(currency) => setURLCurrency(currency)}
         />
       </InputWrapper>
       {marketIsOpen && (

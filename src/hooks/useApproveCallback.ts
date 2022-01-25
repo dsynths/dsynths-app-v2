@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { TransactionResponse } from '@ethersproject/providers'
 import { MaxUint256 } from '@ethersproject/constants'
 import { Currency } from '@sushiswap/core-sdk'
@@ -9,7 +9,6 @@ import useERC20Allowance from './useERC20Allowance'
 
 import { useTransactionAdder, useHasPendingApproval } from 'state/transactions/hooks'
 import { calculateGasMargin } from 'utils/web3'
-import { BigNumber } from '@ethersproject/bignumber'
 
 export enum ApprovalState {
   UNKNOWN = 'UNKNOWN',
@@ -24,7 +23,6 @@ export default function useApproveCallback(
 ): [ApprovalState, () => Promise<void>] {
   const { chainId, account } = useWeb3React()
   const addTransaction = useTransactionAdder()
-  const [allowance, setAllowance] = useState(BigNumber.from('1')) // mitigate jumping on boot + reloads
 
   const token = currency?.isToken ? currency : undefined
   const currentAllowance = useERC20Allowance(token, spender)
@@ -32,8 +30,6 @@ export default function useApproveCallback(
   const TokenContract = useERC20Contract(token?.address)
 
   const approvalState = useMemo(() => {
-    // if (allowance.eq(1)) return ApprovalState.APPROVED
-
     if (!currency) return ApprovalState.UNKNOWN
     if (!spender) return ApprovalState.UNKNOWN
     if (currency.isNative) return ApprovalState.APPROVED
@@ -44,7 +40,7 @@ export default function useApproveCallback(
       : pendingApproval
       ? ApprovalState.PENDING
       : ApprovalState.NOT_APPROVED
-  }, [allowance, currency, spender, currentAllowance, pendingApproval])
+  }, [currency, spender, currentAllowance, pendingApproval])
 
   const approve = useCallback(async () => {
     if (approvalState === ApprovalState.APPROVED || approvalState === ApprovalState.PENDING) {

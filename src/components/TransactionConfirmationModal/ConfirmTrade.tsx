@@ -6,7 +6,6 @@ import { TradeType } from 'state/trade/reducer'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import { SubAsset } from 'hooks/useAssetList'
 import { Direction } from 'hooks/useTradePage'
-import { dynamicPrecision } from 'utils/numbers'
 
 import { PrimaryButton } from 'components/Button'
 import { IconWrapper, ChevronDown } from 'components/Icons'
@@ -123,7 +122,7 @@ export default function ConfirmTrade({
       return ''
     }
     return `${asset.price.toFixed(2)}$ / ${asset.id}`
-  }, [asset, tradeType])
+  }, [asset])
 
   const summary = useMemo(() => {
     if (!amountIn || !amountOut || !currencyIn || !currencyOut) return ''

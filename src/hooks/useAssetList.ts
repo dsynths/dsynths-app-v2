@@ -62,7 +62,7 @@ export function useAssetList(): Asset[] {
         }
 
         const longAsset: SubAsset = {
-          id: id,
+          id,
           ticker: asset.symbol,
           name: asset.name,
           sector: asset.sector,
@@ -76,7 +76,7 @@ export function useAssetList(): Asset[] {
         }
 
         const shortAsset: SubAsset = {
-          id: id,
+          id,
           ticker: asset.symbol,
           name: asset.name,
           sector: asset.sector,
@@ -90,13 +90,13 @@ export function useAssetList(): Asset[] {
         }
 
         return {
-          id: id,
+          id,
           long: longAsset,
           short: shortAsset,
         }
       })
       .filter(notEmpty)
-  }, [chainId, details, conducted, quotes, signatures, details])
+  }, [chainId, details, conducted, quotes, signatures])
 }
 
 /**

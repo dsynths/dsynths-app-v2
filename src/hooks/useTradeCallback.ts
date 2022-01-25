@@ -12,7 +12,6 @@ import { Signature, Signatures } from 'state/signatures/reducer'
 import { ORACLE_BASE_URL_MAP, ORACLE_NETWORK_NAMES } from 'constants/muon'
 import { calculateGasMargin } from 'utils/web3'
 import { makeHttpRequest } from 'utils/http'
-import { dynamicPrecision } from 'utils/numbers'
 
 export enum TradeCallbackState {
   INVALID = 'INVALID',
@@ -74,10 +73,9 @@ export default function useTradeCallback(
   const Synchronizer = useSynchronizerContract()
   const isProxyTrade = useMemo(() => chainId && ProxyChains.includes(chainId), [chainId])
 
-  const [originalAddress, address, decimals] = useMemo(() => {
+  const address = useMemo(() => {
     const contract = tradeType === TradeType.OPEN ? currencyB : currencyA
-    const address = contract?.wrapped.address
-    return [address, address?.toLowerCase(), contract?.decimals]
+    return contract?.wrapped.address.toLowerCase() ?? ''
   }, [currencyA, currencyB, tradeType])
 
   const signatureRequest = useCallback(
@@ -118,9 +116,9 @@ export default function useTradeCallback(
           throw new Error('Currency is undefined')
         }
 
-        let priceFeed: Signature[] = []
+        const priceFeed: Signature[] = []
         for (let i = 0; i < signaturesPerNode.length; i++) {
-          let node = signaturesPerNode[i]
+          const node = signaturesPerNode[i]
 
           // Fix casing
           const sigs = Object.entries(node).reduce((acc: Signatures, [contract, values]) => {
@@ -139,7 +137,7 @@ export default function useTradeCallback(
         }
 
         if (tradeType === TradeType.OPEN) {
-          let result = priceFeed.sort(comparePrice)
+          const result = priceFeed.sort(comparePrice)
           return {
             price: result[0].price,
             data: result.slice(0, expectedSignatures).sort(compareOrder),
@@ -201,7 +199,7 @@ export default function useTradeCallback(
         error,
       }
     }
-  }, [fetchSignatures, sortSignatures, account, address, Synchronizer, amountA, amountB])
+  }, [fetchSignatures, sortSignatures, isProxyTrade, tradeType, account, address, Synchronizer, amountA, amountB])
 
   return useMemo(() => {
     if (!account || !chainId || !library || !Synchronizer || !currencyA || !currencyB) {
@@ -289,5 +287,5 @@ export default function useTradeCallback(
           })
       },
     }
-  }, [account, chainId, library, addTransaction, constructCall])
+  }, [account, chainId, library, addTransaction, constructCall, Synchronizer, amountA, amountB, currencyA, currencyB])
 }

@@ -1,11 +1,10 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback } from 'react'
 import { Currency } from '@sushiswap/core-sdk'
 import { useRouter } from 'next/router'
 
 import useWeb3React from 'hooks/useWeb3'
 import { useCurrency } from 'hooks/useCurrency'
 import { Collateral } from 'constants/addresses'
-import { TradeType } from './reducer'
 import { useConductedContracts } from 'state/conducted/hooks'
 import { isAddress } from 'utils/validate'
 

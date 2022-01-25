@@ -62,12 +62,10 @@ const NameWrapper = styled.div`
 
 const AssetRow = ({
   asset,
-  loading,
   onDismiss,
   style,
 }: {
   asset: SubAsset
-  loading?: boolean
   onDismiss: () => void
   style: React.CSSProperties
 }) => {

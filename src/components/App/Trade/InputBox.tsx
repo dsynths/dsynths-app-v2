@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import styled from 'styled-components'
 import { Currency } from '@sushiswap/core-sdk'
+import { darken } from 'polished'
 
 import useWeb3React from 'hooks/useWeb3'
 import { useCurrencyBalance } from 'state/wallet/hooks'
@@ -10,13 +11,6 @@ import { useAssetByContract } from 'hooks/useAssetList'
 import ImageWithFallback from 'components/ImageWithFallback'
 import AssetsModal from 'components/AssetsModal'
 import { ChevronDown } from 'components/Icons'
-import { darken } from 'polished'
-
-const Container = styled.div`
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-`
 
 const BalanceLabel = styled.div`
   height: 1rem;
@@ -101,48 +95,46 @@ function escapeRegExp(string: string): string {
 }
 
 const inputRegex = RegExp(`^\\d*(?:\\\\[.])?\\d*$`) // match escaped "." characters via in a non-capturing group
-const NumericalInput = React.memo(
-  ({
-    value,
-    onUserInput,
-    placeholder,
-    ...rest
-  }: {
-    value: string | number
-    onUserInput: (input: string) => void
-    placeholder: string
-  } & Omit<React.HTMLProps<HTMLInputElement>, 'ref' | 'onChange' | 'as'>) => {
-    const enforcer = (nextUserInput: string) => {
-      if (nextUserInput === '' || inputRegex.test(escapeRegExp(nextUserInput))) {
-        onUserInput(nextUserInput)
-      }
+const NumericalInput = ({
+  value,
+  onUserInput,
+  placeholder,
+  ...rest
+}: {
+  value: string | number
+  onUserInput: (input: string) => void
+  placeholder: string
+} & Omit<React.HTMLProps<HTMLInputElement>, 'ref' | 'onChange' | 'as'>) => {
+  const enforcer = (nextUserInput: string) => {
+    if (nextUserInput === '' || inputRegex.test(escapeRegExp(nextUserInput))) {
+      onUserInput(nextUserInput)
     }
-
-    return (
-      <InputField
-        {...rest}
-        value={value}
-        onChange={(event) => {
-          // replace commas with periods
-          enforcer(event.target.value.replace(/,/g, '.'))
-        }}
-        // universal input options
-        inputMode="decimal"
-        title="Amount"
-        autoComplete="off"
-        autoCorrect="off"
-        // text-specific options
-        type="text"
-        pattern="^[0-9]*[.,]?[0-9]*$"
-        placeholder={placeholder || '0.00'}
-        min={0}
-        minLength={1}
-        maxLength={79}
-        spellCheck="false"
-      />
-    )
   }
-)
+
+  return (
+    <InputField
+      {...rest}
+      value={value}
+      onChange={(event) => {
+        // replace commas with periods
+        enforcer(event.target.value.replace(/,/g, '.'))
+      }}
+      // universal input options
+      inputMode="decimal"
+      title="Amount"
+      autoComplete="off"
+      autoCorrect="off"
+      // text-specific options
+      type="text"
+      pattern="^[0-9]*[.,]?[0-9]*$"
+      placeholder={placeholder || '0.00'}
+      min={0}
+      minLength={1}
+      maxLength={79}
+      spellCheck="false"
+    />
+  )
+}
 
 export default function InputBox({
   currency,
@@ -151,7 +143,6 @@ export default function InputBox({
   showBalance,
   showMax,
   onChange,
-  onSelect,
 }: {
   currency: Currency | undefined
   value: string
@@ -159,7 +150,6 @@ export default function InputBox({
   showBalance?: boolean
   showMax?: boolean
   onChange(x?: string): void
-  onSelect(x?: Currency): void
 }) {
   const { account } = useWeb3React()
   const asset = useAssetByContract(currency?.wrapped.address)

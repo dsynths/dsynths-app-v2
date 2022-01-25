@@ -50,7 +50,7 @@ export const fetchConducted = createAsyncThunk('conducted/fetchConducted', async
   )
 
   // Bind results to according network
-  return results.reduce((acc: { [chainId: number]: Conducted[] }, res, index) => {
+  return results.reduce((acc: { [chainId: number]: Conducted[] }, res) => {
     if (res.status !== 'fulfilled') return acc
     acc[res.value.chainId] = res.value.result
     return acc
@@ -70,7 +70,7 @@ const conductedSlice = createSlice({
         state.status = ConductedStatus.OK
         state.conducted = payload
       })
-      .addCase(fetchConducted.rejected, (state) => {
+      .addCase(fetchConducted.rejected, () => {
         console.log('Unable to fetch conducted')
         return {
           ...initialState,

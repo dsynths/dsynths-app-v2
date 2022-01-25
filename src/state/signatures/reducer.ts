@@ -79,7 +79,7 @@ const signaturesSlice = createSlice({
         state.status = SignaturesStatus.OK
         state.signatures = payload
       })
-      .addCase(fetchSignatures.rejected, (state) => {
+      .addCase(fetchSignatures.rejected, () => {
         console.log('Unable to fetch signatures')
         return {
           ...initialState,

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 import { AppState, useAppSelector } from 'state'
-import { INFO_BASE_URL, ORACLE_NETWORK_NAMES } from 'constants/muon'
+import { INFO_BASE_URL } from 'constants/muon'
 import { makeHttpRequest } from 'utils/http'
 
 export enum DetailsStatus {
@@ -69,7 +69,7 @@ const detailsSlice = createSlice({
         state.status = DetailsStatus.OK
         state.details = payload
       })
-      .addCase(fetchDetails.rejected, (state) => {
+      .addCase(fetchDetails.rejected, () => {
         console.log('Unable to fetch details')
         return {
           ...initialState,
