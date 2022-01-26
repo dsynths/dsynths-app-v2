@@ -51,7 +51,7 @@ const AssetSelect = styled(Row)<{
   padding: 5px 10px;
   border-radius: 15px;
   background: ${({ select, theme }) => darken(0.05, select ? theme.secondary1 : theme.bg1)};
-  color: ${({ theme }) => theme.text2};
+  color: ${({ select, theme }) => (select ? 'white' : theme.text2)};
   font-size: ${({ select }) => select && '0.9rem'};
 
   &:hover {
