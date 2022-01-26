@@ -51,7 +51,7 @@ const AssetSelect = styled(Row)<{
   padding: 5px 10px;
   border-radius: 15px;
   background: ${({ select, theme }) => darken(0.05, select ? theme.secondary1 : theme.bg1)};
-  color: white;
+  color: ${({ theme }) => theme.text2};
   font-size: ${({ select }) => select && '0.9rem'};
 
   &:hover {
@@ -73,6 +73,8 @@ const Balance = styled(Row)`
     border-radius: 6px;
     padding: 2px 3px;
     font-size: 0.6rem;
+    color: white;
+
     &:hover {
       background: ${({ theme }) => theme.secondary2};
       cursor: pointer;
