@@ -1,17 +1,17 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
+import { useRouter } from 'next/router'
 
 import Web3Network from 'components/Web3Network'
 import Web3Status from 'components/Web3Status'
-import { ThemeToggle, SearchToggle, NavToggle as NavToggleIcon } from 'components/Icons'
+import { ThemeToggle, SearchToggle } from 'components/Icons'
 import { NavButton } from 'components/Button'
 import AssetsModal from 'components/AssetsModal'
-import { useDarkModeManager } from 'state/user/hooks'
-
-import { Sidebar } from './Sidebar'
+import Menu from './Menu'
 import NavLogo from './NavLogo'
+
 import { Z_INDEX } from 'theme'
-import { useRouter } from 'next/router'
+import { useDarkModeManager } from 'state/user/hooks'
 
 const Wrapper = styled.div`
   display: flex;
@@ -43,13 +43,6 @@ const NavItems = styled.div`
 `};
 `
 
-const NavToggle = styled(NavToggleIcon)`
-  display: none;
-  ${({ theme }) => theme.mediaWidth.upToSmall`
-    display: block;
-  `};
-`
-
 const SearchText = styled.div`
   font-size: 0.8rem;
   margin-right: 5px;
@@ -58,17 +51,12 @@ const SearchText = styled.div`
 
 export default function NavBar() {
   const [, toggleDarkMode] = useDarkModeManager()
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
   const [assetModalOpen, setAssetModalOpen] = useState<boolean>(false)
 
   // get custom theme name from url, if any
   // allow the default light/dark theme toggle if there isn't any custom theme defined via url
   const router = useRouter()
   const showThemeToggle = !router.query?.theme
-
-  const toggleSidebar = (isOpen: boolean) => {
-    setSidebarOpen((prev) => isOpen ?? !prev)
-  }
 
   return (
     <Wrapper>
@@ -85,9 +73,8 @@ export default function NavBar() {
         )}
         <Web3Status />
         <Web3Network />
+        <Menu />
       </NavItems>
-      <NavToggle onClick={() => toggleSidebar(true)} />
-      <Sidebar toggled={sidebarOpen} onToggle={toggleSidebar} />
       <AssetsModal isOpen={assetModalOpen} onDismiss={() => setAssetModalOpen(false)} />
     </Wrapper>
   )
