@@ -15,7 +15,12 @@ export const SUPPORTED_CHAIN_IDS: SupportedChainId[] = Object.values(SupportedCh
   (id) => typeof id === 'number'
 ) as SupportedChainId[]
 
-export const SynchronizerChains = [SupportedChainId.MAINNET, SupportedChainId.POLYGON]
+export const SynchronizerChains = [
+  SupportedChainId.MAINNET,
+  SupportedChainId.BSC,
+  SupportedChainId.HECO,
+  SupportedChainId.POLYGON,
+]
 export const ProxyChains = [SupportedChainId.XDAI]
 
 export const NETWORK_URLS = {

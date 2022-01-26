@@ -25,13 +25,12 @@ import InputBox from './InputBox'
 import { ArrowBubble, IconWrapper } from 'components/Icons'
 import { PrimaryButton } from 'components/Button'
 import { DotFlashing } from 'components/Icons'
-import { useWalletModalToggle } from 'state/application/hooks'
+import { useNetworkModalToggle, useWalletModalToggle } from 'state/application/hooks'
 import ConfirmTradeModal from 'components/TransactionConfirmationModal/ConfirmTrade'
 import { ZERO } from '@sushiswap/core-sdk'
 
 const Wrapper = styled(Card)`
   justify-content: flex-start;
-  overflow: visible;
   padding: 30px;
   overflow: visible;
   box-shadow: ${({ theme }) => theme.boxShadow2};
@@ -40,7 +39,6 @@ const Wrapper = styled(Card)`
 const DirectionWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
-  margin: 0 10px;
   width: 100%;
   overflow: visible;
 `
@@ -98,10 +96,9 @@ const InputWrapper = styled.div`
 `
 
 const ArrowWrapper = styled(IconWrapper)`
-  position: absolute;
-  top: calc(50% + 11px); // trial and error adjustment to account for the balancelabel
-  left: 50%;
-  transform: translate(-50%, -50%);
+  height: 0px;
+  overflow: visible;
+  margin: 0 auto;
 
   &:hover {
     cursor: pointer;
@@ -116,6 +113,15 @@ const ButtonRow = styled.div`
   overflow: visible;
   margin-top: 30px;
   z-index: 0;
+`
+
+const TextBlock = styled.div`
+  display: flex;
+  flex-flow: column nowrap;
+  text-align: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: ${({ theme }) => theme.text2};
 `
 
 const FeeWrapper = styled.div`
@@ -138,6 +144,7 @@ export default function Trade() {
   } = useDefaultsFromURL()
   const tradeState = useTradeState()
   const toggleWalletModal = useWalletModalToggle()
+  const toggleNetworkModal = useNetworkModalToggle()
 
   const [tradeType, setTradeType] = useState<TradeType>(TradeType.OPEN)
   const [direction, setDirection] = useState(Direction.LONG)
@@ -275,12 +282,12 @@ export default function Trade() {
     return null
   }
 
-  function getActionButton(): JSX.Element | null {
+  function getActionButton(): JSX.Element {
     if (error === PrimaryError.ACCOUNT) {
       return <PrimaryButton onClick={toggleWalletModal}>Connect Wallet</PrimaryButton>
     }
     if (!isSupportedChainId) {
-      return null
+      return <PrimaryButton onClick={toggleNetworkModal}>Click to select chain</PrimaryButton>
     }
     if (!asset) {
       return <PrimaryButton>Select an asset</PrimaryButton>
@@ -298,48 +305,65 @@ export default function Trade() {
     )
   }
 
+  function getMainContent(): JSX.Element {
+    return (
+      <>
+        <DirectionWrapper>
+          <DirectionTab
+            isLong
+            active={direction === Direction.LONG}
+            onClick={() => direction === Direction.SHORT && handleSwitchDirection(Direction.LONG)}
+          >
+            {Direction.LONG}
+          </DirectionTab>
+          <DirectionTab
+            isShort
+            active={direction === Direction.SHORT}
+            onClick={() => direction === Direction.LONG && handleSwitchDirection(Direction.SHORT)}
+          >
+            {Direction.SHORT}
+          </DirectionTab>
+        </DirectionWrapper>
+        <InputWrapper>
+          <InputBox
+            currency={currencies[0]}
+            value={formattedAmounts[0]}
+            showMax
+            showSelect={currencies[0]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()}
+            onChange={(value) =>
+              dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.A }))
+            }
+          />
+          <ArrowWrapper size="25px" onClick={handleSwitchCurrencies}>
+            <ArrowBubble size={25} style={{ transform: 'rotate(90deg)' }} />
+          </ArrowWrapper>
+          <InputBox
+            currency={currencies[1]}
+            value={formattedAmounts[1]}
+            showSelect={currencies[1]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()}
+            onChange={(value) =>
+              dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.B }))
+            }
+          />
+        </InputWrapper>
+      </>
+    )
+  }
+
+  function getWarning(): JSX.Element | null {
+    if (!account || !chainId) {
+      return <TextBlock>Please connect your wallet.</TextBlock>
+    }
+    if (!isSupportedChainId) {
+      return <TextBlock>Please connect with one of our supported chains.</TextBlock>
+    }
+    return null
+  }
+
   return (
     <Wrapper>
-      <DirectionWrapper>
-        <DirectionTab
-          isLong
-          active={direction === Direction.LONG}
-          onClick={() => direction === Direction.SHORT && handleSwitchDirection(Direction.LONG)}
-        >
-          {Direction.LONG}
-        </DirectionTab>
-        <DirectionTab
-          isShort
-          active={direction === Direction.SHORT}
-          onClick={() => direction === Direction.LONG && handleSwitchDirection(Direction.SHORT)}
-        >
-          {Direction.SHORT}
-        </DirectionTab>
-      </DirectionWrapper>
-      <InputWrapper>
-        <InputBox
-          currency={currencies[0]}
-          value={formattedAmounts[0]}
-          showBalance
-          showMax
-          showSelect={currencies[0]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()}
-          onChange={(value) =>
-            dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.A }))
-          }
-        />
-        <ArrowWrapper size="25px" onClick={handleSwitchCurrencies}>
-          <ArrowBubble size={25} style={{ transform: 'rotate(90deg)' }} />
-        </ArrowWrapper>
-        <InputBox
-          currency={currencies[1]}
-          value={formattedAmounts[1]}
-          showSelect={currencies[1]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()}
-          onChange={(value) =>
-            dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.B }))
-          }
-        />
-      </InputWrapper>
-      {marketIsOpen && (
+      {getWarning() ? getWarning() : getMainContent()}
+      {marketIsOpen && !getWarning() && (
         <FeeWrapper>
           <div>{feeLabel}</div>
           <div>{priceLabel}</div>

@@ -7,7 +7,7 @@ import { ApplicationModal } from 'state/application/reducer'
 import useWeb3React from 'hooks/useWeb3'
 import useRpcChangerCallback from 'hooks/useRpcChangerCallback'
 
-import { SupportedChainId, SUPPORTED_CHAIN_IDS } from 'constants/chains'
+import { SupportedChainId, SynchronizerChains } from 'constants/chains'
 import { ChainInfo } from 'constants/chainInfo'
 import { Modal, ModalHeader } from 'components/Modal'
 import { IconWrapper, GreenCircle } from 'components/Icons'
@@ -73,10 +73,16 @@ export default function NetworkModal() {
   const toggleModal = useNetworkModalToggle()
   const rpcChangerCallback = useRpcChangerCallback()
 
-  const sortedChainIds = useMemo(() => {
-    return Object.values(SUPPORTED_CHAIN_IDS).reduce((acc: SupportedChainId[], id: SupportedChainId) => {
-      if (chainId == id) {
+  const chainMap = useMemo(() => {
+    return Object.values(SynchronizerChains).reduce((acc: SupportedChainId[], id: SupportedChainId, index, arr) => {
+      if (chainId === id) {
         return [id, ...acc]
+      }
+
+      // Insert connected chain, accepting outsiders
+      if (chainId && index === arr.length - 1) {
+        acc.push(id)
+        return acc.includes(chainId) ? acc : [chainId, ...acc]
       }
       return [...acc, id]
     }, [])
@@ -86,7 +92,7 @@ export default function NetworkModal() {
     <Modal isOpen={modalOpen} onBackgroundClick={toggleModal} onEscapeKeydown={toggleModal}>
       <ModalHeader onClose={toggleModal} title="Select a Network" />
       <Wrapper>
-        {sortedChainIds.map((id, index) => {
+        {chainMap.map((id, index) => {
           const active = chainId == id
           const Chain = ChainInfo[id]
           return (

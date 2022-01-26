@@ -17,6 +17,7 @@ const BaseModal = StyledModal.styled`
   transform: translateY(-50%);
   border-radius: 10px;
   z-index: ${Z_INDEX.modal};
+  overflow: hidden;
 `
 
 export const Modal = styled(BaseModal)<{
