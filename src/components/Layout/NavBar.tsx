@@ -3,8 +3,9 @@ import styled from 'styled-components'
 
 import Web3Network from 'components/Web3Network'
 import Web3Status from 'components/Web3Status'
-import { ThemeToggle, NavToggle as NavToggleIcon } from 'components/Icons'
+import { ThemeToggle, SearchToggle, NavToggle as NavToggleIcon } from 'components/Icons'
 import { NavButton } from 'components/Button'
+import AssetsModal from 'components/AssetsModal'
 import { useDarkModeManager } from 'state/user/hooks'
 
 import { Sidebar } from './Sidebar'
@@ -49,9 +50,16 @@ const NavToggle = styled(NavToggleIcon)`
   `};
 `
 
+const SearchText = styled.div`
+  font-size: 0.8rem;
+  margin-right: 5px;
+  color: ${({ theme }) => theme.text2};
+`
+
 export default function NavBar() {
   const [, toggleDarkMode] = useDarkModeManager()
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
+  const [assetModalOpen, setAssetModalOpen] = useState<boolean>(false)
 
   // get custom theme name from url, if any
   // allow the default light/dark theme toggle if there isn't any custom theme defined via url
@@ -66,6 +74,10 @@ export default function NavBar() {
     <Wrapper>
       <NavLogo />
       <NavItems>
+        <NavButton onClick={() => setAssetModalOpen(true)}>
+          <SearchText>Search for a stock</SearchText>
+          <SearchToggle size={20} />
+        </NavButton>
         {showThemeToggle && (
           <NavButton onClick={() => toggleDarkMode()}>
             <ThemeToggle size={20} />
@@ -76,6 +88,7 @@ export default function NavBar() {
       </NavItems>
       <NavToggle onClick={() => toggleSidebar(true)} />
       <Sidebar toggled={sidebarOpen} onToggle={toggleSidebar} />
+      <AssetsModal isOpen={assetModalOpen} onDismiss={() => setAssetModalOpen(false)} />
     </Wrapper>
   )
 }

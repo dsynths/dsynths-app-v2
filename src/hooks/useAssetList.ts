@@ -10,15 +10,28 @@ import { Sector, useDetailsState } from 'state/details/reducer'
 import { Direction } from './useTradePage'
 import { constructPercentage } from 'utils/prices'
 
+/**
+ * @param id Identifier according to the oracle
+ * @param ticker official ticker, usually same as id
+ * @param symbol symbol as per the direction (long or short)
+ * @param name contract name as per mint constructor
+ * @param sector crypto or stock
+ * @param direction direction (long or short)
+ * @param contract the contract address
+ * @param sibling contract address of the asset in opposite direction
+ * @param price latest quote provided by the oracle
+ * @param fee latest fee provided by the oracle
+ * @param open if asset is tradeable
+ */
 export interface SubAsset {
   id: string
   ticker: string
+  symbol: string
   name: string
   sector: Sector
   direction: Direction
   contract: string
   sibling: string
-  symbol: string
   price: number
   fee: Percent
   open: boolean

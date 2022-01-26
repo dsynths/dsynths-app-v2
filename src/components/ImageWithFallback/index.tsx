@@ -30,7 +30,7 @@ export default function ImageWithFallback({
   [x: string]: any
 }) {
   return (
-    <Wrapper round>
+    <Wrapper round={round}>
       <Image src={src} alt={alt} width={width} height={height} {...rest} />
     </Wrapper>
   )

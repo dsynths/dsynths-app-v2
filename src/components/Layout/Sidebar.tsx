@@ -10,8 +10,6 @@ import useOnOutsideClick from 'hooks/useOnOutsideClick'
 import { Z_INDEX } from 'theme'
 import { useDarkModeManager } from 'state/user/hooks'
 
-// TODO: design and create navbar
-
 const Wrapper = styled.nav<{
   toggled: boolean
 }>`
@@ -47,7 +45,6 @@ const Header = styled.div`
   justify-content: flex-start;
   align-items: center;
   gap: 10px;
-  margin-bottom: auto;
 
   & > * {
     &:first-child {
