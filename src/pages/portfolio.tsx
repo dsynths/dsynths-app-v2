@@ -16,10 +16,6 @@ const Container = styled.div`
 export default function Trade() {
   return (
     <Container>
-      <div>
-        This is where the PNL widget should go, but that is NOT priority!!! We can do that later, first perfect the
-        actual barebones balance list.
-      </div>
       <Portfolio />
     </Container>
   )

@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import styled from 'styled-components'
-import { Currency, ZERO } from '@sushiswap/core-sdk'
+import styled, { useTheme } from 'styled-components'
+import { Currency, Fraction, ZERO } from '@sushiswap/core-sdk'
 import { FixedSizeList as List } from 'react-window'
 
 import { SubAsset, useSubAssetList } from 'hooks/useAssetList'
@@ -15,6 +15,8 @@ import { SynchronizerChains } from 'constants/chains'
 import ImageWithFallback from 'components/ImageWithFallback'
 import { Loader } from 'components/Icons'
 import { Card } from 'components/Card'
+import { ToggleLeft, ToggleRight } from 'react-feather'
+import WalletLabel from 'components/Icons/WalletLabel'
 
 const Wrapper = styled(Card)``
 
@@ -33,9 +35,7 @@ const Row = styled.div`
   }
   & > * {
     &:last-child {
-      font-size: 0.8rem;
       margin-left: auto;
-      color: ${({ theme }) => theme.text2};
     }
   }
 `
@@ -55,10 +55,48 @@ const NameWrapper = styled.div`
   }
 `
 
+const AssetHeaderContainer = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  padding: 0px 16px 16px 16px;
+`
+const AssetHeaderWrapper = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-items: center;
+`
+
+const LoadingContainer = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+`
+
+const PrimaryLabel = styled.div`
+  font-size: normal;
+  font-weight: normal;
+  font-size: 12.5px;
+  line-height: 20px;
+  margin-right: 8px;
+  color: ${({ theme }) => theme.text1};
+`
+const SecondaryLabel = styled.div`
+  font-size: normal;
+  font-weight: normal;
+  font-size: 12.5px;
+  line-height: 20px;
+  color: ${({ theme }) => theme.text2};
+`
+
 export default function Portfolio() {
   const { chainId, account } = useWeb3React()
   const [modalOpen, setModalOpen] = useState<boolean>(false)
   const [selectedAsset, setSelectedAsset] = useState<string>('') // asset contract
+  const theme = useTheme()
 
   const onDismiss = () => {
     setModalOpen(false)
@@ -74,6 +112,7 @@ export default function Portfolio() {
    * out of the box. So for now, go for option 2. Which impless we need a button for toggleNetworkModal
    */
   const toggleNetworkModal = useNetworkModalToggle()
+  console.log('toggle network modal', toggleNetworkModal)
 
   /**
    * Assets are divided into SubAssets. Each Asset has a long and a short version (with its own contract + own name etc)
@@ -81,6 +120,7 @@ export default function Portfolio() {
    * There are like a thousand assets or something btw.
    */
   const assetList = useSubAssetList()
+  console.log('asset List', assetList)
 
   // Use this to display something or nothing (including a warning banner?)
   // Return a warning block or whatever if not supported chainId (we can work on content + styling later)
@@ -88,6 +128,8 @@ export default function Portfolio() {
     if (!chainId || !account) return false
     return SynchronizerChains.includes(chainId)
   }, [chainId, account])
+
+  console.log('is supported chain', isSupportedChainId)
 
   /**
    * OKAY SO HERES THE ISSUE: the virtualized list requires scrolling to see balances
@@ -100,20 +142,37 @@ export default function Portfolio() {
   return (
     <>
       <Wrapper>
-        <div>Title or something idk</div>
-        <List
-          width={450} // need a memo hook for the exact width for responsive modes
-          height={400}
-          itemCount={assetList.length}
-          itemSize={50}
-          initialScrollOffset={0}
-          itemData={assetList}
-        >
-          {({ data, index, style }) => {
-            const asset = data[index]
-            return <AssetRow key={index} asset={asset} style={style} />
-          }}
-        </List>
+        <AssetHeaderContainer>
+          <AssetHeaderWrapper>
+            <PrimaryLabel>Positions</PrimaryLabel>
+            <SecondaryLabel>45</SecondaryLabel>
+          </AssetHeaderWrapper>
+          <AssetHeaderWrapper>
+            <PrimaryLabel>Equity</PrimaryLabel>
+            <ToggleRight size="12.5px" />
+          </AssetHeaderWrapper>
+        </AssetHeaderContainer>
+        {assetList.length > 0 ? (
+          <List
+            width={450} // need a memo hook for the exact width for responsive modes
+            height={400}
+            itemCount={assetList.length}
+            itemSize={50}
+            initialScrollOffset={0}
+            itemData={assetList}
+          >
+            {({ data, index, style }) => {
+              const asset = data[index]
+              console.log('data', asset)
+              return <AssetRow key={index} asset={asset} style={style} />
+            }}
+          </List>
+        ) : (
+          <LoadingContainer>
+            <PrimaryLabel>Loading assets</PrimaryLabel>
+            <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />
+          </LoadingContainer>
+        )}
       </Wrapper>
       <Modal isOpen={modalOpen} onBackgroundClick={onDismiss} onEscapeKeydown={onDismiss} width="300px">
         <ModalHeader title="Select an asset" onClose={onDismiss} border={false} />
@@ -125,10 +184,12 @@ export default function Portfolio() {
 }
 
 function AssetRow({ asset, style }: { asset: SubAsset; style: React.CSSProperties }) {
-  const { account } = useWeb3React()
+  const { account, chainId } = useWeb3React()
   const currency = useCurrency(asset.contract)
   const balance = useCurrencyBalance(account ?? undefined, currency ?? undefined)
   const logo = useCurrencyLogo(asset.id, currency?.symbol)
+  const theme = useTheme()
+  const assetOraclePrice = parseInt(asset.price.toString())
 
   // again we dont want this,  only render an assetRow if the balance is ALREADY positive
   // return balance?.greaterThan(ZERO) ? (
@@ -148,7 +209,17 @@ function AssetRow({ asset, style }: { asset: SubAsset; style: React.CSSPropertie
         <div>{asset.symbol}</div>
         <div>{asset.name}</div>
       </NameWrapper>
-      {balance ? <div>{balance?.toSignificant(6)}</div> : <Loader size="12px" duration={'3s'} />}
+      {balance ? (
+        <PrimaryLabel>{balance?.toSignificant(6)}</PrimaryLabel>
+      ) : (
+        <Loader size="12px" duration={'3s'} stroke={theme.text2} />
+      )}
+      <WalletLabel chainId={chainId} />
+      {balance ? (
+        <PrimaryLabel>${balance.multiply(assetOraclePrice)?.toSignificant(6)}</PrimaryLabel>
+      ) : (
+        <Loader size="12px" duration={'3s'} stroke={theme.text2} />
+      )}
     </Row>
   )
 }
