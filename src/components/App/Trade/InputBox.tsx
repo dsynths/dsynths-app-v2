@@ -204,7 +204,7 @@ export default function InputBox({
           <div />
         )}
       </Wrapper>
-      <AssetsModal isOpen={modalOpen} onDismiss={() => setModalOpen(false)} activeCurrency={currency} />
+      <AssetsModal isOpen={modalOpen} onDismiss={() => setModalOpen(false)} />
     </>
   )
 }
