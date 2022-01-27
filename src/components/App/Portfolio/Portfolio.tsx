@@ -1,6 +1,5 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { Currency, Fraction, ZERO } from '@sushiswap/core-sdk'
 import { FixedSizeList as List } from 'react-window'
 
 import { SubAsset, useSubAssetList } from 'hooks/useAssetList'
@@ -15,8 +14,8 @@ import { SynchronizerChains } from 'constants/chains'
 import ImageWithFallback from 'components/ImageWithFallback'
 import { Loader } from 'components/Icons'
 import { Card } from 'components/Card'
-import { ToggleLeft, ToggleRight } from 'react-feather'
-import WalletLabel from 'components/Icons/WalletLabel'
+import { ToggleRight } from 'react-feather'
+import ChainLabel from 'components/Icons/ChainLabel'
 
 const Wrapper = styled(Card)``
 
@@ -24,7 +23,7 @@ const Row = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
-  gap: 1rem;
+  gap: 16px;
   align-items: center;
   width: 100%;
   height: 50px;
@@ -119,6 +118,7 @@ export default function Portfolio() {
    * so hence the SubAssets which are Assets but times 2 in size. We need balances for alllllllllll of them.
    * There are like a thousand assets or something btw.
    */
+  // TODO : Need to get the filtered asset list with non-zero balances for the given account
   const assetList = useSubAssetList()
   console.log('asset List', assetList)
 
@@ -145,7 +145,9 @@ export default function Portfolio() {
         <AssetHeaderContainer>
           <AssetHeaderWrapper>
             <PrimaryLabel>Positions</PrimaryLabel>
-            <SecondaryLabel>45</SecondaryLabel>
+            <SecondaryLabel>
+              {assetList.length > 0 ? assetList.length : <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />}
+            </SecondaryLabel>
           </AssetHeaderWrapper>
           <AssetHeaderWrapper>
             <PrimaryLabel>Equity</PrimaryLabel>
@@ -214,7 +216,7 @@ function AssetRow({ asset, style }: { asset: SubAsset; style: React.CSSPropertie
       ) : (
         <Loader size="12px" duration={'3s'} stroke={theme.text2} />
       )}
-      <WalletLabel chainId={chainId} />
+      <ChainLabel chainId={chainId} />
       {balance ? (
         <PrimaryLabel>${balance.multiply(assetOraclePrice)?.toSignificant(6)}</PrimaryLabel>
       ) : (
