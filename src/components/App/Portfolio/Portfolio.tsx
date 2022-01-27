@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { FixedSizeList as List } from 'react-window'
 
@@ -9,13 +9,13 @@ import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import { useNetworkModalToggle } from 'state/application/hooks'
 import { useCurrencyBalance } from 'state/wallet/hooks'
 
-import { Modal, ModalHeader } from 'components/Modal'
 import { SynchronizerChains } from 'constants/chains'
 import ImageWithFallback from 'components/ImageWithFallback'
 import { Loader } from 'components/Icons'
 import { Card } from 'components/Card'
 import { ToggleRight } from 'react-feather'
 import ChainLabel from 'components/Icons/ChainLabel'
+import Link from 'next/link'
 
 const Wrapper = styled(Card)``
 
@@ -54,13 +54,13 @@ const NameWrapper = styled.div`
   }
 `
 
-const AssetHeaderContainer = styled.div`
+const HeaderContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
   padding: 0px 16px 16px 16px;
 `
-const AssetHeaderWrapper = styled.div`
+const HeaderWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
@@ -93,13 +93,7 @@ const SecondaryLabel = styled.div`
 
 export default function Portfolio() {
   const { chainId, account } = useWeb3React()
-  const [modalOpen, setModalOpen] = useState<boolean>(false)
-  const [selectedAsset, setSelectedAsset] = useState<string>('') // asset contract
   const theme = useTheme()
-
-  const onDismiss = () => {
-    setModalOpen(false)
-  }
 
   /**
    * Toms design shows a crosschain portfolio but thats an issue with the Multicall hook.
@@ -111,7 +105,6 @@ export default function Portfolio() {
    * out of the box. So for now, go for option 2. Which impless we need a button for toggleNetworkModal
    */
   const toggleNetworkModal = useNetworkModalToggle()
-  console.log('toggle network modal', toggleNetworkModal)
 
   /**
    * Assets are divided into SubAssets. Each Asset has a long and a short version (with its own contract + own name etc)
@@ -120,7 +113,6 @@ export default function Portfolio() {
    */
   // TODO : Need to get the filtered asset list with non-zero balances for the given account
   const assetList = useSubAssetList()
-  console.log('asset List', assetList)
 
   // Use this to display something or nothing (including a warning banner?)
   // Return a warning block or whatever if not supported chainId (we can work on content + styling later)
@@ -128,8 +120,6 @@ export default function Portfolio() {
     if (!chainId || !account) return false
     return SynchronizerChains.includes(chainId)
   }, [chainId, account])
-
-  console.log('is supported chain', isSupportedChainId)
 
   /**
    * OKAY SO HERES THE ISSUE: the virtualized list requires scrolling to see balances
@@ -140,48 +130,40 @@ export default function Portfolio() {
 
   // We use a virtualized List for a massive performance boost
   return (
-    <>
-      <Wrapper>
-        <AssetHeaderContainer>
-          <AssetHeaderWrapper>
-            <PrimaryLabel>Positions</PrimaryLabel>
-            <SecondaryLabel>
-              {assetList.length > 0 ? assetList.length : <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />}
-            </SecondaryLabel>
-          </AssetHeaderWrapper>
-          <AssetHeaderWrapper>
-            <PrimaryLabel>Equity</PrimaryLabel>
-            <ToggleRight size="12.5px" />
-          </AssetHeaderWrapper>
-        </AssetHeaderContainer>
-        {assetList.length > 0 ? (
-          <List
-            width={450} // need a memo hook for the exact width for responsive modes
-            height={400}
-            itemCount={assetList.length}
-            itemSize={50}
-            initialScrollOffset={0}
-            itemData={assetList}
-          >
-            {({ data, index, style }) => {
-              const asset = data[index]
-              console.log('data', asset)
-              return <AssetRow key={index} asset={asset} style={style} />
-            }}
-          </List>
-        ) : (
-          <LoadingContainer>
-            <PrimaryLabel>Loading assets</PrimaryLabel>
-            <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />
-          </LoadingContainer>
-        )}
-      </Wrapper>
-      <Modal isOpen={modalOpen} onBackgroundClick={onDismiss} onEscapeKeydown={onDismiss} width="300px">
-        <ModalHeader title="Select an asset" onClose={onDismiss} border={false} />
-        <div>This is the content for a single asset and with the buttons to trade it</div>
-        <div>Just like Tom designed it. This is where the selectedContract param will have to shine!</div>
-      </Modal>
-    </>
+    <Wrapper>
+      <HeaderContainer>
+        <HeaderWrapper>
+          <PrimaryLabel>Positions</PrimaryLabel>
+          <SecondaryLabel>
+            {assetList.length > 0 ? assetList.length : <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />}
+          </SecondaryLabel>
+        </HeaderWrapper>
+        <HeaderWrapper>
+          <PrimaryLabel>Equity</PrimaryLabel>
+          <ToggleRight size="12.5px" />
+        </HeaderWrapper>
+      </HeaderContainer>
+      {assetList.length > 0 ? (
+        <List
+          width={450} // need a memo hook for the exact width for responsive modes
+          height={400}
+          itemCount={assetList.length}
+          itemSize={50}
+          initialScrollOffset={0}
+          itemData={assetList}
+        >
+          {({ data, index, style }) => {
+            const asset = data[index]
+            return <AssetRow key={index} asset={asset} style={style} />
+          }}
+        </List>
+      ) : (
+        <LoadingContainer>
+          <PrimaryLabel>Loading assets</PrimaryLabel>
+          <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />
+        </LoadingContainer>
+      )}
+    </Wrapper>
   )
 }
 
@@ -205,23 +187,25 @@ function AssetRow({ asset, style }: { asset: SubAsset; style: React.CSSPropertie
   //   </Row>
   // ) : null
   return (
-    <Row style={style}>
-      <ImageWithFallback src={logo} width={30} height={30} alt={`${asset.symbol}`} />
-      <NameWrapper>
-        <div>{asset.symbol}</div>
-        <div>{asset.name}</div>
-      </NameWrapper>
-      {balance ? (
-        <PrimaryLabel>{balance?.toSignificant(6)}</PrimaryLabel>
-      ) : (
-        <Loader size="12px" duration={'3s'} stroke={theme.text2} />
-      )}
-      <ChainLabel chainId={chainId} />
-      {balance ? (
-        <PrimaryLabel>${balance.multiply(assetOraclePrice)?.toSignificant(6)}</PrimaryLabel>
-      ) : (
-        <Loader size="12px" duration={'3s'} stroke={theme.text2} />
-      )}
-    </Row>
+    <Link href={`/asset?assetId=${asset.contract}`} passHref>
+      <Row style={style}>
+        <ImageWithFallback src={logo} width={30} height={30} alt={`${asset.symbol}`} />
+        <NameWrapper>
+          <div>{asset.symbol}</div>
+          <div>{asset.name}</div>
+        </NameWrapper>
+        {balance ? (
+          <PrimaryLabel>{balance?.toSignificant(6)}</PrimaryLabel>
+        ) : (
+          <Loader size="12px" duration={'3s'} stroke={theme.text2} />
+        )}
+        <ChainLabel chainId={chainId} />
+        {balance ? (
+          <PrimaryLabel>${balance.multiply(assetOraclePrice)?.toSignificant(6)}</PrimaryLabel>
+        ) : (
+          <Loader size="12px" duration={'3s'} stroke={theme.text2} />
+        )}
+      </Row>
+    </Link>
   )
 }
