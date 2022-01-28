@@ -42,7 +42,7 @@ const Input = styled.input<{
 
 function fuzzySearch(options: SelectSearchOption[]): any {
   const config = {
-    keys: ['ticker'],
+    keys: ['ticker', 'name'],
     isCaseSensitive: false,
     threshold: 0.2,
   }

@@ -92,7 +92,7 @@ const NameWrapper = styled.div`
 
 function fuzzySearch(options: SelectSearchOption[]): any {
   const config = {
-    keys: ['ticker'],
+    keys: ['ticker', 'name'],
     isCaseSensitive: false,
     threshold: 0.2,
   }
@@ -135,7 +135,7 @@ export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; on
             title="Search a ticker"
             autoFocus
             type="text"
-            placeholder="Search a stock ticker"
+            placeholder="Search a stock by name or ticker..."
             spellCheck="false"
             onBlur={() => null}
           />
