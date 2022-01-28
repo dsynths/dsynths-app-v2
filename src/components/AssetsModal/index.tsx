@@ -135,7 +135,7 @@ export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; on
             title="Search a ticker"
             autoFocus
             type="text"
-            placeholder="Search a stock by name or ticker..."
+            placeholder="Search for a stock or crypto..."
             spellCheck="false"
             onBlur={() => null}
           />
