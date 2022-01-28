@@ -1,18 +1,18 @@
-import { Search } from 'react-feather'
+import { Search as SearchIcon } from 'react-feather'
 
 import { useIsDarkMode } from 'state/user/hooks'
 import { IconWrapper } from './index'
 
-export default function SearchToggle({ size }: { size?: number }) {
+export default function Search({ size }: { size?: number }) {
   const darkMode = useIsDarkMode()
 
   return darkMode ? (
     <IconWrapper>
-      <Search opacity={0.6} size={size ?? 16} />
+      <SearchIcon opacity={0.6} size={size ?? 16} />
     </IconWrapper>
   ) : (
     <IconWrapper>
-      <Search opacity={0.6} size={size ?? 16} />
+      <SearchIcon opacity={0.6} size={size ?? 16} />
     </IconWrapper>
   )
 }
