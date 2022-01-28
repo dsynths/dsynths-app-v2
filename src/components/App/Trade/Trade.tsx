@@ -31,9 +31,13 @@ import { ZERO } from '@sushiswap/core-sdk'
 
 const Wrapper = styled(Card)`
   justify-content: flex-start;
-  padding: 30px;
+  padding: 1.5rem;
   overflow: visible;
   box-shadow: ${({ theme }) => theme.boxShadow2};
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    padding: 1rem;
+  `}
 `
 
 const DirectionWrapper = styled.div`
@@ -48,13 +52,14 @@ const DirectionTab = styled.div<{
   isLong?: boolean
   isShort?: boolean
 }>`
-  font-size: 15px;
+  font-size: 0.9rem;
   flex: 1;
   height: 35px;
   line-height: 35px;
   text-align: center;
   color: ${({ theme }) => theme.black};
   border-radius: ${({ isLong }) => (isLong ? '10px 0 0 10px' : '0 10px 10px 0')};
+
   ${({ theme, isLong, isShort, active }) =>
     isLong && active
       ? `
@@ -91,8 +96,12 @@ const InputWrapper = styled.div`
   position: relative;
   justify-content: flex-start;
   width: 100%;
-  margin-top: 30px;
+  margin-top: 2.5rem;
   gap: 5px;
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    margin-top: 1.5rem;
+  `}
 `
 
 const ArrowWrapper = styled(IconWrapper)`
@@ -111,17 +120,26 @@ const ButtonRow = styled.div`
   align-items: center;
   gap: 10px;
   overflow: visible;
-  margin-top: 30px;
+  margin-top: 2rem;
   z-index: 0;
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    margin-top: 1rem;
+  `}
 `
 
-const TextBlock = styled.div`
+const WarningBlock = styled.div`
   display: flex;
   flex-flow: column nowrap;
   text-align: center;
   justify-content: center;
   font-size: 0.8rem;
+  border-radius: 10px;
   color: ${({ theme }) => theme.text2};
+  background: ${({ theme }) => theme.bg1};
+  border: 1px solid ${({ theme }) => theme.border2};
+  padding: 0.6rem;
+  height: 40px;
 `
 
 const FeeWrapper = styled.div`
@@ -258,6 +276,14 @@ export default function Trade() {
     return `Oracle Price: ${asset.price.toFixed(2)}$ / ${asset.id}`
   }, [asset])
 
+  const warning = useMemo(() => {
+    return !account || !chainId
+      ? 'Please connect your wallet.'
+      : !isSupportedChainId
+      ? 'Please connect with one of our supported chains.'
+      : ''
+  }, [account, chainId, isSupportedChainId])
+
   function getApproveButton(): JSX.Element | null {
     if (!isSupportedChainId || !account || !asset || error || !marketIsOpen) {
       return null
@@ -334,36 +360,32 @@ export default function Trade() {
               dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.A }))
             }
           />
-          <ArrowWrapper size="25px" onClick={handleSwitchCurrencies}>
-            <ArrowBubble size={25} style={{ transform: 'rotate(90deg)' }} />
-          </ArrowWrapper>
-          <InputBox
-            currency={currencies[1]}
-            value={formattedAmounts[1]}
-            showSelect={currencies[1]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()}
-            onChange={(value) =>
-              dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.B }))
-            }
-          />
+          {warning ? (
+            <WarningBlock>{warning}</WarningBlock>
+          ) : (
+            <>
+              <ArrowWrapper size="25px" onClick={handleSwitchCurrencies}>
+                <ArrowBubble size={25} style={{ transform: 'rotate(90deg)' }} />
+              </ArrowWrapper>
+              <InputBox
+                currency={currencies[1]}
+                value={formattedAmounts[1]}
+                showSelect={currencies[1]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()}
+                onChange={(value) =>
+                  dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.B }))
+                }
+              />
+            </>
+          )}
         </InputWrapper>
       </>
     )
   }
 
-  function getWarning(): JSX.Element | null {
-    if (!account || !chainId) {
-      return <TextBlock>Please connect your wallet.</TextBlock>
-    }
-    if (!isSupportedChainId) {
-      return <TextBlock>Please connect with one of our supported chains.</TextBlock>
-    }
-    return null
-  }
-
   return (
     <Wrapper>
-      {getWarning() ? getWarning() : getMainContent()}
-      {marketIsOpen && !getWarning() && (
+      {getMainContent()}
+      {marketIsOpen && !warning && (
         <FeeWrapper>
           <div>{feeLabel}</div>
           <div>{priceLabel}</div>

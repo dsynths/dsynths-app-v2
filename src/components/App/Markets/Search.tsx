@@ -73,6 +73,7 @@ export function useSearch(selectedChain: number) {
     search: true,
     filterOptions: fuzzySearch,
     allowEmpty: true,
+    closeOnSelect: false,
   })
 
   return {
@@ -93,6 +94,7 @@ export function InputField({ searchProps }: { searchProps: any }) {
         type="text"
         placeholder="Search a stock by name or ticker..."
         spellCheck="false"
+        onBlur={() => null}
       />
       <SearchIcon size={20} />
     </SearchWrapper>

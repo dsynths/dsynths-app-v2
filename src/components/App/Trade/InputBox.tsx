@@ -58,6 +58,10 @@ const AssetSelect = styled(Row)<{
     cursor: pointer;
     background: ${({ select, theme }) => darken(0.03, select ? theme.secondary1 : theme.bg1)};
   }
+
+  ${({ theme, select }) => theme.mediaWidth.upToMedium`
+    font-size: ${select && '0.8rem'};
+  `}
 `
 
 const Balance = styled(Row)`

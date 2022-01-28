@@ -8,20 +8,15 @@ const Container = styled.div`
   display: flex;
   flex-flow: row nowrap;
   overflow: visible;
-  & > * {
-    display: flex;
-    justify-content: center;
 
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    margin-top: 30px;
+  `}
+
+  & > * {
     &:first-child {
-      flex: 1;
-      margin-right: auto;
-    }
-    &:nth-child(2) {
-      width: clamp(250px, 80%, 512px);
-    }
-    &:last-child {
-      flex: 1;
-      margin-left: auto;
+      margin: 0 auto;
+      width: clamp(250px, 90%, 512px);
     }
   }
 `
@@ -29,9 +24,7 @@ const Container = styled.div`
 export default function Trade() {
   return (
     <Container>
-      <div />
       <TradeComponent />
-      <div />
     </Container>
   )
 }

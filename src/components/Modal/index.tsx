@@ -20,6 +20,12 @@ const BaseModal = StyledModal.styled`
   overflow: hidden;
 `
 
+export const MobileModal = styled(BaseModal)`
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0px;
+`
+
 export const Modal = styled(BaseModal)<{
   width?: string
 }>`

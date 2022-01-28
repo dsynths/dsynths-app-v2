@@ -4,6 +4,7 @@ import { FixedSizeList as List } from 'react-window'
 import Fuse from 'fuse.js'
 import { useSelect, SelectSearchOption } from 'react-select-search'
 import AutoSizer from 'react-virtualized-auto-sizer'
+import { isMobile } from 'react-device-detect'
 
 import { SubAsset, useLongAssetsList } from 'hooks/useAssetList'
 import { useCurrency } from 'hooks/useCurrency'
@@ -12,7 +13,7 @@ import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import useDefaultsFromURL from 'state/trade/hooks'
 import { useCurrencyBalance } from 'state/wallet/hooks'
 
-import { Modal, ModalHeader } from 'components/Modal'
+import { MobileModal, Modal, ModalHeader } from 'components/Modal'
 import ImageWithFallback from 'components/ImageWithFallback'
 import { Loader } from 'components/Icons'
 
@@ -124,50 +125,63 @@ export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; on
     allowEmpty: true,
   })
 
-  return (
-    <Modal isOpen={isOpen} onBackgroundClick={onDismiss} onEscapeKeydown={onDismiss} width="450px">
-      <ModalHeader title="Select an asset" onClose={onDismiss} />
-      <SearchWrapper>
-        <InputField
-          {...searchProps}
-          title="Search a ticker"
-          autoFocus
-          type="text"
-          placeholder="Search a stock ticker"
-          spellCheck="false"
-        />
-      </SearchWrapper>
-      <ListWrapper>
-        <AutoSizer>
-          {({ height, width }) => {
-            return (
-              <List
-                width={width}
-                height={height}
-                itemCount={snapshot.options.length}
-                itemSize={50}
-                itemData={snapshot.options}
-              >
-                {({ data, index, style }) => {
-                  const asset = data[index] as unknown as SubAsset
-                  return (
-                    <AssetRow
-                      key={index}
-                      asset={asset}
-                      style={style}
-                      onClick={() => {
-                        setURLCurrency(asset.contract)
-                        onDismiss()
-                      }}
-                      {...optionProps}
-                    />
-                  )
-                }}
-              </List>
-            )
-          }}
-        </AutoSizer>
-      </ListWrapper>
+  function getModalContent() {
+    return (
+      <>
+        <ModalHeader title="Select an asset" onClose={onDismiss} />
+        <SearchWrapper>
+          <InputField
+            {...searchProps}
+            title="Search a ticker"
+            autoFocus
+            type="text"
+            placeholder="Search a stock ticker"
+            spellCheck="false"
+            onBlur={() => null}
+          />
+        </SearchWrapper>
+        <ListWrapper>
+          <AutoSizer>
+            {({ height, width }) => {
+              return (
+                <List
+                  width={width}
+                  height={height}
+                  itemCount={snapshot.options.length}
+                  itemSize={50}
+                  itemData={snapshot.options}
+                >
+                  {({ data, index, style }) => {
+                    const asset = data[index] as unknown as SubAsset
+                    return (
+                      <AssetRow
+                        key={index}
+                        asset={asset}
+                        style={style}
+                        onClick={() => {
+                          setURLCurrency(asset.contract)
+                          onDismiss()
+                        }}
+                        {...optionProps}
+                      />
+                    )
+                  }}
+                </List>
+              )
+            }}
+          </AutoSizer>
+        </ListWrapper>
+      </>
+    )
+  }
+
+  return isMobile ? (
+    <MobileModal isOpen={isOpen} onBackgroundClick={onDismiss} onEscapeKeydown={onDismiss}>
+      {getModalContent()}
+    </MobileModal>
+  ) : (
+    <Modal isOpen={isOpen} onBackgroundClick={onDismiss} onEscapeKeydown={onDismiss}>
+      {getModalContent()}
     </Modal>
   )
 }

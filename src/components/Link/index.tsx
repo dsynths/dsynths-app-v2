@@ -1,5 +1,4 @@
 import React from 'react'
-import Link from 'next/link'
 import styled from 'styled-components'
 import { ExternalLink as LinkIconFeather } from 'react-feather'
 import { ExplorerDataType, getExplorerLink } from 'utils/explorers'
@@ -11,25 +10,6 @@ const StyledLink = styled.a`
 
   :hover {
     cursor: pointer;
-    color: ${({ theme }) => theme.primary2};
-  }
-  :focus {
-    outline: none;
-    text-decoration: underline;
-  }
-  :active {
-    text-decoration: none;
-  }
-`
-
-export const StyledInternalLink = styled(Link)`
-  text-decoration: none;
-  cursor: pointer;
-  color: ${({ theme }) => theme.primary1};
-  font-weight: 500;
-
-  :hover {
-    text-decoration: underline;
     color: ${({ theme }) => theme.primary2};
   }
   :focus {
