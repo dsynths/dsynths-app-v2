@@ -32,7 +32,7 @@ const SearchWrapper = styled.div`
 
 const ListWrapper = styled.div`
   width: 100%;
-  height: 300px;
+  height: 400px;
 `
 
 const InputField = styled.input<{
@@ -125,7 +125,7 @@ export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; on
   })
 
   return (
-    <Modal isOpen={isOpen} onBackgroundClick={onDismiss} onEscapeKeydown={onDismiss} width="350px">
+    <Modal isOpen={isOpen} onBackgroundClick={onDismiss} onEscapeKeydown={onDismiss} width="450px">
       <ModalHeader title="Select an asset" onClose={onDismiss} />
       <SearchWrapper>
         <InputField
@@ -197,7 +197,7 @@ const AssetRow = ({
         rest.onMouseDown(evt)
       }}
     >
-      <ImageWithFallback src={logo} width={30} height={30} alt={`${asset.symbol}`} />
+      <ImageWithFallback src={logo} width={30} height={30} alt={`${asset.symbol}`} round />
       <NameWrapper>
         <div>{asset.id}</div>
         <div>{asset.name}</div>

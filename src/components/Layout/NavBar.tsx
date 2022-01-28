@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 
 import Web3Network from 'components/Web3Network'
 import Web3Status from 'components/Web3Status'
-import { ThemeToggle, SearchToggle } from 'components/Icons'
+import { ThemeToggle, Search as SearchIcon } from 'components/Icons'
 import { NavButton } from 'components/Button'
 import AssetsModal from 'components/AssetsModal'
 import Menu from './Menu'
@@ -64,7 +64,7 @@ export default function NavBar() {
       <NavItems>
         <NavButton onClick={() => setAssetModalOpen(true)}>
           <SearchText>Search for a stock</SearchText>
-          <SearchToggle size={20} />
+          <SearchIcon size={20} />
         </NavButton>
         {showThemeToggle && (
           <NavButton onClick={() => toggleDarkMode()}>

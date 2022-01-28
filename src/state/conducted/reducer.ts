@@ -19,7 +19,7 @@ interface OracleResponse {
   }[]
 }
 
-type Conducted = {
+export type Conducted = {
   id: string
   long: string
   short: string

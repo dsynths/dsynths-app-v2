@@ -9,6 +9,7 @@ import { useSignaturesState } from 'state/signatures/reducer'
 import { Sector, useDetailsState } from 'state/details/reducer'
 import { Direction } from './useTradePage'
 import { constructPercentage } from 'utils/prices'
+import { SupportedChainId } from 'constants/chains'
 
 /**
  * @param id Identifier according to the oracle
@@ -25,6 +26,7 @@ import { constructPercentage } from 'utils/prices'
  */
 export interface SubAsset {
   id: string
+  chainId: SupportedChainId
   ticker: string
   symbol: string
   name: string
@@ -50,15 +52,29 @@ function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
   return true
 }
 
+function sortAlphabetically(x: SubAsset, y: SubAsset) {
+  if (x.ticker < y.ticker) {
+    return -1
+  }
+  if (x.ticker > y.ticker) {
+    return 1
+  }
+  return 0
+}
+
 /**
  * A list of all conducted tokens supported by DEUS, where longs/shorts are considered siblings.
  */
-export function useAssetList(): Asset[] {
-  const { chainId } = useWeb3React()
+export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
+  const { chainId: connectedChainId } = useWeb3React()
   const { conducted } = useConductedState()
   const { quotes } = useQuotesState()
   const { signatures } = useSignaturesState()
   const { details } = useDetailsState()
+
+  const chainId = useMemo(() => {
+    return targetChainId ?? connectedChainId
+  }, [targetChainId, connectedChainId])
 
   return useMemo(() => {
     if (!chainId || !conducted[chainId] || !quotes[chainId] || !signatures[chainId] || !details) return []
@@ -76,6 +92,7 @@ export function useAssetList(): Asset[] {
 
         const longAsset: SubAsset = {
           id,
+          chainId,
           ticker: asset.symbol,
           name: asset.name,
           sector: asset.sector,
@@ -90,6 +107,7 @@ export function useAssetList(): Asset[] {
 
         const shortAsset: SubAsset = {
           id,
+          chainId,
           ticker: asset.symbol,
           name: asset.name,
           sector: asset.sector,
@@ -115,8 +133,8 @@ export function useAssetList(): Asset[] {
 /**
  * A list of all conducted tokens supported by DEUS, where longs/shorts are returned individually.
  */
-export function useSubAssetList() {
-  const assetList = useAssetList()
+export function useSubAssetList(targetChainId?: SupportedChainId) {
+  const assetList = useAssetList(targetChainId)
   return useMemo(() => {
     return assetList.reduce((acc: SubAsset[], asset: Asset) => {
       acc.push(...[asset.long, asset.short])
@@ -128,9 +146,9 @@ export function useSubAssetList() {
 /**
  * SubAsset list but only long tokens
  */
-export function useLongAssetsList() {
-  const subAssetList = useSubAssetList()
-  return useMemo(() => subAssetList.filter((asset: SubAsset) => asset.direction === Direction.LONG), [subAssetList])
+export function useLongAssetsList(targetChainId?: SupportedChainId) {
+  const assetList = useAssetList(targetChainId)
+  return useMemo(() => assetList.map((asset) => asset.long).sort(sortAlphabetically), [assetList])
 }
 
 export function useAssetByContract(contract: string | undefined) {
