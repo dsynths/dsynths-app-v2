@@ -149,7 +149,7 @@ export default function NavBar() {
         </Routes>
         <Items>
           <NavButton onClick={() => setAssetModalOpen(true)}>
-            <SearchText>Search for a stock</SearchText>
+            <SearchText>Search for a ticker</SearchText>
             <SearchIcon size={20} />
           </NavButton>
           {!isDedicatedTheme && (
