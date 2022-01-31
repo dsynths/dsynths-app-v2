@@ -1,23 +1,26 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { FixedSizeList as List } from 'react-window'
+import AutoSizer from 'react-virtualized-auto-sizer'
 
-import { SubAsset, useSubAssetList } from 'hooks/useAssetList'
 import useWeb3React from 'hooks/useWeb3'
-import { useCurrency } from 'hooks/useCurrency'
+import Link from 'next/link'
+import { CurrencyAmount, Token, ZERO } from '@sushiswap/core-sdk'
+import { ToggleRight } from 'react-feather'
+
+import { useTokens, useAssetByContract } from 'hooks/useAssetList'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
-import { useNetworkModalToggle } from 'state/application/hooks'
-import { useCurrencyBalance } from 'state/wallet/hooks'
+import { useTokenBalances } from 'state/wallet/hooks'
 
 import { SynchronizerChains } from 'constants/chains'
 import ImageWithFallback from 'components/ImageWithFallback'
 import { Loader } from 'components/Icons'
 import { Card } from 'components/Card'
-import { ToggleRight } from 'react-feather'
 import ChainLabel from 'components/Icons/ChainLabel'
-import Link from 'next/link'
 
-const Wrapper = styled(Card)``
+const Wrapper = styled(Card)`
+  height: 400px;
+`
 
 const Row = styled.div`
   display: flex;
@@ -91,108 +94,107 @@ const SecondaryLabel = styled.div`
   color: ${({ theme }) => theme.text2};
 `
 
+type AssetMap = Array<{
+  contract: string
+  balance: CurrencyAmount<Token>
+}>
+
 export default function Portfolio() {
   const { chainId, account } = useWeb3React()
   const theme = useTheme()
+  const assetTokens = useTokens()
+  const assetBalances = useTokenBalances(account ?? undefined, assetTokens)
 
   /**
-   * Toms design shows a crosschain portfolio but thats an issue with the Multicall hook.
-   * You can do 2 things: 1) modify Multicall or whatever so u can fetch balance across all chains
-   * or 2) fuck it and we stick to 1 chain unless the user switches network I RECOMMEND THIS OPTION
+   * If you want to create loaders... check out:
+   * - state/conducted
+   * - state/details
    *
-   * It isn't worth the trouble imo because I will write subgraphs when I have time where user balance
-   * for specifically stocks is indexed, so we dont even need to query onchain data + subgraphs are multichain
-   * out of the box. So for now, go for option 2. Which impless we need a button for toggleNetworkModal
+   * Both have a status enum built-in, use those. Loading is fully done when both are OK.
    */
-  const toggleNetworkModal = useNetworkModalToggle()
+  // this line is purely for demonstration purposes, pls remove it and replace it with the above described hooks
+  const [loading, setLoading] = useState(false)
 
-  /**
-   * Assets are divided into SubAssets. Each Asset has a long and a short version (with its own contract + own name etc)
-   * so hence the SubAssets which are Assets but times 2 in size. We need balances for alllllllllll of them.
-   * There are like a thousand assets or something btw.
-   */
-  // TODO : Need to get the filtered asset list with non-zero balances for the given account
-  const assetList = useSubAssetList()
+  const filteredAssets = useMemo(() => {
+    return Object.entries(assetBalances).reduce((acc: AssetMap, [contract, balance]) => {
+      if (balance.greaterThan(ZERO)) {
+        acc.push({ contract, balance })
+      }
+      return acc
+    }, [])
+  }, [assetBalances])
 
-  // Use this to display something or nothing (including a warning banner?)
-  // Return a warning block or whatever if not supported chainId (we can work on content + styling later)
   const isSupportedChainId: boolean = useMemo(() => {
     if (!chainId || !account) return false
     return SynchronizerChains.includes(chainId)
   }, [chainId, account])
 
-  /**
-   * OKAY SO HERES THE ISSUE: the virtualized list requires scrolling to see balances
-   * but we want to see ALL positive balances. Please study how state/wallet/hooks
-   * works and pick a hook that can fetch the user balances for ALL contracts at once
-   * and then ofcourse memo filter with balance?.greaterThan(ZERO)
-   */
-
-  // We use a virtualized List for a massive performance boost
   return (
     <Wrapper>
       <HeaderContainer>
         <HeaderWrapper>
           <PrimaryLabel>Positions</PrimaryLabel>
-          <SecondaryLabel>
-            {assetList.length > 0 ? assetList.length : <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />}
-          </SecondaryLabel>
+          <SecondaryLabel>{filteredAssets.length}</SecondaryLabel>
         </HeaderWrapper>
         <HeaderWrapper>
           <PrimaryLabel>Equity</PrimaryLabel>
           <ToggleRight size="12.5px" />
         </HeaderWrapper>
       </HeaderContainer>
-      {assetList.length > 0 ? (
-        <List
-          width={450} // need a memo hook for the exact width for responsive modes
-          height={400}
-          itemCount={assetList.length}
-          itemSize={50}
-          initialScrollOffset={0}
-          itemData={assetList}
-        >
-          {({ data, index, style }) => {
-            const asset = data[index]
-            return <AssetRow key={index} asset={asset} style={style} />
-          }}
-        </List>
+      {loading ? (
+        <LoadingContainer>
+          <PrimaryLabel>No asset</PrimaryLabel>
+          <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />
+        </LoadingContainer>
+      ) : filteredAssets.length > 0 ? (
+        <AutoSizer>
+          {({ height, width }) => (
+            <List
+              width={width}
+              height={height}
+              itemCount={filteredAssets.length}
+              itemSize={50}
+              initialScrollOffset={0}
+              itemData={filteredAssets}
+            >
+              {({ data, index, style }) => {
+                const { contract, balance } = data[index]
+                return <AssetRow key={index} contract={contract} balance={balance} style={style} />
+              }}
+            </List>
+          )}
+        </AutoSizer>
       ) : (
         <LoadingContainer>
-          <PrimaryLabel>Loading assets</PrimaryLabel>
-          <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />
+          <PrimaryLabel>You don't own any synthetics. Click to trade or something?</PrimaryLabel>
         </LoadingContainer>
       )}
     </Wrapper>
   )
 }
 
-function AssetRow({ asset, style }: { asset: SubAsset; style: React.CSSProperties }) {
-  const { account, chainId } = useWeb3React()
-  const currency = useCurrency(asset.contract)
-  const balance = useCurrencyBalance(account ?? undefined, currency ?? undefined)
-  const logo = useCurrencyLogo(asset.id, currency?.symbol)
+function AssetRow({
+  contract,
+  balance,
+  style,
+}: {
+  contract: string
+  balance: CurrencyAmount<Token>
+  style: React.CSSProperties
+}) {
+  const { chainId } = useWeb3React()
+  const asset = useAssetByContract(contract)
+  const logo = useCurrencyLogo(asset?.id, asset?.symbol)
   const theme = useTheme()
-  const assetOraclePrice = parseInt(asset.price.toString())
+  const assetOraclePrice = parseInt(asset?.price ? asset.price.toString() : '0')
 
-  // again we dont want this,  only render an assetRow if the balance is ALREADY positive
-  // return balance?.greaterThan(ZERO) ? (
-  //   <Row style={style}>
-  //     <ImageWithFallback src={logo} width={30} height={30} alt={`${asset.symbol}`} />
-  //     <NameWrapper>
-  //       <div>{asset.id}</div>
-  //       <div>{asset.name}</div>
-  //     </NameWrapper>
-  //     {balance ? <div>{balance?.toSignificant(6)}</div> : <Loader size="12px" duration={'3s'} />}
-  //   </Row>
-  // ) : null
   return (
-    <Link href={`/asset?assetId=${asset.contract}`} passHref>
+    <Link href={`/asset?assetId=${contract}`} passHref>
       <Row style={style}>
-        <ImageWithFallback src={logo} width={30} height={30} alt={`${asset.symbol}`} />
+        <ImageWithFallback src={logo} width={30} height={30} alt={`${asset?.symbol}`} />
         <NameWrapper>
-          <div>{asset.symbol}</div>
-          <div>{asset.name}</div>
+          <div>{asset?.symbol}</div>
+          <div>{asset?.name}</div>
         </NameWrapper>
         {balance ? (
           <PrimaryLabel>{balance?.toSignificant(6)}</PrimaryLabel>
