@@ -1,7 +1,6 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { useAppDispatch } from 'state'
 import styled from 'styled-components'
-import { darken } from 'polished'
 
 import useWeb3React from 'hooks/useWeb3'
 import useApproveCallback, { ApprovalState } from 'hooks/useApproveCallback'
@@ -48,42 +47,32 @@ const DirectionWrapper = styled.div`
 `
 
 const DirectionTab = styled.div<{
-  active?: boolean
-  isLong?: boolean
-  isShort?: boolean
+  active: boolean
+  isLong: boolean
 }>`
   font-size: 0.9rem;
   flex: 1;
   height: 35px;
   line-height: 35px;
   text-align: center;
-  color: ${({ theme }) => theme.black};
   border-radius: ${({ isLong }) => (isLong ? '10px 0 0 10px' : '0 10px 10px 0')};
+  background: ${({ theme }) => theme.primary1};
+  border: 1px solid ${({ theme }) => theme.primary1};
 
-  ${({ theme, isLong, isShort, active }) =>
-    isLong && active
+  ${({ theme, active, isLong }) =>
+    active
       ? `
-    background: #00D16C;
-    border: 1px solid #00D16C;
-    &:hover {
-      background: ${darken(0.05, '#00D16C')};
-      border-color: ${darken(0.05, '#00D16C')};
-    };
-  `
-      : isShort && active
-      ? `
-      background: rgba(255, 0, 0, 0.5);
-      border: 1px solid rgba(255, 0, 0, 0.5);
       &:hover {
-        background: ${darken(0.05, 'rgba(255, 0, 0, 0.5)')};
-        border-color: ${darken(0.05, 'rgba(255, 0, 0, 0.5)')};
-      };    
-  `
+        background: ${theme.primary2};
+        border-color: ${theme.primary2};
+      };
+    `
       : `
       background: rgba(206, 206, 206, 0.35);
       border: 1px solid #A9A8A8;
-      color: ${theme.text2};
-  `};
+      ${isLong && `border-right: none`};
+      ${!isLong && `border-left: none`};
+    `};
 
   &:hover {
     cursor: pointer;
@@ -197,11 +186,18 @@ export default function Trade() {
 
   const handleSwitchDirection = useCallback(
     (newDirection) => {
+      if (newDirection === direction) return
       setDirection(newDirection)
       asset && setURLCurrency(asset.sibling)
     },
-    [asset, setURLCurrency]
+    [asset, setURLCurrency, direction]
   )
+
+  useEffect(() => {
+    if (asset && asset.direction !== direction) {
+      setDirection(asset.direction)
+    }
+  }, [asset, direction])
 
   const handleSwitchCurrencies = useCallback(() => {
     dispatch(setTradeState({ ...tradeState, typedValue: '', typedField: TypedField.A }))
@@ -343,7 +339,7 @@ export default function Trade() {
             {Direction.LONG}
           </DirectionTab>
           <DirectionTab
-            isShort
+            isLong={false}
             active={direction === Direction.SHORT}
             onClick={() => direction === Direction.LONG && handleSwitchDirection(Direction.SHORT)}
           >
