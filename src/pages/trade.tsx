@@ -1,29 +1,27 @@
 import React from 'react'
 import styled from 'styled-components'
+import { isMobile } from 'react-device-detect'
 
-import { Trade as TradeComponent } from 'components/App/Trade'
+import { Trade as TradeComponent, LineChart } from 'components/App/Trade'
 
 const Container = styled.div`
-  margin-top: 75px;
   display: flex;
-  flex-flow: row nowrap;
+  flex-flow: column nowrap;
+  gap: 5px;
   overflow: visible;
+  margin: 0 auto;
+  margin-top: 75px;
+  width: clamp(250px, 90%, 512px);
 
   ${({ theme }) => theme.mediaWidth.upToMedium`
     margin-top: 30px;
   `}
-
-  & > * {
-    &:first-child {
-      margin: 0 auto;
-      width: clamp(250px, 90%, 512px);
-    }
-  }
 `
 
 export default function Trade() {
   return (
     <Container>
+      {!isMobile && <LineChart />}
       <TradeComponent />
     </Container>
   )

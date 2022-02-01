@@ -52,7 +52,6 @@ export enum SupportedThemes {
   LIGHT = 'light',
   DARK = 'dark',
   SPIRIT = 'spirit',
-  SPIRIT2 = 'spirit2',
 }
 
 function colors(themeName: SupportedThemes): Colors {
@@ -88,9 +87,9 @@ function colors(themeName: SupportedThemes): Colors {
         'linear-gradient(90deg, rgba(81, 171, 255, 0.1) 0%, rgba(22, 72, 250, 0.1) 100%), linear-gradient(0deg, #FFFFFF, #FFFFFF)',
 
       // primary colors
-      primary1: '#FFB463',
-      primary2: '#FFA76A',
-      primary3: 'linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 167, 106, 0) 100%), #FFA76A',
+      primary1: 'linear-gradient(90deg, #FFBA35 1.54%, #FFB463 98.9%)',
+      primary2: 'linear-gradient(90deg, #FFBA35 1.54%, #FFA76A 50%)',
+      primary3: '#FFBA35',
 
       // color text
       primaryText1: '#FFB463', // TODO check if we want these values
@@ -142,9 +141,9 @@ function colors(themeName: SupportedThemes): Colors {
       specialBG2: '#14181E',
 
       // primary colors
-      primary1: '#FFB463',
-      primary2: '#FFA76A',
-      primary3: 'linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 167, 106, 0) 100%), #FFA76A',
+      primary1: 'linear-gradient(90deg, #FFBA35 1.54%, #FFB463 98.9%)',
+      primary2: 'linear-gradient(90deg, #FFBA35 1.54%, #FFA76A 50%)',
+      primary3: '#FFBA35',
 
       // color text
       primaryText1: '#1749FA', // TODO check if we want these values
@@ -176,7 +175,7 @@ function colors(themeName: SupportedThemes): Colors {
       black,
 
       // text
-      text1: '#45BAE5',
+      text1: '#FFFFFF',
       text2: '#D9F1F9',
       text3: '#C7EAF7',
       text4: '#B4E3F4',
@@ -198,65 +197,7 @@ function colors(themeName: SupportedThemes): Colors {
       // primary colors
       primary1: '#71D887',
       primary2: '#5AAC6C',
-      primary3: 'linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 167, 106, 0) 100%), #5AAC6C',
-
-      // color text
-      primaryText1: '#1749FA', // TODO check if we want these values
-
-      // secondary colors
-      secondary1: '#1749FA',
-      secondary2: 'rgba(23, 73, 250, 0.2)',
-
-      // other
-      red1: '#FF4343',
-      red2: '#F82D3A',
-      red3: '#D60000',
-      green1: '#27AE60',
-      yellow1: '#E3A507',
-      yellow2: '#FF8F00',
-      yellow3: '#F3B71E',
-      blue1: '#2172E5',
-      blue2: '#5199FF',
-
-      error: '#FD4040',
-      success: '#27AE60',
-      warning: '#FF8F00',
-    },
-    [SupportedThemes.SPIRIT2]: {
-      themeName: SupportedThemes.SPIRIT2,
-
-      // base
-      white,
-      black,
-
-      // text
-      text1: '#45BAE5',
-      text2: '#D9F1F9',
-      text3: '#C7EAF7',
-      text4: '#B4E3F4',
-
-      // backgrounds / greys
-      bg0: 'rgb(13, 15, 34)',
-      bg1: 'rgba(96, 213, 220, 0.25)',
-      bg2: 'rgb(21, 30, 49)',
-      bg3: 'rgba(96, 213, 220, 0.05)',
-
-      // borders
-      border1: '#ECF8FC',
-      border2: 'rgba(99, 126, 161, 0.2)',
-
-      //long short btn colours
-      long: '#71D887',
-      short: '#45BAE5',
-
-      //specialty colors
-      specialBG1: 'rgb(13, 15, 34)',
-      specialBG2: 'rgb(21, 30, 49)',
-
-      // primary colors
-      primary1: '#71D887',
-      primary2: '#5AAC6C',
-      primary3: 'linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 167, 106, 0) 100%), #5AAC6C',
+      primary3: '#43784f',
 
       // color text
       primaryText1: '#1749FA', // TODO check if we want these values
@@ -299,11 +240,6 @@ function shadows(themeName: SupportedThemes): Shadows {
       boxShadow2: '0px 5px 5px rgba(0, 0, 0, 0.15)',
     },
     [SupportedThemes.SPIRIT]: {
-      shadow1: '#000',
-      boxShadow1: '0px 0px 4px rgba(0, 0, 0, 0.125)',
-      boxShadow2: 'rgb(96 213 220) 0px 4px 30px',
-    },
-    [SupportedThemes.SPIRIT2]: {
       shadow1: '#000',
       boxShadow1: '0px 0px 4px rgba(0, 0, 0, 0.125)',
       boxShadow2: 'rgb(96 213 220) 0px 4px 30px',

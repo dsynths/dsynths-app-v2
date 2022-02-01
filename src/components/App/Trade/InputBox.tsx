@@ -25,12 +25,7 @@ const Wrapper = styled.div`
   overflow: hidden;
   border: 1px solid ${({ theme }) => theme.border2};
   padding: 0.6rem;
-
-  & > * {
-    &:last-child {
-      flex: 1;
-    }
-  }
+  height: 82px;
 `
 
 const AssetPanel = styled.div`
@@ -90,11 +85,15 @@ const Balance = styled(Row)`
   }
 `
 
-const InputField = styled.input`
-  height: 100%;
+const InputWrapper = styled.div`
+  display: flex;
   flex: 1;
+  justify-content: flex-end;
+`
+
+const InputField = styled.input`
   text-align: right;
-  padding: 0px 1.25rem;
+  padding: 20px 1.25rem;
   border: none;
   background: transparent;
   font-size: 0.9rem;
@@ -128,27 +127,29 @@ const NumericalInput = ({
   }
 
   return (
-    <InputField
-      {...rest}
-      value={value}
-      onChange={(event) => {
-        // replace commas with periods
-        enforcer(event.target.value.replace(/,/g, '.'))
-      }}
-      // universal input options
-      inputMode="decimal"
-      title="Amount"
-      autoComplete="off"
-      autoCorrect="off"
-      // text-specific options
-      type="text"
-      pattern="^[0-9]*[.,]?[0-9]*$"
-      placeholder={placeholder || '0.00'}
-      min={0}
-      minLength={1}
-      maxLength={79}
-      spellCheck="false"
-    />
+    <InputWrapper>
+      <InputField
+        {...rest}
+        value={value}
+        onChange={(event) => {
+          // replace commas with periods
+          enforcer(event.target.value.replace(/,/g, '.'))
+        }}
+        // universal input options
+        inputMode="decimal"
+        title="Amount"
+        autoComplete="off"
+        autoCorrect="off"
+        // text-specific options
+        type="text"
+        pattern="^[0-9]*[.,]?[0-9]*$"
+        placeholder={placeholder || '0.00'}
+        min={0}
+        minLength={1}
+        maxLength={79}
+        spellCheck="false"
+      />
+    </InputWrapper>
   )
 }
 
@@ -183,7 +184,7 @@ export default function InputBox({
           {!currency ? (
             <AssetSelect onClick={() => setModalOpen(true)} select>
               Select an asset
-              <ChevronDown size={15} />
+              <ChevronDown size={15} color="white" />
             </AssetSelect>
           ) : showSelect ? (
             <AssetSelect onClick={() => setModalOpen(true)}>
