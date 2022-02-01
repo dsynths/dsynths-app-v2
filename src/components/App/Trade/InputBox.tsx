@@ -43,8 +43,8 @@ const Row = styled.div`
 const AssetSelect = styled(Row)<{
   select?: boolean
 }>`
-  padding: 5px 10px;
-  border-radius: 15px;
+  padding: 5px;
+  border-radius: 20px;
   background: ${({ select, theme }) => darken(0.05, select ? theme.secondary1 : theme.bg1)};
   color: ${({ select, theme }) => (select ? 'white' : theme.text2)};
   font-size: ${({ select }) => select && '0.9rem'};
@@ -193,7 +193,7 @@ export default function InputBox({
               <ChevronDown size={15} />
             </AssetSelect>
           ) : (
-            <Row style={{ marginLeft: '8px' }}>
+            <Row style={{ marginLeft: '5px' }}>
               <ImageWithFallback src={logo} width={30} height={30} alt={`${currency?.symbol} Logo`} round />
               {currency?.symbol}
             </Row>

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { useAppDispatch } from 'state'
 import styled from 'styled-components'
+import { ZERO } from '@sushiswap/core-sdk'
 
 import useWeb3React from 'hooks/useWeb3'
 import useApproveCallback, { ApprovalState } from 'hooks/useApproveCallback'
@@ -16,6 +17,7 @@ import {
   TradeType,
 } from 'state/trade/reducer'
 import useDefaultsFromURL from 'state/trade/hooks'
+import { useNetworkModalToggle, useWalletModalToggle } from 'state/application/hooks'
 import { Synchronizer } from 'constants/addresses'
 import { SynchronizerChains } from 'constants/chains'
 
@@ -24,9 +26,8 @@ import InputBox from './InputBox'
 import { ArrowBubble, IconWrapper } from 'components/Icons'
 import { PrimaryButton } from 'components/Button'
 import { DotFlashing } from 'components/Icons'
-import { useNetworkModalToggle, useWalletModalToggle } from 'state/application/hooks'
 import ConfirmTradeModal from 'components/TransactionConfirmationModal/ConfirmTrade'
-import { ZERO } from '@sushiswap/core-sdk'
+import { TrendingDown, TrendingUp } from 'react-feather'
 
 const Wrapper = styled(Card)`
   justify-content: flex-start;
@@ -50,7 +51,11 @@ const DirectionTab = styled.div<{
   active: boolean
   isLong: boolean
 }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.9rem;
+  gap: 5px;
   flex: 1;
   height: 35px;
   line-height: 35px;
@@ -93,10 +98,14 @@ const InputWrapper = styled.div`
   `}
 `
 
-const ArrowWrapper = styled(IconWrapper)`
+const ArrowWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 0px;
   overflow: visible;
   margin: 0 auto;
+  z-index: 1;
 
   &:hover {
     cursor: pointer;
@@ -337,6 +346,7 @@ export default function Trade() {
             onClick={() => direction === Direction.SHORT && handleSwitchDirection(Direction.LONG)}
           >
             {Direction.LONG}
+            <TrendingUp size={14} />
           </DirectionTab>
           <DirectionTab
             isLong={false}
@@ -344,6 +354,7 @@ export default function Trade() {
             onClick={() => direction === Direction.LONG && handleSwitchDirection(Direction.SHORT)}
           >
             {Direction.SHORT}
+            <TrendingDown size={14} />
           </DirectionTab>
         </DirectionWrapper>
         <InputWrapper>
@@ -360,8 +371,8 @@ export default function Trade() {
             <WarningBlock>{warning}</WarningBlock>
           ) : (
             <>
-              <ArrowWrapper size="25px" onClick={handleSwitchCurrencies}>
-                <ArrowBubble size={25} style={{ transform: 'rotate(90deg)' }} />
+              <ArrowWrapper onClick={handleSwitchCurrencies}>
+                <ArrowBubble size={30} />
               </ArrowWrapper>
               <InputBox
                 currency={currencies[1]}

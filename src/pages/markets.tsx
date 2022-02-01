@@ -106,7 +106,7 @@ export default function Markets() {
         <>
           {chainId !== modalAsset.chainId && (
             <div>
-              You are currently connected to the <span>{ChainInfo[chainId]['label']}</span> network. In order to trade{' '}
+              You are currently connected to the <span>{ChainInfo[chainId]['label']}</span> network. In order to trade $
               {modalAsset.ticker} on the <span>{ChainInfo[modalAsset.chainId]['label']}</span> network you have to
               switch chains first.
             </div>
