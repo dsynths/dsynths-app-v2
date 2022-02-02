@@ -97,7 +97,7 @@ const PrimaryLabel = styled.div`
   color: ${({ theme }) => theme.text1};
 
   & > span {
-    color: ${({ theme }) => theme.primary1};
+    color: ${({ theme }) => theme.primary3};
     &:hover {
       cursor: pointer;
     }
