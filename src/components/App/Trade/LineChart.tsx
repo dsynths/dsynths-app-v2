@@ -164,8 +164,6 @@ export default function LineChart() {
     return `${change > 0 ? '+' : ''}${change.toFixed(2)}% Past Year`
   }, [data])
 
-  console.log(!!data.length, isSpiritTheme)
-
   return (
     <Wrapper show={!!data.length} border={isSpiritTheme}>
       <InfoWrapper>
