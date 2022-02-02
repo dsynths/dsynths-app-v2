@@ -1,5 +1,5 @@
 import React from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { ArrowDown } from 'react-feather'
 
 const Circle = styled.div<{

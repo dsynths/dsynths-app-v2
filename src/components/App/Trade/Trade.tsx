@@ -23,7 +23,7 @@ import { SynchronizerChains } from 'constants/chains'
 
 import { Card } from 'components/Card'
 import InputBox from './InputBox'
-import { ArrowBubble, IconWrapper } from 'components/Icons'
+import { ArrowBubble } from 'components/Icons'
 import { PrimaryButton } from 'components/Button'
 import { DotFlashing } from 'components/Icons'
 import ConfirmTradeModal from 'components/TransactionConfirmationModal/ConfirmTrade'
