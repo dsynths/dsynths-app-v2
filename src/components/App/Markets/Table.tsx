@@ -40,7 +40,7 @@ const Row = styled.tr`
 
   :hover {
     cursor: pointer;
-    background: ${({ theme }) => theme.bg3};
+    background: ${({ theme }) => theme.bg1};
   }
 `
 

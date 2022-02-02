@@ -28,12 +28,16 @@ import { PrimaryButton } from 'components/Button'
 import { DotFlashing } from 'components/Icons'
 import ConfirmTradeModal from 'components/TransactionConfirmationModal/ConfirmTrade'
 import { TrendingDown, TrendingUp } from 'react-feather'
+import { useRouter } from 'next/router'
 
-const Wrapper = styled(Card)`
+const Wrapper = styled(Card)<{
+  border?: boolean
+}>`
   justify-content: flex-start;
   padding: 1.5rem;
   overflow: visible;
   box-shadow: ${({ theme }) => theme.boxShadow2};
+  border: 1px solid ${({ theme, border }) => (border ? theme.border2 : 'transparent')};
 
   ${({ theme }) => theme.mediaWidth.upToMedium`
     padding: 1rem;
@@ -161,12 +165,17 @@ export default function Trade() {
   const tradeState = useTradeState()
   const toggleWalletModal = useWalletModalToggle()
   const toggleNetworkModal = useNetworkModalToggle()
+  const router = useRouter()
 
   const [tradeType, setTradeType] = useState<TradeType>(TradeType.OPEN)
   const [direction, setDirection] = useState(Direction.LONG)
   const { attemptingTxn, showReview, error: tradeStateError } = tradeState
   const [txHash, setTxHash] = useState<string>('')
   const [awaitingApproveConfirmation, setAwaitingApproveConfirmation] = useState<boolean>(false)
+
+  const isSpiritTheme = useMemo(() => {
+    return router.query?.theme === 'spirit'
+  }, [router])
 
   const currencies = useMemo(() => {
     return tradeType === TradeType.OPEN ? [quoteCurrency, baseCurrency] : [baseCurrency, quoteCurrency]
@@ -390,7 +399,7 @@ export default function Trade() {
   }
 
   return (
-    <Wrapper>
+    <Wrapper border={isSpiritTheme}>
       {getMainContent()}
       {marketIsOpen && !warning && (
         <FeeWrapper>

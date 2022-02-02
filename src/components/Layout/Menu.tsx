@@ -102,7 +102,7 @@ export default function Menu() {
               </IconWrapper>
             </Row>
           </Link>
-          <Link href={'/portfolio'}>
+          <Link href={'/portfolio'} passHref>
             <Row active={router.route === '/portfolio'}>
               <div>Portfolio Manager</div>
               <IconWrapper>
