@@ -21,7 +21,13 @@ export default function useRpcChangerCallback() {
         // This error code indicates that the chain has not been added to MetaMask.
         if (switchError.code === 4902) {
           try {
-            await library?.send('wallet_addEthereumChain', [ChainInfo[targetChainId], account])
+            const params = {
+              chainId: ChainInfo[targetChainId].chainId,
+              chainName: ChainInfo[targetChainId].chainName,
+              nativeCurrency: ChainInfo[targetChainId].nativeCurrency,
+              rpcUrls: [ChainInfo[targetChainId].rpcUrl],
+            }
+            await library?.send('wallet_addEthereumChain', [params, account])
             return true
           } catch (addError) {
             console.log('Something went wrong trying to add a new  network RPC: ')
