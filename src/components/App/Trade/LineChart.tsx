@@ -10,12 +10,15 @@ import { LineChart as Chart } from 'components/Chart'
 import { Card } from 'components/Card'
 import { Direction } from 'hooks/useTradePage'
 import { formatDollarAmount } from 'utils/numbers'
+import { useRouter } from 'next/router'
 
 const Wrapper = styled(Card)<{
   show: boolean
+  border?: boolean
 }>`
   padding: 0;
   height: ${({ show }) => (show ? '285px' : '0px')}; // exact infowrapper + last-child height
+  border: ${({ theme, border, show }) => (show && border ? `1px solid ${theme.border2}` : 'none')};
 
   -webkit-transition: height 0.4s linear;
   -moz-transition: height 0.4s linear;
@@ -94,6 +97,11 @@ export default function LineChart() {
   const { currencies } = useDefaultsFromURL()
   const asset = useAssetByContract(currencies.baseCurrency?.wrapped.address ?? undefined)
 
+  const router = useRouter()
+  const isSpiritTheme = useMemo(() => {
+    return router.query?.theme === 'spirit'
+  }, [router])
+
   const fetchCandlesticks = useCallback(
     async (ticker: string) => {
       try {
@@ -157,7 +165,7 @@ export default function LineChart() {
   }, [data])
 
   return (
-    <Wrapper show={!!data.length}>
+    <Wrapper show={!!data.length} border={isSpiritTheme}>
       <InfoWrapper>
         <div>
           <UpperText>{cachedTicker}</UpperText>

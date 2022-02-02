@@ -10,6 +10,7 @@ import { Sector, useDetailsState } from 'state/details/reducer'
 import { Direction } from './useTradePage'
 import { constructPercentage } from 'utils/prices'
 import { SupportedChainId } from 'constants/chains'
+import { getAddress } from '@ethersproject/address'
 
 /**
  * @param id Identifier according to the oracle
@@ -102,13 +103,13 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
           name: asset.name,
           sector: asset.sector,
           direction: Direction.LONG,
-          contract: long,
+          contract: getAddress(long),
           sibling: short,
           symbol: asset.longSymbol,
           price: quote.long.price,
           fee: constructPercentage(quote.long.fee),
           open: !!longSigs,
-          token: new Token(chainId, long, 18, asset.symbol, asset.name),
+          token: new Token(chainId, getAddress(long), 18, asset.symbol, asset.name),
         }
 
         const shortAsset: SubAsset = {
@@ -118,13 +119,13 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
           name: asset.name,
           sector: asset.sector,
           direction: Direction.SHORT,
-          contract: short,
+          contract: getAddress(short),
           sibling: long,
           symbol: asset.shortSymbol,
           price: quote.short.price,
           fee: constructPercentage(quote.short.fee),
           open: !!shortSigs,
-          token: new Token(chainId, short, 18, asset.symbol, asset.name),
+          token: new Token(chainId, getAddress(short), 18, asset.symbol, asset.name),
         }
 
         return {
