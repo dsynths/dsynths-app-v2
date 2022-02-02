@@ -3,6 +3,7 @@ import Link from 'next/link'
 import styled, { useTheme } from 'styled-components'
 import { Eye, EyeOff } from 'react-feather'
 import BigNumber from 'bignumber.js'
+import { useRouter } from 'next/router'
 
 import useWeb3React from 'hooks/useWeb3'
 import { useAssetByContract } from 'hooks/useAssetList'
@@ -22,7 +23,11 @@ import { Card } from 'components/Card'
 import { BaseButton, PrimaryButton } from 'components/Button'
 import { SynchronizerChains } from 'constants/chains'
 
-const Wrapper = styled(Card)`
+const Wrapper = styled(Card)<{
+  border?: boolean
+}>`
+  border: ${({ theme, border }) => (border ? `1px solid ${theme.border2}` : 'none')};
+
   ${({ theme }) => theme.mediaWidth.upToMedium`
     padding: 10px;
   `}
@@ -155,6 +160,11 @@ export default function Portfolio({
     return !!account
   }, [account])
 
+  const router = useRouter()
+  const isSpiritTheme = useMemo(() => {
+    return router.query?.theme === 'spirit'
+  }, [router])
+
   // temporarily notify user about the pricing issue during market-close hours
   // const hasPricingIssue: boolean = useMemo(() => {
   //   return assetList.map((asset) => !!asset.price).includes(false)
@@ -197,7 +207,7 @@ export default function Portfolio({
   }
 
   return (
-    <Wrapper>
+    <Wrapper border={isSpiritTheme}>
       <HeaderContainer>
         <HeaderWrapper>
           <PrimaryLabel>Positions</PrimaryLabel>
