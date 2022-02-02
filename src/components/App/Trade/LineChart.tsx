@@ -145,8 +145,8 @@ export default function LineChart() {
     fetchCandlesticks(asset.ticker)
   }, [asset, cache, fetchCandlesticks])
 
-  const placeholder = useMemo(() => {
-    return asset ? 'Chart is not available' : 'Select an asset to view the chart'
+  const content = useMemo(() => {
+    return asset ? '' : 'Select an asset to view the chart'
   }, [asset])
 
   const priceLabel = useMemo(() => {
@@ -176,7 +176,7 @@ export default function LineChart() {
           <BottomText>{priceChangeLabel}</BottomText>
         </div>
       </InfoWrapper>
-      <Chart data={data} dataKey="close" loading={loading} placeholder={placeholder} />
+      <Chart data={data} dataKey="close" loading={loading} content={content} />
     </Wrapper>
   )
 }

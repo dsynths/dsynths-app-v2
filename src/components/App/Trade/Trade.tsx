@@ -299,7 +299,14 @@ export default function Trade() {
   }, [account, chainId, isSupportedChainId])
 
   function getApproveButton(): JSX.Element | null {
-    if (!isSupportedChainId || !account || !asset || error !== PrimaryError.VALID || !marketIsOpen) {
+    if (
+      !isSupportedChainId ||
+      !account ||
+      !asset ||
+      error !== PrimaryError.VALID ||
+      !marketIsOpen ||
+      !formattedAmounts[0]
+    ) {
       return null
     }
 

@@ -93,7 +93,6 @@ export default function Menu() {
       <div>
         <InlineModal isOpen={isOpen}>
           <Web3Network />
-
           <Link href={buildUrl('trade')} passHref>
             <Row onClick={() => toggle()} active={router.route === '/trade'}>
               <div>Trade</div>
@@ -154,14 +153,4 @@ export default function Menu() {
       </div>
     </Container>
   )
-
-  // return (
-  //   <Wrapper ref={wrapperRef} toggled={toggled}>
-  //     <Web3Status />
-  //     <NavButton onClick={() => toggleDarkMode()}>
-  //       <ThemeToggle size={20} />
-  //     </NavButton>
-  //     <Web3Network />
-  //   </Wrapper>
-  // )
 }
