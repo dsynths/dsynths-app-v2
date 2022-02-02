@@ -25,12 +25,7 @@ const Wrapper = styled.div`
   overflow: hidden;
   border: 1px solid ${({ theme }) => theme.border2};
   padding: 0.6rem;
-
-  & > * {
-    &:last-child {
-      flex: 1;
-    }
-  }
+  height: 82px;
 `
 
 const AssetPanel = styled.div`
@@ -48,16 +43,20 @@ const Row = styled.div`
 const AssetSelect = styled(Row)<{
   select?: boolean
 }>`
-  padding: 5px 10px;
-  border-radius: 15px;
+  padding: 5px;
+  border-radius: 20px;
   background: ${({ select, theme }) => darken(0.05, select ? theme.secondary1 : theme.bg1)};
-  color: white;
+  color: ${({ select, theme }) => (select ? 'white' : theme.text2)};
   font-size: ${({ select }) => select && '0.9rem'};
 
   &:hover {
     cursor: pointer;
     background: ${({ select, theme }) => darken(0.03, select ? theme.secondary1 : theme.bg1)};
   }
+
+  ${({ theme, select }) => theme.mediaWidth.upToMedium`
+    font-size: ${select && '0.8rem'};
+  `}
 `
 
 const Balance = styled(Row)`
@@ -73,6 +72,8 @@ const Balance = styled(Row)`
     border-radius: 6px;
     padding: 2px 3px;
     font-size: 0.6rem;
+    color: white;
+
     &:hover {
       background: ${({ theme }) => theme.secondary2};
       cursor: pointer;
@@ -84,11 +85,15 @@ const Balance = styled(Row)`
   }
 `
 
-const InputField = styled.input`
-  height: 100%;
+const InputWrapper = styled.div`
+  display: flex;
   flex: 1;
+  justify-content: flex-end;
+`
+
+const InputField = styled.input`
   text-align: right;
-  padding: 0px 1.25rem;
+  padding: 20px 1.25rem;
   border: none;
   background: transparent;
   font-size: 0.9rem;
@@ -122,27 +127,29 @@ const NumericalInput = ({
   }
 
   return (
-    <InputField
-      {...rest}
-      value={value}
-      onChange={(event) => {
-        // replace commas with periods
-        enforcer(event.target.value.replace(/,/g, '.'))
-      }}
-      // universal input options
-      inputMode="decimal"
-      title="Amount"
-      autoComplete="off"
-      autoCorrect="off"
-      // text-specific options
-      type="text"
-      pattern="^[0-9]*[.,]?[0-9]*$"
-      placeholder={placeholder || '0.00'}
-      min={0}
-      minLength={1}
-      maxLength={79}
-      spellCheck="false"
-    />
+    <InputWrapper>
+      <InputField
+        {...rest}
+        value={value}
+        onChange={(event) => {
+          // replace commas with periods
+          enforcer(event.target.value.replace(/,/g, '.'))
+        }}
+        // universal input options
+        inputMode="decimal"
+        title="Amount"
+        autoComplete="off"
+        autoCorrect="off"
+        // text-specific options
+        type="text"
+        pattern="^[0-9]*[.,]?[0-9]*$"
+        placeholder={placeholder || '0.00'}
+        min={0}
+        minLength={1}
+        maxLength={79}
+        spellCheck="false"
+      />
+    </InputWrapper>
   )
 }
 
@@ -177,7 +184,7 @@ export default function InputBox({
           {!currency ? (
             <AssetSelect onClick={() => setModalOpen(true)} select>
               Select an asset
-              <ChevronDown size={15} />
+              <ChevronDown size={15} color="white" />
             </AssetSelect>
           ) : showSelect ? (
             <AssetSelect onClick={() => setModalOpen(true)}>
@@ -186,7 +193,7 @@ export default function InputBox({
               <ChevronDown size={15} />
             </AssetSelect>
           ) : (
-            <Row style={{ marginLeft: '8px' }}>
+            <Row style={{ marginLeft: '5px' }}>
               <ImageWithFallback src={logo} width={30} height={30} alt={`${currency?.symbol} Logo`} round />
               {currency?.symbol}
             </Row>
@@ -204,7 +211,7 @@ export default function InputBox({
           <div />
         )}
       </Wrapper>
-      <AssetsModal isOpen={modalOpen} onDismiss={() => setModalOpen(false)} activeCurrency={currency} />
+      <AssetsModal isOpen={modalOpen} onDismiss={() => setModalOpen(false)} />
     </>
   )
 }

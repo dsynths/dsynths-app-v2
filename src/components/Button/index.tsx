@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 import { Button as RebassButton, ButtonProps as ButtonPropsOriginal } from 'rebass/styled-components'
-import { darken } from 'polished'
 
 type ButtonProps = Omit<ButtonPropsOriginal, 'css'>
 
@@ -66,22 +65,22 @@ export const NavButton = styled.button`
 `
 
 export const PrimaryButton = styled(BaseButton)`
-  background-color: ${({ theme }) => theme.primary1};
-  color: white;
+  background: ${({ theme }) => theme.primary1};
+  color: ${({ theme }) => theme.text1};
   z-index: 0;
   &:focus {
-    box-shadow: 0 0 0 1pt ${({ theme }) => darken(0.05, theme.primary1)};
-    background-color: ${({ theme }) => darken(0.05, theme.primary1)};
+    box-shadow: 0 0 0 1pt ${({ theme }) => theme.primary2};
+    background: ${({ theme }) => theme.primary2};
   }
   &:hover {
-    background-color: ${({ theme }) => darken(0.05, theme.primary1)};
+    background: ${({ theme }) => theme.primary2};
   }
   &:active {
-    box-shadow: 0 0 0 1pt ${({ theme }) => darken(0.1, theme.primary1)};
-    background-color: ${({ theme }) => darken(0.1, theme.primary1)};
+    box-shadow: 0 0 0 1pt ${({ theme }) => theme.primary2};
+    background: ${({ theme }) => theme.primary2};
   }
   &:disabled {
-    background-color: ${({ theme, disabled }) => (disabled ? theme.primary1 : theme.bg2)};
+    background: ${({ theme, disabled }) => (disabled ? theme.primary1 : theme.bg2)};
     color: ${({ theme, disabled }) => (disabled ? theme.white : theme.text2)};
     cursor: auto;
     box-shadow: none;

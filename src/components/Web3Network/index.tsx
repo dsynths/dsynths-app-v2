@@ -8,6 +8,7 @@ import { ChainInfo } from 'constants/chainInfo'
 
 import NetworkModal from 'components/NetworkModal'
 import { NavButton } from 'components/Button'
+import { ChevronDown } from 'components/Icons'
 
 const Text = styled.p`
   width: fit-content;
@@ -28,9 +29,10 @@ export default function Web3Network() {
 
   return Chain ? (
     <>
-      <NavButton onClick={() => toggleNetworkModal()}>
+      <NavButton onClick={() => toggleNetworkModal()} style={{ justifyContent: 'space-between' }}>
         <Image src={Chain.logoUrl} alt={Chain.label} width={20} height={20} />
         <Text>{Chain.label}</Text>
+        <ChevronDown />
       </NavButton>
       <NetworkModal />
     </>

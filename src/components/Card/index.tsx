@@ -7,6 +7,6 @@ export const Card = styled.div`
   overflow: hidden;
   background: ${({ theme }) => theme.bg0};
   box-shadow: ${({ theme }) => theme.boxShadow1};
-  border-radius: 15px;
+  border-radius: 10px;
   padding: 1.25rem;
 `
