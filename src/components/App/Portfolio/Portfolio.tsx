@@ -1,16 +1,19 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import Link from 'next/link'
 import styled, { useTheme } from 'styled-components'
-import { CurrencyAmount, Token, ZERO } from '@sushiswap/core-sdk'
 import { Eye, EyeOff } from 'react-feather'
 import BigNumber from 'bignumber.js'
 
 import useWeb3React from 'hooks/useWeb3'
-import { useTokens, useAssetByContract, useSubAssetList } from 'hooks/useAssetList'
+import { useAssetByContract } from 'hooks/useAssetList'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
-import { useTokenBalances } from 'state/wallet/hooks'
 import { ConductedStatus, useConductedState } from 'state/conducted/reducer'
 import { DetailsStatus, useDetailsState } from 'state/details/reducer'
+import { useWalletModalToggle } from 'state/application/hooks'
+import { TokenBalancesMap } from 'state/wallet/types'
+
+import { AssetMap, OwnedAsset } from 'pages/portfolio'
+import { formatDollarAmount } from 'utils/numbers'
 
 import ImageWithFallback from 'components/ImageWithFallback'
 import { Loader } from 'components/Icons'
@@ -18,10 +21,12 @@ import { Card } from 'components/Card'
 // import ChainLabel from 'components/Icons/ChainLabel'
 import { BaseButton, PrimaryButton } from 'components/Button'
 import { SynchronizerChains } from 'constants/chains'
-import { formatDollarAmount } from 'utils/numbers'
-import { useWalletModalToggle } from 'state/application/hooks'
 
-const Wrapper = styled(Card)``
+const Wrapper = styled(Card)`
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    padding: 10px;
+  `}
+`
 
 const Row = styled.div`
   display: flex;
@@ -30,8 +35,7 @@ const Row = styled.div`
   gap: 1rem;
   align-items: center;
   width: 100%;
-  height: 3rem;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0;
   &:hover {
     cursor: pointer;
     background: ${({ theme }) => theme.bg1};
@@ -50,10 +54,16 @@ const NameWrapper = styled.div`
     &:first-child {
       font-size: 0.9rem;
       color: ${({ theme }) => theme.text1};
+      ${({ theme }) => theme.mediaWidth.upToMedium`
+        font-size: 0.7rem;
+      `}
     }
     &:last-child {
       font-size: 0.7rem;
       color: ${({ theme }) => theme.text2};
+      ${({ theme }) => theme.mediaWidth.upToMedium`
+        font-size: 0.6rem;
+      `}
     }
   }
 `
@@ -62,7 +72,7 @@ const HeaderContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
-  padding: 0rem 1rem 1rem 1rem;
+  margin-bottom: 5px;
 `
 const HeaderWrapper = styled.div<{
   hover?: boolean
@@ -111,33 +121,30 @@ const SecondaryLabel = styled.div`
   color: ${({ theme }) => theme.text2};
 `
 
-interface OwnedAsset {
-  contract: string
-  balance: CurrencyAmount<Token>
-  equity: BigNumber
-}
-
-type AssetMap = Array<OwnedAsset>
-
-function sortBalances(a: OwnedAsset, b: OwnedAsset) {
-  return a.equity.gte(b.equity) ? -1 : 1
-}
-
-export default function Portfolio() {
+export default function Portfolio({
+  balances,
+  assets,
+  totalEquity,
+  showEquity,
+  setShowEquity,
+}: {
+  balances: TokenBalancesMap
+  assets: AssetMap
+  totalEquity: BigNumber
+  showEquity: boolean
+  setShowEquity: () => void
+}) {
   const { chainId, account } = useWeb3React()
   const theme = useTheme()
-  const assetList = useSubAssetList()
-  const assetTokens = useTokens()
-  const assetBalances = useTokenBalances(account ?? undefined, assetTokens)
+
   const { status: conductedStatus } = useConductedState()
   const { status: detailsStatus } = useDetailsState()
-  const [showEquityPercentage, setShowEquityPercentage] = useState(false)
   const toggleWalletModal = useWalletModalToggle()
 
   const isLoading: boolean = useMemo(() => {
-    const balancesLoading = !!Object.keys(assetBalances).length
+    const balancesLoading = !!Object.keys(balances).length
     return !(balancesLoading && conductedStatus === ConductedStatus.OK && detailsStatus === DetailsStatus.OK)
-  }, [conductedStatus, detailsStatus, assetBalances])
+  }, [conductedStatus, detailsStatus, balances])
 
   const isSupportedChainId: boolean = useMemo(() => {
     if (!chainId || !account) return false
@@ -148,25 +155,10 @@ export default function Portfolio() {
     return !!account
   }, [account])
 
-  const filteredAssets = useMemo(() => {
-    const unsorted = Object.entries(assetBalances).reduce((acc: AssetMap, [contract, balance]) => {
-      if (balance.equalTo(ZERO)) return acc
-
-      const asset = assetList.find((asset) => asset.contract === contract)
-      const price = asset ? new BigNumber(asset.price.toString()) : new BigNumber('0')
-      const equity = new BigNumber(balance.toExact()).times(price)
-      acc.push({ contract, balance, equity })
-      return acc
-    }, [])
-
-    return unsorted.sort(sortBalances)
-  }, [assetBalances, assetList])
-
-  const totalEquity = useMemo(() => {
-    return filteredAssets.reduce((acc: BigNumber, { equity }) => {
-      return acc.plus(equity)
-    }, new BigNumber('0'))
-  }, [filteredAssets])
+  // temporarily notify user about the pricing issue during market-close hours
+  // const hasPricingIssue: boolean = useMemo(() => {
+  //   return assetList.map((asset) => !!asset.price).includes(false)
+  // }, [assetList])
 
   function getStatusLabel(): JSX.Element | null {
     if (!isWalletConnected) {
@@ -190,7 +182,7 @@ export default function Portfolio() {
       )
     }
 
-    if (!filteredAssets.length) {
+    if (!assets.length) {
       return (
         <PrimaryLabel>
           You don&apos;t own any synthetics. Click&nbsp;
@@ -209,12 +201,12 @@ export default function Portfolio() {
       <HeaderContainer>
         <HeaderWrapper>
           <PrimaryLabel>Positions</PrimaryLabel>
-          <SecondaryLabel>{filteredAssets.length}</SecondaryLabel>
+          <SecondaryLabel>{assets.length}</SecondaryLabel>
         </HeaderWrapper>
-        <HeaderWrapper hover onClick={() => setShowEquityPercentage(!showEquityPercentage)}>
+        <HeaderWrapper hover onClick={setShowEquity}>
           <PrimaryLabel>Equity</PrimaryLabel>
           <BaseButton padding="0" $borderRadius="0" width={'1rem'}>
-            {showEquityPercentage ? <EyeOff size="12.5px" /> : <Eye size="12.5px" />}
+            {showEquity ? <Eye size="12.5px" /> : <EyeOff size="12.5px" />}
           </BaseButton>
         </HeaderWrapper>
       </HeaderContainer>
@@ -222,8 +214,8 @@ export default function Portfolio() {
         <LoadingContainer>{getStatusLabel()}</LoadingContainer>
       ) : (
         <>
-          {filteredAssets.map((owned: OwnedAsset, index) => (
-            <AssetRow key={index} owned={owned} totalEquity={totalEquity} showEquityPercentage={showEquityPercentage} />
+          {assets.map((owned, index) => (
+            <AssetRow key={index} owned={owned} totalEquity={totalEquity} showEquity={showEquity} />
           ))}
         </>
       )}
@@ -234,21 +226,19 @@ export default function Portfolio() {
 function AssetRow({
   owned: { contract, balance, equity },
   totalEquity,
-  showEquityPercentage,
+  showEquity,
 }: {
   owned: OwnedAsset
   totalEquity: BigNumber
-  showEquityPercentage: boolean
+  showEquity: boolean
 }) {
   // const { chainId } = useWeb3React()
   const asset = useAssetByContract(contract)
   const logo = useCurrencyLogo(asset?.id, asset?.symbol)
 
   const equityLabel = useMemo(() => {
-    return showEquityPercentage
-      ? `${equity.div(totalEquity).times(100).toFixed(2)}%`
-      : formatDollarAmount(equity.toNumber())
-  }, [equity, totalEquity, showEquityPercentage])
+    return showEquity ? formatDollarAmount(equity.toNumber()) : `${equity.div(totalEquity).times(100).toFixed(2)}%`
+  }, [equity, totalEquity, showEquity])
 
   return (
     <Link href={`/trade?assetId=${contract}`} passHref>
@@ -258,7 +248,7 @@ function AssetRow({
           <div>{asset?.symbol}</div>
           <div>{asset?.name}</div>
         </NameWrapper>
-        {!showEquityPercentage && <PrimaryLabel>{balance?.toSignificant(6)}</PrimaryLabel>}
+        {showEquity && <PrimaryLabel>{balance?.toSignificant(6)}</PrimaryLabel>}
         {/* <ChainLabel chainId={chainId} /> */}
         <PrimaryLabel>{equityLabel}</PrimaryLabel>
       </Row>

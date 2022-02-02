@@ -45,13 +45,13 @@ const AssetSelect = styled(Row)<{
 }>`
   padding: 5px 7px;
   border-radius: 20px;
-  background: ${({ select, theme }) => darken(0.05, theme.bg1)};
+  background: ${({ theme }) => darken(0.05, theme.bg1)};
   color: ${({ select, theme }) => (select ? 'white' : theme.text2)};
   font-size: ${({ select }) => select && '0.9rem'};
 
   &:hover {
     cursor: pointer;
-    background: ${({ select, theme }) => darken(0.03, theme.bg1)};
+    background: ${({ theme }) => darken(0.03, theme.bg1)};
   }
 
   ${({ theme, select }) => theme.mediaWidth.upToMedium`

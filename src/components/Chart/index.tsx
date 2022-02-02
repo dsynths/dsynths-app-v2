@@ -9,16 +9,15 @@ const MarginWrapper = styled.div`
 `
 
 const Container = styled(ResponsiveContainer)<{
-  noData: boolean
   loading: boolean
-  placeholder: string
+  content: string
 }>`
-  ${({ noData, placeholder, theme }) =>
-    noData &&
+  ${({ content, theme }) =>
+    content &&
     `
     position: relative;
     &:after {
-      content: '${placeholder}';
+      content: '${content}';
       display: flex;
       justify-content: center;
       width: 100%;
@@ -26,25 +25,7 @@ const Container = styled(ResponsiveContainer)<{
       top: 50%;
       transform: translateY(-50%);
       color: ${theme.text1};
-      opacity: 0.4;
-      pointer-events: none;
-    }
-  `}
-
-  ${({ loading, theme }) =>
-    loading &&
-    `
-    position: relative;
-    &:after {
-      content: 'Loading...';
-      display: flex;
-      justify-content: center;
-      width: 100%;
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      color: ${theme.text1};
-      opacity: 0.4;
+      opacity: 0.2;
       pointer-events: none;
     }
   `}
@@ -52,20 +33,25 @@ const Container = styled(ResponsiveContainer)<{
 
 export function LineChart({
   data,
-  loading,
   dataKey,
-  placeholder = 'No Data Available',
+  loading,
+  content = '',
 }: {
   data: any[]
-  loading: boolean
   dataKey: string
-  placeholder?: string
+  loading: boolean
+  content?: string
 }) {
   const theme = useTheme()
 
   return (
     <MarginWrapper>
-      <Container noData={!data.length} loading={loading} placeholder={placeholder} width="100%" height="100%">
+      <Container
+        loading={loading}
+        content={!data.length ? 'Chart is not available' : loading ? 'Loading...' : content}
+        width="100%"
+        height="100%"
+      >
         <AreaChart data={data}>
           <YAxis dataKey={dataKey} type="number" domain={['dataMin', 'dataMax']} hide={true} />
           <Area
