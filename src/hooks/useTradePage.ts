@@ -12,10 +12,10 @@ import { tryParseAmount } from 'utils/parse'
 import { ONE_HUNDRED_PERCENT } from 'utils/prices'
 
 export enum PrimaryError {
-  ACCOUNT,
-  BALANCE,
-  AMOUNT,
-  VALID,
+  ACCOUNT = 'ACCOUNT',
+  BALANCE = 'BALANCE',
+  AMOUNT = 'AMOUNT',
+  VALID = 'VALID',
 }
 
 export enum Direction {

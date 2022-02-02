@@ -18,7 +18,7 @@ const Wrapper = styled(Card)<{
 }>`
   padding: 0;
   height: ${({ show }) => (show ? '285px' : '0px')}; // exact infowrapper + last-child height
-  border: 1px solid ${({ theme, border, show }) => (show ? (border ? theme.border2 : 'transparent') : 'transparent')};
+  border: ${({ theme, border, show }) => (show && border ? `1px solid ${theme.border2}` : 'none')};
 
   -webkit-transition: height 0.4s linear;
   -moz-transition: height 0.4s linear;
@@ -163,6 +163,8 @@ export default function LineChart() {
     const change = ((currentPrice - zeroDayPrice) / zeroDayPrice) * 100
     return `${change > 0 ? '+' : ''}${change.toFixed(2)}% Past Year`
   }, [data])
+
+  console.log(!!data.length, isSpiritTheme)
 
   return (
     <Wrapper show={!!data.length} border={isSpiritTheme}>

@@ -299,9 +299,10 @@ export default function Trade() {
   }, [account, chainId, isSupportedChainId])
 
   function getApproveButton(): JSX.Element | null {
-    if (!isSupportedChainId || !account || !asset || error || !marketIsOpen) {
+    if (!isSupportedChainId || !account || !asset || error !== PrimaryError.VALID || !marketIsOpen) {
       return null
     }
+
     if (awaitingApproveConfirmation) {
       return (
         <PrimaryButton active>
@@ -322,7 +323,10 @@ export default function Trade() {
     return null
   }
 
-  function getActionButton(): JSX.Element {
+  function getActionButton(): JSX.Element | null {
+    if (!!getApproveButton()) {
+      return null
+    }
     if (error === PrimaryError.ACCOUNT) {
       return <PrimaryButton onClick={toggleWalletModal}>Connect Wallet</PrimaryButton>
     }
