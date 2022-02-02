@@ -102,14 +102,14 @@ export default function Menu() {
               </IconWrapper>
             </Row>
           </Link>
-          {/* <Link href={'/portfolio'}>
+          <Link href={'/portfolio'}>
             <Row active={router.route === '/portfolio'}>
               <div>Portfolio Manager</div>
               <IconWrapper>
-                <PortfolioIcon size={15} />
+                <TradeIcon size={15} />
               </IconWrapper>
             </Row>
-          </Link> */}
+          </Link>
           {!isMobile && (
             <Link href={buildUrl('markets')} passHref>
               <Row onClick={() => toggle()} active={router.route === '/markets'}>
