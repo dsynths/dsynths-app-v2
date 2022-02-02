@@ -1,7 +1,7 @@
 import { ChainInfo } from 'constants/chainInfo'
 import { SupportedChainId } from 'constants/chains'
 import React from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
 const ChainLabelWrapper = styled.div<{
   bgColour: string
@@ -20,8 +20,8 @@ const ChainLabelWrapper = styled.div<{
   padding: 0px 5px;
 `
 
-export default function ChainLabel({ size = 12, chainId = 1 }: { size?: number; chainId?: number }) {
-  const chainLabel = ChainInfo[chainId].nativeCurrency.name
+export default function ChainLabel({ chainId }: { chainId: SupportedChainId }) {
+  const chainLabel = ChainInfo[chainId].label
   switch (chainId) {
     case SupportedChainId.MAINNET:
       return <ChainLabelWrapper bgColour="#0779E4">{chainLabel}</ChainLabelWrapper>

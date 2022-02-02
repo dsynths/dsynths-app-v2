@@ -1,29 +1,27 @@
 import React, { useMemo, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
-import { FixedSizeList as List } from 'react-window'
-import AutoSizer from 'react-virtualized-auto-sizer'
-
-import useWeb3React from 'hooks/useWeb3'
 import Link from 'next/link'
+import styled, { useTheme } from 'styled-components'
 import { CurrencyAmount, Token, ZERO } from '@sushiswap/core-sdk'
 import { Eye, EyeOff } from 'react-feather'
+import BigNumber from 'bignumber.js'
 
-import { useTokens, useAssetByContract } from 'hooks/useAssetList'
+import useWeb3React from 'hooks/useWeb3'
+import { useTokens, useAssetByContract, useSubAssetList } from 'hooks/useAssetList'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import { useTokenBalances } from 'state/wallet/hooks'
+import { ConductedStatus, useConductedState } from 'state/conducted/reducer'
+import { DetailsStatus, useDetailsState } from 'state/details/reducer'
 
 import ImageWithFallback from 'components/ImageWithFallback'
 import { Loader } from 'components/Icons'
 import { Card } from 'components/Card'
-import ChainLabel from 'components/Icons/ChainLabel'
-import { UnsupportedChainIdError } from '@web3-react/core'
-import { ConductedStatus, useConductedState } from 'state/conducted/reducer'
-import { DetailsStatus, useDetailsState } from 'state/details/reducer'
-import { BaseButton } from 'components/Button'
+// import ChainLabel from 'components/Icons/ChainLabel'
+import { BaseButton, PrimaryButton } from 'components/Button'
+import { SynchronizerChains } from 'constants/chains'
+import { formatDollarAmount } from 'utils/numbers'
+import { useWalletModalToggle } from 'state/application/hooks'
 
-const Wrapper = styled(Card)`
-  height: 400px;
-`
+const Wrapper = styled(Card)``
 
 const Row = styled.div`
   display: flex;
@@ -66,11 +64,21 @@ const HeaderContainer = styled.div`
   justify-content: space-between;
   padding: 0rem 1rem 1rem 1rem;
 `
-const HeaderWrapper = styled.div`
+const HeaderWrapper = styled.div<{
+  hover?: boolean
+}>`
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
   align-items: center;
+
+  ${({ hover }) =>
+    hover &&
+    `
+    &:hover {
+      cursor: pointer;
+    }
+  `}
 `
 
 const LoadingContainer = styled.div`
@@ -87,6 +95,13 @@ const PrimaryLabel = styled.div`
   line-height: 20px;
   margin-right: 8px;
   color: ${({ theme }) => theme.text1};
+
+  & > span {
+    color: ${({ theme }) => theme.primary1};
+    &:hover {
+      cursor: pointer;
+    }
+  }
 `
 const SecondaryLabel = styled.div`
   font-size: normal;
@@ -96,57 +111,96 @@ const SecondaryLabel = styled.div`
   color: ${({ theme }) => theme.text2};
 `
 
-type AssetMap = Array<{
+interface OwnedAsset {
   contract: string
   balance: CurrencyAmount<Token>
-}>
+  equity: BigNumber
+}
+
+type AssetMap = Array<OwnedAsset>
+
+function sortBalances(a: OwnedAsset, b: OwnedAsset) {
+  return a.equity.gte(b.equity) ? -1 : 1
+}
 
 export default function Portfolio() {
-  const { account, error } = useWeb3React()
+  const { chainId, account } = useWeb3React()
   const theme = useTheme()
+  const assetList = useSubAssetList()
   const assetTokens = useTokens()
   const assetBalances = useTokenBalances(account ?? undefined, assetTokens)
   const { status: conductedStatus } = useConductedState()
   const { status: detailsStatus } = useDetailsState()
-  // TODO : Use this flag to display equity value in %
   const [showEquityPercentage, setShowEquityPercentage] = useState(false)
+  const toggleWalletModal = useWalletModalToggle()
 
-  const loading = !(conductedStatus === ConductedStatus.OK && detailsStatus === DetailsStatus.OK)
-  // TODO : Have another loading state to show the state then filteredAssets are being processed
-  //const assetsLoading = Object.keys(assetBalances).length === 0
-
-  const filteredAssets = useMemo(() => {
-    return Object.entries(assetBalances).reduce((acc: AssetMap, [contract, balance]) => {
-      if (balance.greaterThan(ZERO)) {
-        acc.push({ contract, balance })
-      }
-      return acc
-    }, [])
-  }, [assetBalances])
+  const isLoading: boolean = useMemo(() => {
+    const balancesLoading = !!Object.keys(assetBalances).length
+    return !(balancesLoading && conductedStatus === ConductedStatus.OK && detailsStatus === DetailsStatus.OK)
+  }, [conductedStatus, detailsStatus, assetBalances])
 
   const isSupportedChainId: boolean = useMemo(() => {
-    if (error instanceof UnsupportedChainIdError) return false
-    return true
-  }, [error])
+    if (!chainId || !account) return false
+    return SynchronizerChains.includes(chainId)
+  }, [chainId, account])
 
   const isWalletConnected: boolean = useMemo(() => {
-    if (!account) return false
-    return true
+    return !!account
   }, [account])
 
-  const getStatusLabel = () => {
-    if (!isSupportedChainId) return 'Please connect to one of our supported networks'
-    else if (!isWalletConnected) return 'Connect Wallet'
-    else if (filteredAssets.length === 0)
+  const filteredAssets = useMemo(() => {
+    const unsorted = Object.entries(assetBalances).reduce((acc: AssetMap, [contract, balance]) => {
+      if (balance.equalTo(ZERO)) return acc
+
+      const asset = assetList.find((asset) => asset.contract === contract)
+      const price = asset ? new BigNumber(asset.price.toString()) : new BigNumber('0')
+      const equity = new BigNumber(balance.toExact()).times(price)
+      acc.push({ contract, balance, equity })
+      return acc
+    }, [])
+
+    return unsorted.sort(sortBalances)
+  }, [assetBalances, assetList])
+
+  const totalEquity = useMemo(() => {
+    return filteredAssets.reduce((acc: BigNumber, { equity }) => {
+      return acc.plus(equity)
+    }, new BigNumber('0'))
+  }, [filteredAssets])
+
+  function getStatusLabel(): JSX.Element | null {
+    if (!isWalletConnected) {
       return (
         <>
-          You don't own any synthetics. Click{' '}
-          <Link href={'/trade'} passHref>
-            here
-          </Link>{' '}
-          to own some.
+          <PrimaryButton onClick={() => toggleWalletModal()}>Connect Wallet</PrimaryButton>
         </>
       )
+    }
+
+    if (!isSupportedChainId) {
+      return <PrimaryLabel>Please connect to one of our supported networks.</PrimaryLabel>
+    }
+
+    if (isLoading) {
+      return (
+        <>
+          <PrimaryLabel>Loading assets</PrimaryLabel>
+          <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />
+        </>
+      )
+    }
+
+    if (!filteredAssets.length) {
+      return (
+        <PrimaryLabel>
+          You don&apos;t own any synthetics. Click&nbsp;
+          <Link href="/trade" passHref>
+            <span>here</span>
+          </Link>
+          &nbsp;to start trading.
+        </PrimaryLabel>
+      )
+    }
     return null
   }
 
@@ -157,84 +211,56 @@ export default function Portfolio() {
           <PrimaryLabel>Positions</PrimaryLabel>
           <SecondaryLabel>{filteredAssets.length}</SecondaryLabel>
         </HeaderWrapper>
-        <HeaderWrapper>
+        <HeaderWrapper hover onClick={() => setShowEquityPercentage(!showEquityPercentage)}>
           <PrimaryLabel>Equity</PrimaryLabel>
-          <BaseButton
-            padding="0"
-            $borderRadius="0"
-            width={'1rem'}
-            onClick={() => setShowEquityPercentage(!showEquityPercentage)}
-          >
+          <BaseButton padding="0" $borderRadius="0" width={'1rem'}>
             {showEquityPercentage ? <EyeOff size="12.5px" /> : <Eye size="12.5px" />}
           </BaseButton>
         </HeaderWrapper>
       </HeaderContainer>
-      {loading ? (
-        <LoadingContainer>
-          <PrimaryLabel>Loading assets</PrimaryLabel>
-          <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />
-        </LoadingContainer>
-      ) : filteredAssets.length > 0 ? (
-        <AutoSizer>
-          {({ height, width }) => (
-            <List
-              width={width}
-              height={height}
-              itemCount={filteredAssets.length}
-              itemSize={50}
-              initialScrollOffset={0}
-              itemData={filteredAssets}
-            >
-              {({ data, index, style }) => {
-                const { contract, balance } = data[index]
-                return <AssetRow key={index} contract={contract} balance={balance} style={style} />
-              }}
-            </List>
-          )}
-        </AutoSizer>
+      {getStatusLabel() ? (
+        <LoadingContainer>{getStatusLabel()}</LoadingContainer>
       ) : (
-        <LoadingContainer>
-          <PrimaryLabel>{getStatusLabel()}</PrimaryLabel>
-        </LoadingContainer>
+        <>
+          {filteredAssets.map((owned: OwnedAsset, index) => (
+            <AssetRow key={index} owned={owned} totalEquity={totalEquity} showEquityPercentage={showEquityPercentage} />
+          ))}
+        </>
       )}
     </Wrapper>
   )
 }
 
 function AssetRow({
-  contract,
-  balance,
-  style,
+  owned: { contract, balance, equity },
+  totalEquity,
+  showEquityPercentage,
 }: {
-  contract: string
-  balance: CurrencyAmount<Token>
-  style: React.CSSProperties
+  owned: OwnedAsset
+  totalEquity: BigNumber
+  showEquityPercentage: boolean
 }) {
-  const { chainId } = useWeb3React()
+  // const { chainId } = useWeb3React()
   const asset = useAssetByContract(contract)
   const logo = useCurrencyLogo(asset?.id, asset?.symbol)
-  const theme = useTheme()
-  const assetOraclePrice = parseInt(asset?.price ? asset.price.toString() : '0')
+
+  const equityLabel = useMemo(() => {
+    return showEquityPercentage
+      ? `${equity.div(totalEquity).times(100).toFixed(2)}%`
+      : formatDollarAmount(equity.toNumber())
+  }, [equity, totalEquity, showEquityPercentage])
 
   return (
-    <Link href={`/asset?assetId=${contract}`} passHref>
-      <Row style={style}>
+    <Link href={`/trade?assetId=${contract}`} passHref>
+      <Row>
         <ImageWithFallback src={logo} width={30} height={30} alt={`${asset?.symbol}`} />
         <NameWrapper>
           <div>{asset?.symbol}</div>
           <div>{asset?.name}</div>
         </NameWrapper>
-        {balance ? (
-          <PrimaryLabel>{balance?.toSignificant(6)}</PrimaryLabel>
-        ) : (
-          <Loader size="12px" duration={'3s'} stroke={theme.text2} />
-        )}
-        <ChainLabel chainId={chainId} />
-        {balance ? (
-          <PrimaryLabel>${balance.multiply(assetOraclePrice)?.toSignificant(6)}</PrimaryLabel>
-        ) : (
-          <Loader size="12px" duration={'3s'} stroke={theme.text2} />
-        )}
+        {!showEquityPercentage && <PrimaryLabel>{balance?.toSignificant(6)}</PrimaryLabel>}
+        {/* <ChainLabel chainId={chainId} /> */}
+        <PrimaryLabel>{equityLabel}</PrimaryLabel>
       </Row>
     </Link>
   )

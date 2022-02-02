@@ -9,6 +9,7 @@ import { useAssetByContract } from 'hooks/useAssetList'
 import { useCurrency } from 'hooks/useCurrency'
 import { useCurrencyBalance } from 'state/wallet/hooks'
 import { useRouter } from 'next/router'
+import { useMemo } from 'react'
 
 const Wrapper = styled(Card)`
   padding: 1.5rem 1.8rem;
@@ -60,7 +61,12 @@ export default function AssetCard() {
   const { chainId, account } = useWeb3React()
   const theme = useTheme()
   const router = useRouter()
-  const contract = router.query?.assetId || undefined
+
+  const contract = useMemo(() => {
+    const assetId = router.query?.assetId
+    return typeof assetId === 'string' ? assetId : undefined
+  }, [router])
+
   const asset = useAssetByContract(contract)
   const currency = useCurrency(asset?.contract)
   const balance = useCurrencyBalance(account ?? undefined, currency ?? undefined)
@@ -77,7 +83,7 @@ export default function AssetCard() {
       </TitleContainer>
       <AssetContainer>
         <EquityContainer>${balance?.multiply(assetOraclePrice)?.toSignificant(6)}</EquityContainer>
-        <ChainLabel chainId={chainId} />
+        {chainId && <ChainLabel chainId={chainId} />}
       </AssetContainer>
       <SecondaryLabel>
         {balance ? (
