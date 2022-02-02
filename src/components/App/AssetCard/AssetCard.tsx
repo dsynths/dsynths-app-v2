@@ -11,7 +11,7 @@ import { useCurrencyBalance } from 'state/wallet/hooks'
 import { useRouter } from 'next/router'
 
 const Wrapper = styled(Card)`
-  padding: '16px 32px';
+  padding: 1.5rem 1.8rem;
 `
 
 const TitleContainer = styled.div`
@@ -19,15 +19,15 @@ const TitleContainer = styled.div`
   flex-flow: row nowrap;
   justify-content: flex-start;
   align-items: center;
-  padding-bottom: 4px;
+  padding-bottom: 0.25rem;
 `
 
 const AssetContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
-  gap: 16px;
-  padding: 4px 0px;
+  gap: 1rem;
+  padding: 0.25rem 0rem;
   align-items: center;
 `
 
@@ -38,20 +38,18 @@ const EquityContainer = styled.div`
 `
 
 const Divider = styled.div`
-  margin: 24px 0px;
+  margin: 1.5rem 0rem;
   border: 1px solid ${({ theme }) => theme.text2};
 `
 
 const PrimaryLabel = styled.div`
-  font-size: normal;
   font-weight: normal;
   font-size: 12.5px;
   line-height: 20px;
-  margin-right: 8px;
+  margin-right: 0.5rem;
   color: ${({ theme }) => theme.text1};
 `
 const SecondaryLabel = styled.div`
-  font-size: normal;
   font-weight: normal;
   font-size: 12.5px;
   line-height: 20px;

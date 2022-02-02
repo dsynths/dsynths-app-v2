@@ -6,17 +6,20 @@ import AutoSizer from 'react-virtualized-auto-sizer'
 import useWeb3React from 'hooks/useWeb3'
 import Link from 'next/link'
 import { CurrencyAmount, Token, ZERO } from '@sushiswap/core-sdk'
-import { ToggleRight } from 'react-feather'
+import { Eye, EyeOff } from 'react-feather'
 
 import { useTokens, useAssetByContract } from 'hooks/useAssetList'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import { useTokenBalances } from 'state/wallet/hooks'
 
-import { SynchronizerChains } from 'constants/chains'
 import ImageWithFallback from 'components/ImageWithFallback'
 import { Loader } from 'components/Icons'
 import { Card } from 'components/Card'
 import ChainLabel from 'components/Icons/ChainLabel'
+import { UnsupportedChainIdError } from '@web3-react/core'
+import { ConductedStatus, useConductedState } from 'state/conducted/reducer'
+import { DetailsStatus, useDetailsState } from 'state/details/reducer'
+import { BaseButton } from 'components/Button'
 
 const Wrapper = styled(Card)`
   height: 400px;
@@ -26,10 +29,10 @@ const Row = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
-  gap: 16px;
+  gap: 1rem;
   align-items: center;
   width: 100%;
-  height: 50px;
+  height: 3rem;
   padding: 0.5rem 1rem;
   &:hover {
     cursor: pointer;
@@ -61,7 +64,7 @@ const HeaderContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
-  padding: 0px 16px 16px 16px;
+  padding: 0rem 1rem 1rem 1rem;
 `
 const HeaderWrapper = styled.div`
   display: flex;
@@ -75,11 +78,10 @@ const LoadingContainer = styled.div`
   flex-flow: row nowrap;
   justify-content: center;
   align-items: center;
-  padding: 16px;
+  padding: 1rem;
 `
 
 const PrimaryLabel = styled.div`
-  font-size: normal;
   font-weight: normal;
   font-size: 12.5px;
   line-height: 20px;
@@ -100,20 +102,18 @@ type AssetMap = Array<{
 }>
 
 export default function Portfolio() {
-  const { chainId, account } = useWeb3React()
+  const { account, error } = useWeb3React()
   const theme = useTheme()
   const assetTokens = useTokens()
   const assetBalances = useTokenBalances(account ?? undefined, assetTokens)
+  const { status: conductedStatus } = useConductedState()
+  const { status: detailsStatus } = useDetailsState()
+  // TODO : Use this flag to display equity value in %
+  const [showEquityPercentage, setShowEquityPercentage] = useState(false)
 
-  /**
-   * If you want to create loaders... check out:
-   * - state/conducted
-   * - state/details
-   *
-   * Both have a status enum built-in, use those. Loading is fully done when both are OK.
-   */
-  // this line is purely for demonstration purposes, pls remove it and replace it with the above described hooks
-  const [loading, setLoading] = useState(false)
+  const loading = !(conductedStatus === ConductedStatus.OK && detailsStatus === DetailsStatus.OK)
+  // TODO : Have another loading state to show the state then filteredAssets are being processed
+  //const assetsLoading = Object.keys(assetBalances).length === 0
 
   const filteredAssets = useMemo(() => {
     return Object.entries(assetBalances).reduce((acc: AssetMap, [contract, balance]) => {
@@ -125,9 +125,30 @@ export default function Portfolio() {
   }, [assetBalances])
 
   const isSupportedChainId: boolean = useMemo(() => {
-    if (!chainId || !account) return false
-    return SynchronizerChains.includes(chainId)
-  }, [chainId, account])
+    if (error instanceof UnsupportedChainIdError) return false
+    return true
+  }, [error])
+
+  const isWalletConnected: boolean = useMemo(() => {
+    if (!account) return false
+    return true
+  }, [account])
+
+  const getStatusLabel = () => {
+    if (!isSupportedChainId) return 'Please connect to one of our supported networks'
+    else if (!isWalletConnected) return 'Connect Wallet'
+    else if (filteredAssets.length === 0)
+      return (
+        <>
+          You don't own any synthetics. Click{' '}
+          <Link href={'/trade'} passHref>
+            here
+          </Link>{' '}
+          to own some.
+        </>
+      )
+    return null
+  }
 
   return (
     <Wrapper>
@@ -138,12 +159,19 @@ export default function Portfolio() {
         </HeaderWrapper>
         <HeaderWrapper>
           <PrimaryLabel>Equity</PrimaryLabel>
-          <ToggleRight size="12.5px" />
+          <BaseButton
+            padding="0"
+            $borderRadius="0"
+            width={'1rem'}
+            onClick={() => setShowEquityPercentage(!showEquityPercentage)}
+          >
+            {showEquityPercentage ? <EyeOff size="12.5px" /> : <Eye size="12.5px" />}
+          </BaseButton>
         </HeaderWrapper>
       </HeaderContainer>
       {loading ? (
         <LoadingContainer>
-          <PrimaryLabel>No asset</PrimaryLabel>
+          <PrimaryLabel>Loading assets</PrimaryLabel>
           <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />
         </LoadingContainer>
       ) : filteredAssets.length > 0 ? (
@@ -166,7 +194,7 @@ export default function Portfolio() {
         </AutoSizer>
       ) : (
         <LoadingContainer>
-          <PrimaryLabel>You don't own any synthetics. Click to trade or something?</PrimaryLabel>
+          <PrimaryLabel>{getStatusLabel()}</PrimaryLabel>
         </LoadingContainer>
       )}
     </Wrapper>
