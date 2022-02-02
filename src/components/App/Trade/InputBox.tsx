@@ -12,12 +12,74 @@ import ImageWithFallback from 'components/ImageWithFallback'
 import AssetsModal from 'components/AssetsModal'
 import { ChevronDown } from 'components/Icons'
 
-const BalanceLabel = styled.div`
-  height: 1rem;
+const Wrapper = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  background: ${({ theme }) => theme.bg1};
+  border-radius: 10px;
+  gap: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  border: 1px solid ${({ theme }) => theme.border2};
+  padding: 0.6rem;
+  height: 82px;
+`
+
+const AssetPanel = styled.div`
+  display: column nowrap;
+  justify-content: flex-start;
+`
+
+const Row = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 10px;
+`
+
+const AssetSelect = styled(Row)<{
+  select?: boolean
+}>`
+  padding: 5px;
+  border-radius: 20px;
+  background: ${({ select, theme }) => darken(0.05, select ? theme.secondary1 : theme.bg1)};
+  color: ${({ select, theme }) => (select ? 'white' : theme.text2)};
+  font-size: ${({ select }) => select && '0.9rem'};
+
+  &:hover {
+    cursor: pointer;
+    background: ${({ select, theme }) => darken(0.03, select ? theme.secondary1 : theme.bg1)};
+  }
+
+  ${({ theme, select }) => theme.mediaWidth.upToMedium`
+    font-size: ${select && '0.8rem'};
+  `}
+`
+
+const Balance = styled(Row)`
   font-size: 0.7rem;
-  text-align: right;
-  margin-right: 5px;
+  text-align: center;
+  margin-top: 5px;
+  margin-left: 8px;
+  gap: 5px;
   color: ${({ theme }) => theme.text2};
+
+  & > span {
+    background: ${({ theme }) => theme.secondary1};
+    border-radius: 6px;
+    padding: 2px 3px;
+    font-size: 0.6rem;
+    color: white;
+
+    &:hover {
+      background: ${({ theme }) => theme.secondary2};
+      cursor: pointer;
+    }
+  }
+
   &:hover {
     cursor: pointer;
   }
@@ -25,42 +87,13 @@ const BalanceLabel = styled.div`
 
 const InputWrapper = styled.div`
   display: flex;
-  flex-flow: row nowrap;
-  justify-content: flex-start;
-  align-items: center;
-  width: 100%;
-  background: ${({ theme }) => theme.bg1};
-  border-radius: 10px;
-  gap: 10px;
-  height: 56px;
-  padding-left: 0.8rem;
-  white-space: nowrap;
-  overflow: hidden;
-  border: 1px solid ${({ theme }) => theme.border2};
-`
-
-const MaxButton = styled.div`
-  text-align: center;
-  font-size: 1rem;
-  border-radius: 6px;
-
-  &:hover {
-    cursor: pointer;
-    background: ${({ theme }) => theme.secondary1};
-  }
-`
-
-const Partition = styled.div`
-  width: 1px;
-  height: 30px;
-  background: ${({ theme }) => theme.border2};
+  flex: 1;
+  justify-content: flex-end;
 `
 
 const InputField = styled.input`
-  height: 100%;
-  flex: 1;
   text-align: right;
-  padding: 0px 1.25rem;
+  padding: 20px 1.25rem;
   border: none;
   background: transparent;
   font-size: 0.9rem;
@@ -69,24 +102,6 @@ const InputField = styled.input`
   &:focus,
   &:hover {
     outline: none;
-  }
-`
-
-const AssetSelect = styled.div<{
-  select?: boolean
-}>`
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  gap: 10px;
-  padding: 5px;
-  border-radius: 20px;
-  background: ${({ select, theme }) => darken(0.05, select ? theme.secondary1 : theme.bg1)};
-  color: ${({ theme }) => theme.text1};
-
-  &:hover {
-    cursor: pointer;
-    background: ${({ select, theme }) => darken(0.07, select ? theme.secondary1 : theme.bg1)};
   }
 `
 
@@ -112,27 +127,29 @@ const NumericalInput = ({
   }
 
   return (
-    <InputField
-      {...rest}
-      value={value}
-      onChange={(event) => {
-        // replace commas with periods
-        enforcer(event.target.value.replace(/,/g, '.'))
-      }}
-      // universal input options
-      inputMode="decimal"
-      title="Amount"
-      autoComplete="off"
-      autoCorrect="off"
-      // text-specific options
-      type="text"
-      pattern="^[0-9]*[.,]?[0-9]*$"
-      placeholder={placeholder || '0.00'}
-      min={0}
-      minLength={1}
-      maxLength={79}
-      spellCheck="false"
-    />
+    <InputWrapper>
+      <InputField
+        {...rest}
+        value={value}
+        onChange={(event) => {
+          // replace commas with periods
+          enforcer(event.target.value.replace(/,/g, '.'))
+        }}
+        // universal input options
+        inputMode="decimal"
+        title="Amount"
+        autoComplete="off"
+        autoCorrect="off"
+        // text-specific options
+        type="text"
+        pattern="^[0-9]*[.,]?[0-9]*$"
+        placeholder={placeholder || '0.00'}
+        min={0}
+        minLength={1}
+        maxLength={79}
+        spellCheck="false"
+      />
+    </InputWrapper>
   )
 }
 
@@ -140,14 +157,12 @@ export default function InputBox({
   currency,
   value,
   showSelect,
-  showBalance,
   showMax,
   onChange,
 }: {
   currency: Currency | undefined
   value: string
   showSelect?: boolean
-  showBalance?: boolean
   showMax?: boolean
   onChange(x?: string): void
 }) {
@@ -162,59 +177,41 @@ export default function InputBox({
     onChange(maxAmountSpend(balance)?.toExact())
   }, [balance, onChange])
 
-  function getInput() {
-    if (currency && showSelect) {
-      return (
-        <InputWrapper>
-          <AssetSelect onClick={() => setModalOpen(true)}>
-            <ImageWithFallback src={logo} width={30} height={30} alt={`${currency?.symbol} Logo`} round />
-            <div>{currency?.symbol}</div>
-            <ChevronDown size={15} />
-          </AssetSelect>
-          {showMax && (
-            <>
-              <Partition />
-              <MaxButton onClick={handleClick}>MAX</MaxButton>
-            </>
-          )}
-          <NumericalInput value={value || ''} onUserInput={onChange} placeholder={'Enter an amount'} autoFocus />
-        </InputWrapper>
-      )
-    }
-    if (currency && !showSelect) {
-      return (
-        <InputWrapper>
-          <ImageWithFallback src={logo} width={30} height={30} alt={`${currency?.symbol} Logo`} round />
-          <div>{currency?.symbol}</div>
-          {showMax && (
-            <>
-              <Partition />
-              <MaxButton onClick={handleClick}>MAX</MaxButton>
-            </>
-          )}
-          <NumericalInput value={value || ''} onUserInput={onChange} placeholder={'Enter an amount'} autoFocus />
-        </InputWrapper>
-      )
-    }
-    return (
-      <InputWrapper>
-        <AssetSelect onClick={() => setModalOpen(true)}>
-          <div>Select an asset</div>
-          <ChevronDown size={15} />
-        </AssetSelect>
-      </InputWrapper>
-    )
-  }
-
   return (
     <>
-      {showBalance && (
-        <BalanceLabel onClick={handleClick}>
-          {balance ? balance.toSignificant(6) : '0.00'} {currency?.symbol}
-        </BalanceLabel>
-      )}
-      {getInput()}
-      <AssetsModal isOpen={modalOpen} onDismiss={() => setModalOpen(false)} activeCurrency={currency} />
+      <Wrapper>
+        <AssetPanel>
+          {!currency ? (
+            <AssetSelect onClick={() => setModalOpen(true)} select>
+              Select an asset
+              <ChevronDown size={15} color="white" />
+            </AssetSelect>
+          ) : showSelect ? (
+            <AssetSelect onClick={() => setModalOpen(true)}>
+              <ImageWithFallback src={logo} width={30} height={30} alt={`${currency?.symbol} Logo`} round />
+              {currency?.symbol}
+              <ChevronDown size={15} />
+            </AssetSelect>
+          ) : (
+            <Row style={{ marginLeft: '5px' }}>
+              <ImageWithFallback src={logo} width={30} height={30} alt={`${currency?.symbol} Logo`} round />
+              {currency?.symbol}
+            </Row>
+          )}
+          {currency && (
+            <Balance onClick={handleClick}>
+              {balance ? balance.toSignificant(6) : '0.00'} {currency?.symbol}
+              {showMax && <span>MAX</span>}
+            </Balance>
+          )}
+        </AssetPanel>
+        {currency ? (
+          <NumericalInput value={value || ''} onUserInput={onChange} placeholder={'Enter an amount'} autoFocus />
+        ) : (
+          <div />
+        )}
+      </Wrapper>
+      <AssetsModal isOpen={modalOpen} onDismiss={() => setModalOpen(false)} />
     </>
   )
 }

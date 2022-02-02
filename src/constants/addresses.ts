@@ -17,10 +17,14 @@ export const Multicall2: AddressMap = {
 
 export const Collateral: AddressMap = {
   [SupportedChainId.MAINNET]: '0xDE12c7959E1a72bbe8a5f7A1dc8f8EeF9Ab011B3', // DEI
+  [SupportedChainId.BSC]: '0xe9e7cea3dedca5984780bafc599bd69add087d56', // BUSD
+  [SupportedChainId.HECO]: '0x0298c2b32eae4da002a15f36fdf7615bea3da047', // HUSD
   [SupportedChainId.POLYGON]: '0xDE12c7959E1a72bbe8a5f7A1dc8f8EeF9Ab011B3', // DEI
 }
 
 export const Synchronizer: AddressMap = {
-  [SupportedChainId.MAINNET]: '0x7a27a7BF25d64FAa090404F94606c580ce8E1D37', // DEI
-  [SupportedChainId.POLYGON]: '0x5e16B021994e3c2536435CA3A45f0dA6536eD315', // DEI
+  [SupportedChainId.MAINNET]: '0x7a27a7BF25d64FAa090404F94606c580ce8E1D37',
+  [SupportedChainId.BSC]: '0x3b62f3820e0b035cc4ad602dece6d796bc325325',
+  [SupportedChainId.HECO]: '0xe82aa18b107aaf8D3829111C91CD0D133E0773DC',
+  [SupportedChainId.POLYGON]: '0x5e16B021994e3c2536435CA3A45f0dA6536eD315',
 }

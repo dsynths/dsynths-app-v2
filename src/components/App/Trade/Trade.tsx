@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { useAppDispatch } from 'state'
 import styled from 'styled-components'
-import { darken } from 'polished'
+import { ZERO } from '@sushiswap/core-sdk'
 
 import useWeb3React from 'hooks/useWeb3'
 import useApproveCallback, { ApprovalState } from 'hooks/useApproveCallback'
@@ -17,70 +17,67 @@ import {
   TradeType,
 } from 'state/trade/reducer'
 import useDefaultsFromURL from 'state/trade/hooks'
+import { useNetworkModalToggle, useWalletModalToggle } from 'state/application/hooks'
 import { Synchronizer } from 'constants/addresses'
 import { SynchronizerChains } from 'constants/chains'
 
 import { Card } from 'components/Card'
 import InputBox from './InputBox'
-import { ArrowBubble, IconWrapper } from 'components/Icons'
+import { ArrowBubble } from 'components/Icons'
 import { PrimaryButton } from 'components/Button'
 import { DotFlashing } from 'components/Icons'
-import { useWalletModalToggle } from 'state/application/hooks'
 import ConfirmTradeModal from 'components/TransactionConfirmationModal/ConfirmTrade'
-import { ZERO } from '@sushiswap/core-sdk'
+import { TrendingDown, TrendingUp } from 'react-feather'
 
 const Wrapper = styled(Card)`
   justify-content: flex-start;
-  overflow: visible;
-  padding: 30px;
+  padding: 1.5rem;
   overflow: visible;
   box-shadow: ${({ theme }) => theme.boxShadow2};
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    padding: 1rem;
+  `}
 `
 
 const DirectionWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
-  margin: 0 10px;
   width: 100%;
   overflow: visible;
 `
 
 const DirectionTab = styled.div<{
-  active?: boolean
-  isLong?: boolean
-  isShort?: boolean
+  active: boolean
+  isLong: boolean
 }>`
-  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  gap: 5px;
   flex: 1;
   height: 35px;
   line-height: 35px;
   text-align: center;
-  color: ${({ theme }) => theme.black};
   border-radius: ${({ isLong }) => (isLong ? '10px 0 0 10px' : '0 10px 10px 0')};
-  ${({ theme, isLong, isShort, active }) =>
-    isLong && active
+  background: ${({ theme }) => theme.primary1};
+  border: 1px solid ${({ theme }) => theme.primary1};
+
+  ${({ theme, active, isLong }) =>
+    active
       ? `
-    background: #00D16C;
-    border: 1px solid #00D16C;
-    &:hover {
-      background: ${darken(0.05, '#00D16C')};
-      border-color: ${darken(0.05, '#00D16C')};
-    };
-  `
-      : isShort && active
-      ? `
-      background: rgba(255, 0, 0, 0.5);
-      border: 1px solid rgba(255, 0, 0, 0.5);
       &:hover {
-        background: ${darken(0.05, 'rgba(255, 0, 0, 0.5)')};
-        border-color: ${darken(0.05, 'rgba(255, 0, 0, 0.5)')};
-      };    
-  `
+        background: ${theme.primary2};
+        border-color: ${theme.primary2};
+      };
+    `
       : `
       background: rgba(206, 206, 206, 0.35);
       border: 1px solid #A9A8A8;
-      color: ${theme.text2};
-  `};
+      ${isLong && `border-right: none`};
+      ${!isLong && `border-left: none`};
+    `};
 
   &:hover {
     cursor: pointer;
@@ -93,15 +90,22 @@ const InputWrapper = styled.div`
   position: relative;
   justify-content: flex-start;
   width: 100%;
-  margin-top: 30px;
+  margin-top: 2.5rem;
   gap: 5px;
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    margin-top: 1.5rem;
+  `}
 `
 
-const ArrowWrapper = styled(IconWrapper)`
-  position: absolute;
-  top: calc(50% + 11px); // trial and error adjustment to account for the balancelabel
-  left: 50%;
-  transform: translate(-50%, -50%);
+const ArrowWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 0px;
+  overflow: visible;
+  margin: 0 auto;
+  z-index: 1;
 
   &:hover {
     cursor: pointer;
@@ -114,8 +118,26 @@ const ButtonRow = styled.div`
   align-items: center;
   gap: 10px;
   overflow: visible;
-  margin-top: 30px;
+  margin-top: 2rem;
   z-index: 0;
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    margin-top: 1rem;
+  `}
+`
+
+const WarningBlock = styled.div`
+  display: flex;
+  flex-flow: column nowrap;
+  text-align: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  border-radius: 10px;
+  color: ${({ theme }) => theme.text2};
+  background: ${({ theme }) => theme.bg1};
+  border: 1px solid ${({ theme }) => theme.border2};
+  padding: 0.6rem;
+  height: 40px;
 `
 
 const FeeWrapper = styled.div`
@@ -138,6 +160,7 @@ export default function Trade() {
   } = useDefaultsFromURL()
   const tradeState = useTradeState()
   const toggleWalletModal = useWalletModalToggle()
+  const toggleNetworkModal = useNetworkModalToggle()
 
   const [tradeType, setTradeType] = useState<TradeType>(TradeType.OPEN)
   const [direction, setDirection] = useState(Direction.LONG)
@@ -172,11 +195,18 @@ export default function Trade() {
 
   const handleSwitchDirection = useCallback(
     (newDirection) => {
+      if (newDirection === direction) return
       setDirection(newDirection)
       asset && setURLCurrency(asset.sibling)
     },
-    [asset, setURLCurrency]
+    [asset, setURLCurrency, direction]
   )
+
+  useEffect(() => {
+    if (asset && asset.direction !== direction) {
+      setDirection(asset.direction)
+    }
+  }, [asset, direction])
 
   const handleSwitchCurrencies = useCallback(() => {
     dispatch(setTradeState({ ...tradeState, typedValue: '', typedField: TypedField.A }))
@@ -251,6 +281,14 @@ export default function Trade() {
     return `Oracle Price: ${asset.price.toFixed(2)}$ / ${asset.id}`
   }, [asset])
 
+  const warning = useMemo(() => {
+    return !account || !chainId
+      ? 'Please connect your wallet.'
+      : !isSupportedChainId
+      ? 'Please connect with one of our supported chains.'
+      : ''
+  }, [account, chainId, isSupportedChainId])
+
   function getApproveButton(): JSX.Element | null {
     if (!isSupportedChainId || !account || !asset || error || !marketIsOpen) {
       return null
@@ -275,12 +313,12 @@ export default function Trade() {
     return null
   }
 
-  function getActionButton(): JSX.Element | null {
+  function getActionButton(): JSX.Element {
     if (error === PrimaryError.ACCOUNT) {
       return <PrimaryButton onClick={toggleWalletModal}>Connect Wallet</PrimaryButton>
     }
     if (!isSupportedChainId) {
-      return null
+      return <PrimaryButton onClick={toggleNetworkModal}>Click to select chain</PrimaryButton>
     }
     if (!asset) {
       return <PrimaryButton>Select an asset</PrimaryButton>
@@ -298,48 +336,63 @@ export default function Trade() {
     )
   }
 
+  function getMainContent(): JSX.Element {
+    return (
+      <>
+        <DirectionWrapper>
+          <DirectionTab
+            isLong
+            active={direction === Direction.LONG}
+            onClick={() => direction === Direction.SHORT && handleSwitchDirection(Direction.LONG)}
+          >
+            {Direction.LONG}
+            <TrendingUp size={14} />
+          </DirectionTab>
+          <DirectionTab
+            isLong={false}
+            active={direction === Direction.SHORT}
+            onClick={() => direction === Direction.LONG && handleSwitchDirection(Direction.SHORT)}
+          >
+            {Direction.SHORT}
+            <TrendingDown size={14} />
+          </DirectionTab>
+        </DirectionWrapper>
+        <InputWrapper>
+          <InputBox
+            currency={currencies[0]}
+            value={formattedAmounts[0]}
+            showMax
+            showSelect={currencies[0]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()}
+            onChange={(value) =>
+              dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.A }))
+            }
+          />
+          {warning ? (
+            <WarningBlock>{warning}</WarningBlock>
+          ) : (
+            <>
+              <ArrowWrapper onClick={handleSwitchCurrencies}>
+                <ArrowBubble size={30} />
+              </ArrowWrapper>
+              <InputBox
+                currency={currencies[1]}
+                value={formattedAmounts[1]}
+                showSelect={currencies[1]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()}
+                onChange={(value) =>
+                  dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.B }))
+                }
+              />
+            </>
+          )}
+        </InputWrapper>
+      </>
+    )
+  }
+
   return (
     <Wrapper>
-      <DirectionWrapper>
-        <DirectionTab
-          isLong
-          active={direction === Direction.LONG}
-          onClick={() => direction === Direction.SHORT && handleSwitchDirection(Direction.LONG)}
-        >
-          {Direction.LONG}
-        </DirectionTab>
-        <DirectionTab
-          isShort
-          active={direction === Direction.SHORT}
-          onClick={() => direction === Direction.LONG && handleSwitchDirection(Direction.SHORT)}
-        >
-          {Direction.SHORT}
-        </DirectionTab>
-      </DirectionWrapper>
-      <InputWrapper>
-        <InputBox
-          currency={currencies[0]}
-          value={formattedAmounts[0]}
-          showBalance
-          showMax
-          showSelect={currencies[0]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()}
-          onChange={(value) =>
-            dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.A }))
-          }
-        />
-        <ArrowWrapper size="25px" onClick={handleSwitchCurrencies}>
-          <ArrowBubble size={25} style={{ transform: 'rotate(90deg)' }} />
-        </ArrowWrapper>
-        <InputBox
-          currency={currencies[1]}
-          value={formattedAmounts[1]}
-          showSelect={currencies[1]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()}
-          onChange={(value) =>
-            dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.B }))
-          }
-        />
-      </InputWrapper>
-      {marketIsOpen && (
+      {getMainContent()}
+      {marketIsOpen && !warning && (
         <FeeWrapper>
           <div>{feeLabel}</div>
           <div>{priceLabel}</div>

@@ -1,6 +1,9 @@
 module.exports = {
   exportPathMap: async function () {
     return {
+      '/markets': {
+        page: '/markets',
+      },
       '/trade': {
         page: '/trade',
       },

@@ -17,6 +17,13 @@ const BaseModal = StyledModal.styled`
   transform: translateY(-50%);
   border-radius: 10px;
   z-index: ${Z_INDEX.modal};
+  overflow: hidden;
+`
+
+export const MobileModal = styled(BaseModal)`
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0px;
 `
 
 export const Modal = styled(BaseModal)<{
