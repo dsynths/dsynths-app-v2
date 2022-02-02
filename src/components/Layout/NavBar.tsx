@@ -146,6 +146,9 @@ export default function NavBar() {
           <Link href={buildUrl('markets')} passHref>
             <NavLink active={router.route === '/markets'}>Markets</NavLink>
           </Link>
+          <Link href={buildUrl('portfolio')} passHref>
+            <NavLink active={router.route === '/portfolio'}>Portfolio</NavLink>
+          </Link>
         </Routes>
         <Items>
           <NavButton onClick={() => setAssetModalOpen(true)}>

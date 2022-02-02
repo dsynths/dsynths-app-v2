@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Percent } from '@sushiswap/core-sdk'
+import { Percent, Token } from '@sushiswap/core-sdk'
 import find from 'lodash/find'
 
 import useWeb3React from 'hooks/useWeb3'
@@ -37,12 +37,17 @@ export interface SubAsset {
   price: number
   fee: Percent
   open: boolean
+  token: Token
 }
 
 export interface Asset {
   id: string
   long: SubAsset
   short: SubAsset
+}
+
+export interface TokenMap {
+  [contract: string]: Token
 }
 
 // https://stackoverflow.com/questions/43118692/typescript-filter-out-nulls-from-an-array
@@ -103,6 +108,7 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
           price: quote.long.price,
           fee: constructPercentage(quote.long.fee),
           open: !!longSigs,
+          token: new Token(chainId, long, 18, asset.symbol, asset.name),
         }
 
         const shortAsset: SubAsset = {
@@ -118,6 +124,7 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
           price: quote.short.price,
           fee: constructPercentage(quote.short.fee),
           open: !!shortSigs,
+          token: new Token(chainId, short, 18, asset.symbol, asset.name),
         }
 
         return {
@@ -161,4 +168,26 @@ export function useAssetByContract(contract: string | undefined) {
     )
     return asset ?? undefined
   }, [contract, subAssetList])
+}
+
+export function useAssetContractMap() {
+  const subAssetList = useSubAssetList()
+  return useMemo(() => subAssetList.map((asset) => asset.contract), [subAssetList])
+}
+
+export function useTokensFromMap() {
+  const subAssetList = useSubAssetList()
+  return useMemo(
+    () =>
+      subAssetList.reduce((acc: TokenMap, asset) => {
+        acc[asset.contract] = asset.token
+        return acc
+      }, {}),
+    [subAssetList]
+  )
+}
+
+export function useTokens() {
+  const subAssetList = useSubAssetList()
+  return useMemo(() => subAssetList.map((asset) => asset.token), [subAssetList])
 }
