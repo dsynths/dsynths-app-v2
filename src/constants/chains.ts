@@ -17,11 +17,11 @@ export const SUPPORTED_CHAIN_IDS: SupportedChainId[] = Object.values(SupportedCh
 
 export const SynchronizerChains = [
   SupportedChainId.MAINNET,
-  SupportedChainId.RINKEBY,
+  // SupportedChainId.RINKEBY,
   SupportedChainId.BSC,
   SupportedChainId.HECO,
   SupportedChainId.POLYGON,
-  SupportedChainId.FANTOM,
+  // SupportedChainId.FANTOM,
 ]
 
 export const SynchronizerV2Chains = [SupportedChainId.FANTOM, SupportedChainId.RINKEBY]
