@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Currency } from '@sushiswap/core-sdk'
 import { useRouter } from 'next/router'
 
@@ -20,13 +20,15 @@ export default function useDefaultsFromURL(): {
   const assets = useSubAssetList()
   const router = useRouter()
 
-  const theme = router.query?.theme || undefined
-  const contract = router.query?.assetId || undefined
-  const parsedContract = typeof contract === 'string' ? contract.toLowerCase() : ''
+  const [theme, contract] = useMemo(() => {
+    const contract = router.query?.assetId || undefined
+    const parsedContract = typeof contract === 'string' ? contract.toLowerCase() : ''
+
+    return [router.query?.theme || undefined, parsedContract]
+  }, [router])
 
   const baseCurrency =
-    useCurrency(assets.some((o) => o.contract.toLowerCase() === parsedContract) ? parsedContract : undefined) ||
-    undefined
+    useCurrency(assets.some((o) => o.contract.toLowerCase() === contract) ? contract : undefined) || undefined
   const quoteCurrency = useCurrency((chainId && Collateral[chainId]) ?? Collateral[1]) || undefined
 
   function instanceOfCurrency(object: any): object is Currency {

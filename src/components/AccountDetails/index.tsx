@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 import { ExternalLink as LinkIcon } from 'react-feather'
 import styled from 'styled-components'
-import { darken } from 'polished'
 
 import useWeb3React from 'hooks/useWeb3'
 import { useAppDispatch } from 'state'
@@ -54,7 +53,7 @@ const ActionButton = styled.button<{
   hide?: boolean
   disable?: boolean
 }>`
-  background: ${({ theme }) => theme.blue1};
+  background: ${({ theme }) => theme.primary1};
   border-radius: 10px;
   outline: none;
   display: ${({ hide }) => (hide ? 'none' : 'flex')};
@@ -66,7 +65,7 @@ const ActionButton = styled.button<{
   color: white;
 
   &:hover {
-    background: ${({ theme }) => darken(0.1, theme.blue2)};
+    background: ${({ theme }) => theme.primary2};
     cursor: pointer;
   }
 

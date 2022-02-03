@@ -7,22 +7,14 @@ import { injected } from '../connectors'
 
 import { Web3ReactContextInterface } from '@web3-react/core/dist/types'
 import { SupportedChainId } from 'constants/chains'
+import { NETWORK_CONTEXT_NAME } from 'constants/misc'
 
-// TODO: I keep trying to find reasons to use the contextNetwork but fail to do everytime.
-// It introduces an incredible amount of bugs and unwanted behavior. Stick to using the
-// traditional way until there is more clarity.
-
-// export default function useWeb3React(): Web3ReactContextInterface<Web3Provider> & {
-//   chainId?: SupportedChainId
-// } {
-//   const context = useWeb3ReactCore<Web3Provider>()
-//   const contextNetwork = useWeb3ReactCore<Web3Provider>(NETWORK_CONTEXT_NAME)
-//   return context.active ? context : contextNetwork
-// }
 export default function useWeb3React(): Web3ReactContextInterface<Web3Provider> & {
   chainId?: SupportedChainId
 } {
-  return useWeb3ReactCore<Web3Provider>()
+  const context = useWeb3ReactCore<Web3Provider>()
+  const contextNetwork = useWeb3ReactCore<Web3Provider>(NETWORK_CONTEXT_NAME)
+  return context.active ? context : contextNetwork
 }
 
 export function useEagerConnect() {

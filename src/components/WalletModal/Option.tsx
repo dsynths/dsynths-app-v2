@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import Image from 'next/image'
+import { darken } from 'polished'
 
 import { IconWrapper, GreenCircle } from 'components/Icons'
 import { ExternalLink } from 'components/Link'
@@ -33,7 +34,7 @@ const Wrapper = styled.button<{
   ${({ theme, clickable }) =>
     !clickable &&
     `
-    background: ${theme.bg2};
+    background: ${darken(0.07, theme.bg1)};
     border: 1px solid transparent;
     &:hover,
     &:focus {

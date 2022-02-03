@@ -86,7 +86,7 @@ export const ChainInfo: { [chainId in SupportedChainId]: Info } = {
     label: 'Polygon',
     logoUrl: require('/public/static/images/networks/polygon.svg'),
     nativeCurrency: {
-      name: 'Matic',
+      name: 'MATIC',
       symbol: 'Matic',
       decimals: 18,
     },

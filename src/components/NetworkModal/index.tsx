@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 import styled from 'styled-components'
 import Image from 'next/image'
+import { darken } from 'polished'
 
 import { useModalOpen, useNetworkModalToggle } from 'state/application/hooks'
 import { ApplicationModal } from 'state/application/reducer'
@@ -45,7 +46,7 @@ const Option = styled.div<{
   ${({ theme, active }) =>
     active
       ? `
-    background: ${theme.bg2};
+    background: ${darken(0.07, theme.bg1)};
     &:hover,
     &:focus {
       cursor: default;

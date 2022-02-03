@@ -93,7 +93,6 @@ export default function Menu() {
       <div>
         <InlineModal isOpen={isOpen}>
           <Web3Network />
-
           <Link href={buildUrl('trade')} passHref>
             <Row onClick={() => toggle()} active={router.route === '/trade'}>
               <div>Trade</div>
@@ -102,14 +101,14 @@ export default function Menu() {
               </IconWrapper>
             </Row>
           </Link>
-          {/* <Link href={'/portfolio'}>
+          <Link href={'/portfolio'} passHref>
             <Row active={router.route === '/portfolio'}>
               <div>Portfolio Manager</div>
               <IconWrapper>
-                <PortfolioIcon size={15} />
+                <TradeIcon size={15} />
               </IconWrapper>
             </Row>
-          </Link> */}
+          </Link>
           {!isMobile && (
             <Link href={buildUrl('markets')} passHref>
               <Row onClick={() => toggle()} active={router.route === '/markets'}>
@@ -154,14 +153,4 @@ export default function Menu() {
       </div>
     </Container>
   )
-
-  // return (
-  //   <Wrapper ref={wrapperRef} toggled={toggled}>
-  //     <Web3Status />
-  //     <NavButton onClick={() => toggleDarkMode()}>
-  //       <ThemeToggle size={20} />
-  //     </NavButton>
-  //     <Web3Network />
-  //   </Wrapper>
-  // )
 }

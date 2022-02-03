@@ -20,14 +20,14 @@ const Text = styled.p`
 `
 
 export default function Web3Network() {
-  const { chainId } = useWeb3React()
+  const { account, chainId } = useWeb3React()
   const toggleNetworkModal = useNetworkModalToggle()
 
   const Chain = useMemo(() => {
     return chainId && chainId in ChainInfo ? ChainInfo[chainId] : null
   }, [chainId])
 
-  return Chain ? (
+  return account && Chain ? (
     <>
       <NavButton onClick={() => toggleNetworkModal()} style={{ justifyContent: 'space-between' }}>
         <Image src={Chain.logoUrl} alt={Chain.label} width={20} height={20} />

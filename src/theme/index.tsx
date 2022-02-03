@@ -181,30 +181,30 @@ function colors(themeName: SupportedThemes): Colors {
       text4: '#B4E3F4',
 
       // backgrounds / greys
-      bg0: '#0D252D',
-      bg1: '#143744',
-      bg2: '#1B4A5B',
+      bg0: '#0D0F22',
+      bg1: '#212230',
+      bg2: '#0D0F22',
       bg3: '#225D72',
 
       // borders
       border1: '#ECF8FC',
-      border2: 'rgba(99, 126, 161, 0.2)',
+      border2: 'rgba(55, 65, 81, 0.3)',
 
       //specialty colors
-      specialBG1: '#1B4A5B',
-      specialBG2: '#1B4A5B',
+      specialBG1: '#0D0F22',
+      specialBG2: '#0D0F22',
 
       // primary colors
-      primary1: '#71D887',
-      primary2: '#5AAC6C',
-      primary3: '#43784f',
+      primary1: '#0abd96',
+      primary2: '#078d70',
+      primary3: '#4ebaa2',
 
       // color text
-      primaryText1: '#1749FA', // TODO check if we want these values
+      primaryText1: '#1749FA',
 
       // secondary colors
-      secondary1: '#1749FA',
-      secondary2: 'rgba(23, 73, 250, 0.2)',
+      secondary1: 'rgba(109, 215, 132, 0.1)',
+      secondary2: 'rgba(109, 215, 132, 0.2)',
 
       // other
       red1: '#FF4343',
@@ -241,8 +241,8 @@ function shadows(themeName: SupportedThemes): Shadows {
     },
     [SupportedThemes.SPIRIT]: {
       shadow1: '#000',
-      boxShadow1: '0px 0px 4px rgba(0, 0, 0, 0.125)',
-      boxShadow2: 'rgb(96 213 220) 0px 4px 30px',
+      boxShadow1: '',
+      boxShadow2: '',
     },
   }
   // default the theme to light mode
