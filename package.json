@@ -59,6 +59,7 @@
     "tiny-invariant": "^1.1.0"
   },
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "dev": "next dev",
     "build": "next build && next export",
     "start": "next start",
