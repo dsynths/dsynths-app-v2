@@ -46,7 +46,7 @@ const AssetSelect = styled(Row)<{
   padding: 5px 7px;
   border-radius: 20px;
   background: ${({ theme }) => darken(0.05, theme.bg1)};
-  color: ${({ select, theme }) => (select ? 'white' : theme.text2)};
+  color: ${({ theme }) => theme.text2};
   font-size: ${({ select }) => select && '0.9rem'};
 
   &:hover {
@@ -184,7 +184,7 @@ export default function InputBox({
           {!currency ? (
             <AssetSelect onClick={() => setModalOpen(true)} select>
               Select an asset
-              <ChevronDown size={15} color="white" />
+              <ChevronDown size={15} />
             </AssetSelect>
           ) : showSelect ? (
             <AssetSelect onClick={() => setModalOpen(true)}>
