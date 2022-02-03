@@ -11,6 +11,7 @@ import { PrimaryButton } from 'components/Button'
 import { IconWrapper, ChevronDown } from 'components/Icons'
 import TransactionConfirmationModal, { ConfirmationContent, TransactionErrorContent } from './index'
 import ImageWithFallback from 'components/ImageWithFallback'
+import { formatDollarAmount } from 'utils/numbers'
 
 const MainWrapper = styled.div`
   display: flex;
@@ -117,11 +118,9 @@ export default function ConfirmTrade({
     return `Fee: ${asset.fee.toSignificant()}% / ${amount} DEI`
   }, [amountIn, amountOut, asset, tradeType])
 
+  // HELLO
   const priceLabel = useMemo(() => {
-    if (!asset || typeof asset.price !== 'number' || asset.price == 0) {
-      return ''
-    }
-    return `${asset.price.toFixed(2)}$ / ${asset.id}`
+    return asset ? `${formatDollarAmount(Number(asset.price))}$ / ${asset.id}` : ''
   }, [asset])
 
   const summary = useMemo(() => {

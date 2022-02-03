@@ -152,7 +152,7 @@ export default function LineChart() {
   const priceLabel = useMemo(() => {
     const close = data.length ? data[data.length - 1].close : ''
     const result = asset ? (asset.direction === Direction.SHORT ? close : !!asset.price ? asset.price : close) : ''
-    return result ? formatDollarAmount(result) : ''
+    return result ? formatDollarAmount(Number(result)) : ''
   }, [data, asset])
 
   const priceChangeLabel = useMemo(() => {

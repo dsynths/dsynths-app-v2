@@ -7,41 +7,32 @@ import { Signature, Signatures } from 'state/signatures/reducer'
 
 import { ORACLE_BASE_URL_MAP, ORACLE_NETWORK_NAMES } from 'constants/oracle'
 import { makeHttpRequest } from 'utils/http'
+import { Currency } from '@sushiswap/core-sdk'
+import { getAddress } from '@ethersproject/address'
 
 const minimumSignatures = 1
 const expectedSignatures = ORACLE_BASE_URL_MAP.length
 
 function comparePrice(a: Signature, b: Signature) {
-  const A = parseInt(a.price)
-  const B = parseInt(b.price)
+  const A = Number(a.price)
+  const B = Number(b.price)
 
-  let comparison = 0
-  if (A > B) {
-    comparison = -1
-  } else if (A < B) {
-    comparison = 1
-  }
-
-  return comparison
+  return A > B ? -1 : 1
 }
 
 function compareOrder(a: Signature, b: Signature) {
   const A = a.index
   const B = b.index
 
-  let comparison = 0
-  if (A > B) {
-    comparison = 1
-  } else if (A < B) {
-    comparison = -1
-  }
-  return comparison
+  return A > B ? 1 : -1
 }
 
-export default function useSynchronzier(
-  address: string,
+export default function useSynchronizer(
+  currencyA: Currency | undefined,
+  currencyB: Currency | undefined,
   tradeType: TradeType
 ): {
+  checksummedAddress: string | undefined
   isProxyTrade: boolean
   isV2Trade: boolean
   fetchSignatures: () => Promise<Signatures[]>
@@ -51,6 +42,13 @@ export default function useSynchronzier(
 
   const isProxyTrade = useMemo(() => !!(chainId && ProxyChains.includes(chainId)), [chainId])
   const isV2Trade = useMemo(() => !!(chainId && SynchronizerV2Chains.includes(chainId)), [chainId])
+
+  const checksummedAddress = useMemo(() => {
+    if (!currencyA || !currencyB) {
+      return undefined
+    }
+    return tradeType === TradeType.OPEN ? getAddress(currencyB.wrapped.address) : getAddress(currencyA.wrapped.address)
+  }, [currencyA, currencyB, tradeType])
 
   const signatureRequest = useCallback(
     async (baseURL) => {
@@ -86,23 +84,18 @@ export default function useSynchronzier(
   const sortSignatures = useCallback(
     (signaturesPerNode: Signatures[]) => {
       try {
-        if (!address) {
+        if (!checksummedAddress) {
           throw new Error('Currency is undefined')
         }
 
         const priceFeed: Signature[] = []
+
         for (let i = 0; i < signaturesPerNode.length; i++) {
           const node = signaturesPerNode[i]
 
-          // Fix casing
-          const sigs = Object.entries(node).reduce((acc: Signatures, [contract, values]) => {
-            acc[contract.toLowerCase()] = values
-            return acc
-          }, {})
-
-          if (address in sigs) {
-            sigs[address]['index'] = i
-            priceFeed.push(sigs[address])
+          if (checksummedAddress in node) {
+            node[checksummedAddress]['index'] = i
+            priceFeed.push(node[checksummedAddress])
           }
         }
 
@@ -126,10 +119,11 @@ export default function useSynchronzier(
         throw err
       }
     },
-    [address, tradeType]
+    [checksummedAddress, tradeType]
   )
 
   return {
+    checksummedAddress,
     isProxyTrade,
     isV2Trade,
     fetchSignatures,

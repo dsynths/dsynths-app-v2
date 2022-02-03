@@ -97,17 +97,13 @@ export default function useTradeCallback(
   const Synchronizer = useSynchronizerContract()
   const SynchronizerV2 = useSynchronizerV2Contract()
 
-  const address = useMemo(() => {
-    const contract = tradeType === TradeType.OPEN ? currencyB : currencyA
-    return contract?.wrapped.address ?? ''
-  }, [currencyA, currencyB, tradeType])
-
-  const addressV2 = useMemo(() => {
-    const contract = tradeType === TradeType.OPEN ? currencyB : currencyA
-    return contract?.wrapped.address ?? ''
-  }, [currencyA, currencyB, tradeType])
-
-  const { isProxyTrade, isV2Trade, fetchSignatures, sortSignatures } = useSynchronizer(address, tradeType)
+  const {
+    checksummedAddress: address,
+    isProxyTrade,
+    isV2Trade,
+    fetchSignatures,
+    sortSignatures,
+  } = useSynchronizer(currencyA, currencyB, tradeType)
 
   const constructV1Call = useCallback(async () => {
     try {
@@ -157,7 +153,7 @@ export default function useTradeCallback(
 
   const constructV2Call = useCallback(async () => {
     try {
-      if (!account || !chainId || !(chainId in MUON_NETWORK_NAMES) || !addressV2 || !amountA || !SynchronizerV2) {
+      if (!account || !chainId || !(chainId in MUON_NETWORK_NAMES) || !address || !amountA || !SynchronizerV2) {
         throw new Error('Missing dependencies.')
       }
 
@@ -165,8 +161,8 @@ export default function useTradeCallback(
 
       const response: MuonResponse = await MuonClient.app('synchronizer')
         .method('signature', {
-          tokenId: addressV2,
-          action: action,
+          tokenId: address,
+          action,
           chain: MUON_NETWORK_NAMES[chainId],
         })
         .call()
@@ -175,7 +171,7 @@ export default function useTradeCallback(
       console.log('Using Muon app: ', 'synchronizer')
       console.log('Using Client : ', MuonClient)
       console.log('With method: ', 'signature')
-      console.log('Trading tokenAddresss: ', addressV2)
+      console.log('Trading tokenAddresss: ', address)
       console.log('Using action: ', action)
       console.log('On chain: ', chainId)
       console.log('With chainName: ', MUON_NETWORK_NAMES[chainId])
@@ -189,10 +185,10 @@ export default function useTradeCallback(
       const args = {
         partnerID: account,
         _user: account,
-        registrar: addressV2,
+        registrar: address,
         amountIn: toHex(amountA.quotient),
         expireBlock: response.data.result.blockNumber,
-        price: response.data.result.price.toString(),
+        price: response.data.result.price,
         _reqId: response.reqId,
         sigs: response.sigs,
       }
@@ -211,7 +207,7 @@ export default function useTradeCallback(
         error,
       }
     }
-  }, [chainId, account, addressV2, amountA, SynchronizerV2, tradeType])
+  }, [chainId, account, address, amountA, SynchronizerV2, tradeType])
 
   return useMemo(() => {
     if (!account || !chainId || !library || (!Synchronizer && !SynchronizerV2) || !currencyA || !currencyB) {
