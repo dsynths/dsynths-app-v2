@@ -205,6 +205,7 @@ export default function WalletModal({
 
   function getModalContent() {
     if (error) {
+      alert(error)
       return (
         <>
           <ModalHeader
