@@ -35,7 +35,7 @@ export interface SubAsset {
   direction: Direction
   contract: string
   sibling: string
-  price: number
+  price: string
   fee: Percent
   open: boolean
   token: Token
@@ -92,7 +92,7 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
         const shortSigs = signatures[chainId][short]
         const asset = details[id]
 
-        if (!quote || !quote.long || !quote.short || !asset) {
+        if (!asset || !quote || !quote.long || !quote.long.price || !quote.short || !quote.short.price) {
           return null
         }
 
@@ -106,7 +106,7 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
           contract: getAddress(long),
           sibling: short,
           symbol: asset.longSymbol,
-          price: quote.long.price,
+          price: quote.long.price.toFixed(6),
           fee: constructPercentage(quote.long.fee),
           open: !!longSigs,
           token: new Token(chainId, getAddress(long), 18, asset.symbol, asset.name),
@@ -122,7 +122,7 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
           contract: getAddress(short),
           sibling: long,
           symbol: asset.shortSymbol,
-          price: quote.short.price,
+          price: quote.short.price.toFixed(6),
           fee: constructPercentage(quote.short.fee),
           open: !!shortSigs,
           token: new Token(chainId, getAddress(short), 18, asset.symbol, asset.name),

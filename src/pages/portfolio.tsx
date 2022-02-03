@@ -46,7 +46,7 @@ export default function Portfolio() {
       if (balance.equalTo(ZERO)) return acc
 
       const asset = assetList.find((asset) => asset.contract === contract)
-      const price = asset ? new BigNumber(asset.price.toString()) : new BigNumber('0')
+      const price = asset ? new BigNumber(asset.price) : new BigNumber('0')
       const equity = new BigNumber(balance.toExact()).times(price)
       acc.push({ contract, balance, equity })
       return acc

@@ -9,10 +9,11 @@ import ERC20_ABI from 'constants/abi/ERC20.json'
 import ERC20_BYTES32_ABI from 'constants/abi/ERC20'
 import MULTICALL2_ABI from 'constants/abi/MULTICALL2.json'
 import SynchronizerABI from 'constants/abi/SYNCHRONIZER.json'
+import SynchronizerV2ABI from 'constants/abi/SYNCHRONIZER_V2.json'
 import SynchronizerProxyABI from 'constants/abi/SYNCHRONIZER_PROXY.json'
 
 import { Providers } from 'constants/providers'
-import { Multicall2, Synchronizer } from 'constants/addresses'
+import { Multicall2, Synchronizer, SynchronizerV2 } from 'constants/addresses'
 import { SupportedChainId } from 'constants/chains'
 import { Web3Provider } from '@ethersproject/providers'
 import { ProxyChains } from 'constants/chains'
@@ -51,15 +52,21 @@ export function useSynchronizerContract() {
   const { chainId } = useWeb3React()
   const address = useMemo(() => Synchronizer[chainId ?? 1], [chainId])
   const ABI = useMemo(
-    () => (chainId && ProxyChains.includes(chainId) ? SynchronizerProxyABI : SynchronizerABI),
+    () => (chainId ? (ProxyChains.includes(chainId) ? SynchronizerProxyABI : SynchronizerABI) : undefined),
     [chainId]
   )
   return useContract(address, ABI)
 }
 
+export function useSynchronizerV2Contract() {
+  const { chainId } = useWeb3React()
+  const address = useMemo(() => (chainId ? SynchronizerV2[chainId] : undefined), [chainId])
+  return useContract(address, SynchronizerV2ABI)
+}
+
 export function useMulticall2Contract() {
   const { chainId } = useWeb3React()
-  const address = useMemo(() => Multicall2[chainId ?? 1], [chainId])
+  const address = useMemo(() => (chainId ? Multicall2[chainId] : undefined), [chainId])
   return useContract(address, MULTICALL2_ABI)
 }
 

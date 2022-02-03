@@ -18,7 +18,7 @@ import {
 } from 'state/trade/reducer'
 import useDefaultsFromURL from 'state/trade/hooks'
 import { useNetworkModalToggle, useWalletModalToggle } from 'state/application/hooks'
-import { Synchronizer } from 'constants/addresses'
+import { Synchronizer, SynchronizerV2 } from 'constants/addresses'
 import { SynchronizerChains } from 'constants/chains'
 
 import { Card } from 'components/Card'
@@ -29,6 +29,8 @@ import { DotFlashing } from 'components/Icons'
 import ConfirmTradeModal from 'components/TransactionConfirmationModal/ConfirmTrade'
 import { TrendingDown, TrendingUp } from 'react-feather'
 import { useRouter } from 'next/router'
+import useSynchronizer from 'hooks/useSynchronizer'
+import { formatDollarAmount } from 'utils/numbers'
 
 const Wrapper = styled(Card)<{
   border?: boolean
@@ -183,6 +185,8 @@ export default function Trade() {
 
   const asset = useAssetByContract(baseCurrency?.wrapped.address ?? undefined)
 
+  const { isV2Trade } = useSynchronizer(currencies[0], currencies[1], tradeType)
+
   const { formattedAmounts, parsedAmounts, error } = useTradePage(
     baseCurrency,
     quoteCurrency,
@@ -198,8 +202,12 @@ export default function Trade() {
   }, [chainId, account])
 
   const spender = useMemo(() => {
-    return isSupportedChainId && chainId ? Synchronizer[chainId] : undefined
-  }, [chainId, isSupportedChainId])
+    if (!isSupportedChainId || !chainId) {
+      return undefined
+    }
+    return isV2Trade ? SynchronizerV2[chainId] : Synchronizer[chainId]
+  }, [chainId, isSupportedChainId, isV2Trade])
+
   const [approvalState, approveCallback1] = useApproveCallback(currencies[0], spender)
 
   const handleSwitchDirection = useCallback(
@@ -284,10 +292,7 @@ export default function Trade() {
   }, [asset])
 
   const priceLabel = useMemo(() => {
-    if (!asset || typeof asset.price !== 'number' || asset.price == 0) {
-      return null
-    }
-    return `Oracle Price: ${asset.price.toFixed(2)}$ / ${asset.id}`
+    return asset ? `Oracle Price: ${formatDollarAmount(Number(asset.price))}$ / ${asset.id}` : ''
   }, [asset])
 
   const warning = useMemo(() => {

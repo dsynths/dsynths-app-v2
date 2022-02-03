@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
-import { INFO_BASE_URL, ORACLE_NETWORK_NAMES } from 'constants/muon'
+import { INFO_BASE_URL, ORACLE_NETWORK_NAMES } from 'constants/oracle'
 import { AppState, useAppSelector } from 'state'
 import { makeHttpRequest } from 'utils/http'
 
@@ -15,12 +15,12 @@ interface OracleResponse {
     Long?: {
       price: number
       fee: number
-      is_close: boolean
+      is_close?: boolean
     }
     Short?: {
       price: number
       fee: number
-      is_close: boolean
+      is_close?: boolean
     }
   }
 }
@@ -28,6 +28,7 @@ interface OracleResponse {
 type Quote = {
   price: number
   fee: number
+  open: boolean
 }
 
 interface Quotes {
@@ -57,14 +58,18 @@ export const fetchQuotes = createAsyncThunk('quotes/fetchQuotes', async () => {
 
       // Modify response
       const result = Object.entries(response).reduce((acc: Quotes, [symbol, values]) => {
+        const longPrice = values.Long?.price ?? 0
+        const shortPrice = values.Short?.price ?? 0
         acc[symbol] = {
           long: {
-            price: values.Long?.price ?? 0,
+            price: longPrice,
             fee: values.Long?.fee ?? 0,
+            open: !!longPrice,
           },
           short: {
-            price: values.Short?.price ?? 0,
+            price: shortPrice,
             fee: values.Short?.fee ?? 0,
+            open: !!shortPrice,
           },
         }
         return acc

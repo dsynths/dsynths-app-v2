@@ -70,7 +70,7 @@ export default function AssetCard() {
   const asset = useAssetByContract(contract)
   const currency = useCurrency(asset?.contract)
   const balance = useCurrencyBalance(account ?? undefined, currency ?? undefined)
-  const assetOraclePrice = parseInt(asset?.price.toString() || '0')
+  const assetOraclePrice = asset?.price ?? '0'
 
   return (
     <Wrapper>

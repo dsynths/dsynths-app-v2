@@ -48,7 +48,7 @@ export default function useTradePage(
     )
     const quote = CurrencyAmount.fromRawAmount(
       quoteCurrency,
-      JSBI.BigInt(parseUnits(asset.price.toString(), quoteCurrency.decimals).toString())
+      JSBI.BigInt(parseUnits(asset.price, quoteCurrency.decimals).toString())
     )
     return new Price({ baseAmount: quote, quoteAmount: base })
   }, [asset, baseCurrency, quoteCurrency])
