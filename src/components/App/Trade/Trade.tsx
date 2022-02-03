@@ -237,6 +237,7 @@ export default function Trade() {
   }
 
   const onTrade = useCallback(() => {
+    dispatch(setShowReview(true))
     if (parsedAmounts[0]?.greaterThan(ZERO) && parsedAmounts[1]?.greaterThan(ZERO)) {
       dispatch(setShowReview(true))
     }
@@ -314,6 +315,11 @@ export default function Trade() {
   }
 
   function getActionButton(): JSX.Element {
+    return (
+      <PrimaryButton onClick={onTrade}>
+        {tradeType} {direction}
+      </PrimaryButton>
+    )
     if (error === PrimaryError.ACCOUNT) {
       return <PrimaryButton onClick={toggleWalletModal}>Connect Wallet</PrimaryButton>
     }

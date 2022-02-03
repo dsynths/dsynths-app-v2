@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 import { AppState, useAppSelector } from 'state'
-import { INFO_BASE_URL, ORACLE_NETWORK_NAMES } from 'constants/muon'
+import { INFO_BASE_URL, ORACLE_NETWORK_NAMES } from 'constants/oracle'
 import { makeHttpRequest } from 'utils/http'
 
 export enum SignaturesStatus {

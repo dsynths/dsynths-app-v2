@@ -17,10 +17,15 @@ export const SUPPORTED_CHAIN_IDS: SupportedChainId[] = Object.values(SupportedCh
 
 export const SynchronizerChains = [
   SupportedChainId.MAINNET,
+  SupportedChainId.RINKEBY,
   SupportedChainId.BSC,
   SupportedChainId.HECO,
   SupportedChainId.POLYGON,
+  SupportedChainId.FANTOM,
 ]
+
+export const SynchronizerV2Chains = [SupportedChainId.FANTOM, SupportedChainId.RINKEBY]
+
 export const ProxyChains = [SupportedChainId.XDAI]
 
 export const NETWORK_URLS = {

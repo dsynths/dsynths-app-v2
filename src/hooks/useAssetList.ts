@@ -77,13 +77,11 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
   }, [targetChainId, connectedChainId])
 
   return useMemo(() => {
-    if (!chainId || !conducted[chainId] || !quotes[chainId] || !signatures[chainId] || !details) return []
+    if (!chainId || !conducted[chainId] || !quotes[chainId] || !details) return []
 
     return conducted[chainId]
       .map(({ id, long, short }) => {
         const quote = quotes[chainId][id]
-        const longSigs = signatures[chainId][long]
-        const shortSigs = signatures[chainId][short]
         const asset = details[id]
 
         if (!quote || !quote.long || !quote.short || !asset) {
@@ -102,7 +100,7 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
           symbol: asset.longSymbol,
           price: quote.long.price,
           fee: constructPercentage(quote.long.fee),
-          open: !!longSigs,
+          open: quote.long.open,
         }
 
         const shortAsset: SubAsset = {
@@ -117,7 +115,7 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
           symbol: asset.shortSymbol,
           price: quote.short.price,
           fee: constructPercentage(quote.short.fee),
-          open: !!shortSigs,
+          open: quote.short.open,
         }
 
         return {

@@ -3,19 +3,73 @@ import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { BigintIsh, JSBI, Currency, CurrencyAmount, NativeCurrency, Token, ZERO } from '@sushiswap/core-sdk'
 
 import useWeb3React from './useWeb3'
-import { useSynchronizerContract } from './useContract'
+import { useSynchronizerContract, useSynchronizerV2Contract } from './useContract'
+import useSynchronizer from './useSynchronizer'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { TradeType } from 'state/trade/reducer'
-import { ProxyChains } from 'constants/chains'
-import { Signature, Signatures } from 'state/signatures/reducer'
-
-import { ORACLE_BASE_URL_MAP, ORACLE_NETWORK_NAMES } from 'constants/muon'
+import { MuonClient, MUON_NETWORK_NAMES } from 'constants/oracle'
 import { calculateGasMargin } from 'utils/web3'
-import { makeHttpRequest } from 'utils/http'
 
 export enum TradeCallbackState {
   INVALID = 'INVALID',
   VALID = 'VALID',
+}
+
+interface MuonResponse {
+  success?: boolean
+  app: string
+  cid: string
+  confirmed: boolean
+  confirmedAt: number
+  data: {
+    init: {
+      none: string
+      nonceAddress: string
+      party: string
+    }
+    params: {
+      action: number
+      chain: string
+      tokenId: string
+    }
+    result: {
+      action: number
+      address: string
+      blockNumber: number
+      chain: string
+      fee: number
+      price: string
+    }
+  }
+  method: string
+  nSign: number
+  owner: string
+  peerId: string
+  reqId: string
+  signatures: {
+    owner: string
+    ownerPubKey: {
+      x: string
+      yParity: string
+    }
+    result: {
+      action: number
+      address: string
+      blockNumber: number
+      chain: string
+      fee: number
+      price: string
+    }
+    signature: string
+    timestamp: number
+  }[]
+  sigs: Array<{
+    nonce: string
+    owner: string
+    signature: string
+  }>
+  startedAt: number
+  _id: string
 }
 
 export function toHex(bigintIsh: BigintIsh) {
@@ -25,36 +79,6 @@ export function toHex(bigintIsh: BigintIsh) {
     hex = `0${hex}`
   }
   return `0x${hex}`
-}
-
-const minimumSignatures = 1
-const expectedSignatures = ORACLE_BASE_URL_MAP.length
-
-function comparePrice(a: Signature, b: Signature) {
-  const A = parseInt(a.price)
-  const B = parseInt(b.price)
-
-  let comparison = 0
-  if (A > B) {
-    comparison = -1
-  } else if (A < B) {
-    comparison = 1
-  }
-
-  return comparison
-}
-
-function compareOrder(a: Signature, b: Signature) {
-  const A = a.index
-  const B = b.index
-
-  let comparison = 0
-  if (A > B) {
-    comparison = 1
-  } else if (A < B) {
-    comparison = -1
-  }
-  return comparison
 }
 
 export default function useTradeCallback(
@@ -71,91 +95,21 @@ export default function useTradeCallback(
   const { chainId, account, library } = useWeb3React()
   const addTransaction = useTransactionAdder()
   const Synchronizer = useSynchronizerContract()
-  const isProxyTrade = useMemo(() => chainId && ProxyChains.includes(chainId), [chainId])
+  const SynchronizerV2 = useSynchronizerV2Contract()
 
   const address = useMemo(() => {
     const contract = tradeType === TradeType.OPEN ? currencyB : currencyA
-    return contract?.wrapped.address.toLowerCase() ?? ''
+    return contract?.wrapped.address ?? ''
   }, [currencyA, currencyB, tradeType])
 
-  const signatureRequest = useCallback(
-    async (baseURL) => {
-      try {
-        if (!chainId) throw new Error('No chainId present')
-        const networkName = ORACLE_NETWORK_NAMES[chainId]
-        if (!networkName) throw new Error(`ChainId ${chainId} is not supported by the oracle`)
+  const addressV2 = useMemo(() => {
+    const contract = tradeType === TradeType.OPEN ? currencyB : currencyA
+    return contract?.wrapped.address ?? ''
+  }, [currencyA, currencyB, tradeType])
 
-        const { href: url } = new URL(`/${networkName}/signatures.json`, baseURL)
-        return makeHttpRequest(url)
-      } catch (err) {
-        throw err
-      }
-    },
-    [chainId]
-  )
+  const { isProxyTrade, isV2Trade, fetchSignatures, sortSignatures } = useSynchronizer(address, tradeType)
 
-  const fetchSignatures = useCallback(async () => {
-    try {
-      const responses = await Promise.allSettled(ORACLE_BASE_URL_MAP.map((url) => signatureRequest(url)))
-      const signatures = responses.map((response) => {
-        if (response.status !== 'fulfilled') {
-          throw new Error(`response.status returns unfulfilled: ${response}`)
-        }
-        return response.value as Signatures
-      })
-      return signatures
-    } catch (err) {
-      throw err
-    }
-  }, [signatureRequest])
-
-  const sortSignatures = useCallback(
-    (signaturesPerNode: Signatures[]) => {
-      try {
-        if (!address) {
-          throw new Error('Currency is undefined')
-        }
-
-        const priceFeed: Signature[] = []
-        for (let i = 0; i < signaturesPerNode.length; i++) {
-          const node = signaturesPerNode[i]
-
-          // Fix casing
-          const sigs = Object.entries(node).reduce((acc: Signatures, [contract, values]) => {
-            acc[contract.toLowerCase()] = values
-            return acc
-          }, {})
-
-          if (address in sigs) {
-            sigs[address]['index'] = i
-            priceFeed.push(sigs[address])
-          }
-        }
-
-        if (priceFeed.length < minimumSignatures) {
-          throw new Error('NOT ENOUGH ORACLE SIGNATURES: For security reasons, we cannot execute this trade right now.')
-        }
-
-        if (tradeType === TradeType.OPEN) {
-          const result = priceFeed.sort(comparePrice)
-          return {
-            price: result[0].price,
-            data: result.slice(0, expectedSignatures).sort(compareOrder),
-          }
-        } else {
-          return {
-            price: null,
-            data: priceFeed.sort(comparePrice).reverse().slice(0, expectedSignatures).sort(compareOrder),
-          }
-        }
-      } catch (err) {
-        throw err
-      }
-    },
-    [address, tradeType]
-  )
-
-  const constructCall = useCallback(async () => {
+  const constructV1Call = useCallback(async () => {
     try {
       if (!account || !address || !Synchronizer || !amountA || !amountB) {
         throw new Error('Missing dependencies.')
@@ -201,8 +155,66 @@ export default function useTradeCallback(
     }
   }, [fetchSignatures, sortSignatures, isProxyTrade, tradeType, account, address, Synchronizer, amountA, amountB])
 
+  const constructV2Call = useCallback(async () => {
+    try {
+      if (!account || !chainId || !(chainId in MUON_NETWORK_NAMES) || !addressV2 || !amountA || !SynchronizerV2) {
+        throw new Error('Missing dependencies.')
+      }
+
+      const action = tradeType === TradeType.OPEN ? 'open' : 'close'
+
+      const response: MuonResponse = await MuonClient.app('synchronizer')
+        .method('signature', {
+          tokenId: addressV2,
+          action: action,
+          chain: MUON_NETWORK_NAMES[chainId],
+        })
+        .call()
+
+      console.log('Test test @ muon devs!')
+      console.log('Using Muon app: ', 'synchronizer')
+      console.log('Using Client : ', MuonClient)
+      console.log('With method: ', 'signature')
+      console.log('Trading tokenAddresss: ', addressV2)
+      console.log('Using action: ', action)
+      console.log('On chain: ', chainId)
+      console.log('With chainName: ', MUON_NETWORK_NAMES[chainId])
+      console.log('Called Muon.....')
+      console.log('The response: ', response)
+
+      if (response.success === false) {
+        throw new Error('Unable to fetch Muon signatures. Please try again later.')
+      }
+
+      const args = {
+        partnerID: account,
+        _user: account,
+        registrar: addressV2,
+        amountIn: toHex(amountA.quotient),
+        expireBlock: response.data.result.blockNumber,
+        price: response.data.result.price.toString(),
+        _reqId: response.reqId,
+        sigs: response.sigs,
+      }
+
+      const methodName = tradeType === TradeType.OPEN ? 'buyFor' : 'sellFor'
+
+      console.log('Contract arguments: ', args)
+
+      return {
+        address: SynchronizerV2.address,
+        calldata: SynchronizerV2.interface.encodeFunctionData(methodName, Object.values(args)) ?? '',
+        value: 0,
+      }
+    } catch (error) {
+      return {
+        error,
+      }
+    }
+  }, [chainId, account, addressV2, amountA, SynchronizerV2, tradeType])
+
   return useMemo(() => {
-    if (!account || !chainId || !library || !Synchronizer || !currencyA || !currencyB) {
+    if (!account || !chainId || !library || (!Synchronizer && !SynchronizerV2) || !currencyA || !currencyB) {
       return {
         state: TradeCallbackState.INVALID,
         callback: null,
@@ -221,12 +233,16 @@ export default function useTradeCallback(
       error: null,
       callback: async function onTrade(): Promise<string> {
         console.log('onTrade callback')
-        const call = await constructCall()
+        const call = isV2Trade ? await constructV2Call() : await constructV1Call()
         const { address, calldata, value } = call
 
         if ('error' in call) {
           console.error(call.error)
-          throw new Error('Unexpected error. Could not construct calldata.')
+          if (call.error.message) {
+            throw new Error(call.error.message)
+          } else {
+            throw new Error('Unexpected error. Could not construct calldata.')
+          }
         }
 
         const tx = !value
@@ -281,11 +297,24 @@ export default function useTradeCallback(
               throw new Error('Transaction rejected.')
             } else {
               // otherwise, the error was unexpected and we need to convey that
-              console.error(`Transacton failed`, error, address, calldata, value)
-              throw new Error(`Transacton failed: ${error.message}`) // TODO make this human readable, see: https://github.com/sushiswap/sushiswap-interface/blob/2082b7ded0162324e83aeffad261cc511441f00e/src/hooks/useSwapCallback.ts#L470
+              console.error(`Transaction failed`, error, address, calldata, value)
+              throw new Error(`Transaction failed: ${error.message}`) // TODO make this human readable, see: https://github.com/sushiswap/sushiswap-interface/blob/2082b7ded0162324e83aeffad261cc511441f00e/src/hooks/useSwapCallback.ts#L470
             }
           })
       },
     }
-  }, [account, chainId, library, addTransaction, constructCall, Synchronizer, amountA, amountB, currencyA, currencyB])
+  }, [
+    account,
+    chainId,
+    library,
+    addTransaction,
+    isV2Trade,
+    constructV1Call,
+    constructV2Call,
+    Synchronizer,
+    amountA,
+    amountB,
+    currencyA,
+    currencyB,
+  ])
 }
