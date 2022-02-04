@@ -1,8 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { Percent } from '@sushiswap/core-sdk'
 
-import { INFO_BASE_URL, ORACLE_NETWORK_NAMES } from 'constants/oracle'
 import { AppState, useAppSelector } from 'state'
+import { INFO_BASE_URL, ORACLE_NETWORK_NAMES } from 'constants/oracle'
 import { makeHttpRequest } from 'utils/http'
+import { constructPercentage } from 'utils/prices'
 
 export enum QuotesStatus {
   OK = 'OK',
@@ -26,8 +28,8 @@ interface OracleResponse {
 }
 
 type Quote = {
-  price: number
-  fee: number
+  price: string
+  fee: Percent
   open: boolean
 }
 
@@ -60,15 +62,16 @@ export const fetchQuotes = createAsyncThunk('quotes/fetchQuotes', async () => {
       const result = Object.entries(response).reduce((acc: Quotes, [symbol, values]) => {
         const longPrice = values.Long?.price ?? 0
         const shortPrice = values.Short?.price ?? 0
+
         acc[symbol] = {
           long: {
-            price: longPrice,
-            fee: values.Long?.fee ?? 0,
+            price: longPrice.toFixed(6),
+            fee: constructPercentage(values.Long?.fee ?? 0),
             open: !!longPrice,
           },
           short: {
-            price: shortPrice,
-            fee: values.Short?.fee ?? 0,
+            price: shortPrice.toFixed(6),
+            fee: constructPercentage(values.Short?.fee ?? 0),
             open: !!shortPrice,
           },
         }
