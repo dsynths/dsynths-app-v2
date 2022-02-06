@@ -16,7 +16,6 @@ const Text = styled.p`
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: bold;
-  margin-left: 10px;
 `
 
 export default function Web3Network() {
@@ -29,10 +28,10 @@ export default function Web3Network() {
 
   return account && Chain ? (
     <>
-      <NavButton onClick={() => toggleNetworkModal()} style={{ justifyContent: 'space-between' }}>
+      <NavButton onClick={() => toggleNetworkModal()} style={{ justifyContent: 'space-between', gap: '5px' }}>
         <Image src={Chain.logoUrl} alt={Chain.label} width={20} height={20} />
         <Text>{Chain.label}</Text>
-        <ChevronDown />
+        <ChevronDown size={20} />
       </NavButton>
       <NetworkModal />
     </>

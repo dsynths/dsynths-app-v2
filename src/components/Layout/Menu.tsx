@@ -8,13 +8,13 @@ import {
   ThemeToggle,
   NavToggle,
   IconWrapper,
-  Trade as TradeIcon,
+  Info as InfoIcon,
   Markets as MarketsIcon,
-  Documentation,
-  Twitter,
-  Telegram,
-  Github,
-  Wallet,
+  Telegram as TelegramIcon,
+  Trade as TradeIcon,
+  Twitter as TwitterIcon,
+  Github as GithubIcon,
+  Wallet as WalletIcon,
 } from 'components/Icons'
 import { Card } from 'components/Card'
 
@@ -107,7 +107,7 @@ export default function Menu() {
             <Row active={router.route === '/portfolio'}>
               <div>Portfolio</div>
               <IconWrapper>
-                <Wallet size={15} />
+                <WalletIcon size={15} />
               </IconWrapper>
             </Row>
           </Link>
@@ -131,7 +131,7 @@ export default function Menu() {
             <Row onClick={() => toggle()}>
               <div>Documentation</div>
               <IconWrapper>
-                <Documentation size={15} />
+                <InfoIcon size={15} />
               </IconWrapper>
             </Row>
           </ExternalLink>
@@ -139,7 +139,7 @@ export default function Menu() {
             <Row onClick={() => toggle()}>
               <div>Twitter</div>
               <IconWrapper>
-                <Twitter size={15} />
+                <TwitterIcon size={15} />
               </IconWrapper>
             </Row>
           </ExternalLink>
@@ -147,7 +147,7 @@ export default function Menu() {
             <Row onClick={() => toggle()}>
               <div>Community</div>
               <IconWrapper>
-                <Telegram size={15} />
+                <TelegramIcon size={15} />
               </IconWrapper>
             </Row>
           </ExternalLink>
@@ -155,7 +155,7 @@ export default function Menu() {
             <Row onClick={() => toggle()}>
               <div>Github</div>
               <IconWrapper>
-                <Github size={15} />
+                <GithubIcon size={15} />
               </IconWrapper>
             </Row>
           </ExternalLink>

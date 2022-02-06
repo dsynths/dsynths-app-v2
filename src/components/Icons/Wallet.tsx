@@ -14,13 +14,3 @@ export const Wallet = ({ size = 12, ...rest }: { size?: number; [x: string]: any
     </svg>
   )
 }
-
-// export const Wallet = styled(TrendingUp)<{
-//   color?: string
-// }>`
-//   color: ${({ theme, color }) => color ?? theme.text1};
-//   &:hover {
-//     cursor: pointer;
-//     opacity: 0.6;
-//   }
-// `

@@ -56,6 +56,9 @@ export const NavButton = styled.button`
   border-radius: 10px;
   background: ${({ theme }) => theme.bg1};
   border: 1px solid ${({ theme }) => theme.border2};
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 
   &:hover,
   &:focus {
