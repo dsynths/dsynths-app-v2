@@ -218,7 +218,7 @@ export default function LineChart() {
   const lastPrice = useMemo(() => {
     const close = candlesticks.length ? candlesticks[candlesticks.length - 1].close : null
     return asset && asset.direction === Direction.LONG && parseInt(asset.price) ? Number(asset.price) : close
-  }, [quote, candlesticks, asset])
+  }, [candlesticks, asset])
 
   const ytdChange = useMemo(() => {
     if (!candlesticks.length || !lastPrice) return ''
@@ -229,7 +229,7 @@ export default function LineChart() {
 
   const majorPriceLabel = useMemo(() => {
     return lastPrice ? lastPrice.toFixed(2) + ' USD' : '-'
-  }, [asset, lastPrice])
+  }, [lastPrice])
 
   const preMarketLabel = useMemo(() => {
     if (asset?.sector !== Sector.STOCKS || !quote || !preMarket) return null

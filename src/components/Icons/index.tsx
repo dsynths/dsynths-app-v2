@@ -4,8 +4,9 @@ export { default as ArrowBubble } from './ArrowBubble'
 export { default as CheckMark } from './CheckMark'
 export { Close } from './Close'
 export { ConfirmationAnimation } from './Confirmation'
-export { default as DotFlashing } from './DotFlashing'
 export { ChevronLeft, ChevronDown, ChevronUp } from './Chevron'
+export { default as DotFlashing } from './DotFlashing'
+export { Documentation } from './Documentation'
 export { default as GreenCircle } from './GreenCircle'
 export { default as Connected } from './Connected'
 export { default as Copy } from './Copy'
@@ -19,7 +20,7 @@ export { Settings } from './Settings'
 export { Twitter, Telegram, Github } from './Socials'
 export { default as ThemeToggle } from './ThemeToggle'
 export { default as Trade } from './Trade'
-export { default as Wallet } from './Wallet'
+export { Wallet } from './Wallet'
 
 // for wrapping react feather icons
 export const IconWrapper = styled.div<{ stroke?: string; size?: string; marginRight?: string; marginLeft?: string }>`
@@ -31,6 +32,6 @@ export const IconWrapper = styled.div<{ stroke?: string; size?: string; marginRi
   margin-right: ${({ marginRight }) => marginRight ?? 0};
   margin-left: ${({ marginLeft }) => marginLeft ?? 0};
   & > * {
-    stroke: ${({ stroke }) => stroke ?? 'white'};
+    stroke: ${({ theme, stroke }) => stroke && theme.text1};
   }
 `

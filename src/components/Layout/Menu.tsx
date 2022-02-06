@@ -10,9 +10,11 @@ import {
   IconWrapper,
   Trade as TradeIcon,
   Markets as MarketsIcon,
+  Documentation,
   Twitter,
   Telegram,
   Github,
+  Wallet,
 } from 'components/Icons'
 import { Card } from 'components/Card'
 
@@ -103,9 +105,9 @@ export default function Menu() {
           </Link>
           <Link href={'/portfolio'} passHref>
             <Row active={router.route === '/portfolio'}>
-              <div>Portfolio Manager</div>
+              <div>Portfolio</div>
               <IconWrapper>
-                <TradeIcon size={15} />
+                <Wallet size={15} />
               </IconWrapper>
             </Row>
           </Link>
@@ -125,6 +127,14 @@ export default function Menu() {
               <ThemeToggle />
             </Row>
           )}
+          <ExternalLink href="https://docs.deus.finance/synchronizer/overview">
+            <Row onClick={() => toggle()}>
+              <div>Documentation</div>
+              <IconWrapper>
+                <Documentation size={15} />
+              </IconWrapper>
+            </Row>
+          </ExternalLink>
           <ExternalLink href="https://twitter.com/dsynths">
             <Row onClick={() => toggle()}>
               <div>Twitter</div>

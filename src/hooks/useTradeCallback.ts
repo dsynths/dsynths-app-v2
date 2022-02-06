@@ -308,6 +308,7 @@ export default function useTradeCallback(
     constructV1Call,
     constructV2Call,
     Synchronizer,
+    SynchronizerV2,
     amountA,
     amountB,
     currencyA,

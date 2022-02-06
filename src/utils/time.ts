@@ -10,7 +10,7 @@ dayjs.extend(utc)
 function getEasternStandardTime() {
   const now = dayjs().tz('EST')
   return {
-    now: now,
+    now,
     minute: now.minute(),
     hour: now.hour(),
     day: now.day(),

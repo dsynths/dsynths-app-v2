@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
-import BigNumber from 'bignumber.js'
 
+import { useShowEquity, useTotalEquity } from 'state/portfolio/hooks'
+import { formatDollarAmount } from 'utils/numbers'
 import { LineChart as Chart } from 'components/Chart'
 import { Card } from 'components/Card'
-import { formatDollarAmount } from 'utils/numbers'
 
 const Wrapper = styled(Card)<{
   border?: boolean
@@ -69,17 +69,20 @@ const data = [
   { name: 1, value: 6 },
 ]
 
-export default function EquityChart({ showEquity, totalEquity }: { showEquity: boolean; totalEquity: BigNumber }) {
+export default function EquityChart() {
   const router = useRouter()
   const isSpiritTheme = useMemo(() => {
     return router.query?.theme === 'spirit'
   }, [router])
 
+  const showEquity = useShowEquity()
+  const totalEquity = useTotalEquity()
+
   return (
     <Wrapper border={isSpiritTheme}>
       <InfoWrapper>
         <div>Overview</div>
-        {showEquity && <div>{formatDollarAmount(totalEquity.toNumber())}</div>}
+        {showEquity && <div>{formatDollarAmount(Number(totalEquity))}</div>}
       </InfoWrapper>
       <Chart data={data} dataKey="value" loading={false} content={'PNL chart coming soon!'} />
     </Wrapper>
