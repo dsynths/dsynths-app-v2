@@ -227,9 +227,11 @@ export default function LineChart() {
     return `${change > 0 ? '+' : ''}${change.toFixed(2)}% Past Year`
   }, [candlesticks, lastPrice])
 
+  const [hoverPrice, setHoverPrice] = useState<number | null>(null)
   const majorPriceLabel = useMemo(() => {
-    return lastPrice ? lastPrice.toFixed(2) + ' USD' : '-'
-  }, [lastPrice])
+    const value = hoverPrice ?? lastPrice
+    return value ? value.toFixed(2) + ' USD' : '-'
+  }, [lastPrice, hoverPrice])
 
   const preMarketLabel = useMemo(() => {
     if (asset?.sector !== Sector.STOCKS || !quote || !preMarket) return null
@@ -261,6 +263,10 @@ export default function LineChart() {
     setInterval(() => fetchTime(), 60 * 1000)
   }, [])
 
+  const onTooltipHover = (value: number, shouldReset: boolean) => {
+    setHoverPrice(shouldReset ? null : value)
+  }
+
   return (
     <Wrapper show={!!candlesticks.length} border={isSpiritTheme}>
       <InfoWrapper>
@@ -275,7 +281,13 @@ export default function LineChart() {
           {afterHoursLabel && <BottomText>{afterHoursLabel}</BottomText>}
         </div>
       </InfoWrapper>
-      <Chart data={candlesticks} dataKey="close" loading={candlesticksLoading} content={content} />
+      <Chart
+        data={candlesticks}
+        dataKey="close"
+        loading={candlesticksLoading}
+        content={content}
+        onTooltipHover={onTooltipHover}
+      />
     </Wrapper>
   )
 }
