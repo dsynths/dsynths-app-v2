@@ -73,7 +73,7 @@ export function LineChart({
           <YAxis dataKey={dataKey} type="number" domain={['dataMin', 'dataMax']} hide={true} />
           {onTooltipHover && (
             <Tooltip
-              cursor={{ stroke: theme.primary1, opacity: 0.1 }}
+              cursor={{ opacity: 0.1 }}
               formatter={onHover}
               contentStyle={{
                 display: 'none',
