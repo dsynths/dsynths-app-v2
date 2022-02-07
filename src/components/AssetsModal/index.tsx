@@ -125,10 +125,15 @@ export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; on
     allowEmpty: true,
   })
 
+  const onDismissProxy = () => {
+    searchProps.onBlur()
+    onDismiss()
+  }
+
   function getModalContent() {
     return (
       <>
-        <ModalHeader title="Select an asset" onClose={onDismiss} />
+        <ModalHeader title="Select an asset" onClose={onDismissProxy} />
         <SearchWrapper>
           <InputField
             {...searchProps}
@@ -160,7 +165,7 @@ export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; on
                         style={style}
                         onClick={() => {
                           setURLCurrency(asset.contract)
-                          onDismiss()
+                          onDismissProxy()
                         }}
                         {...optionProps}
                       />

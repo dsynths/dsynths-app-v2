@@ -7,7 +7,7 @@ import { Sector } from 'state/details/reducer'
 import { useAssetByContract } from 'hooks/useAssetList'
 import { API_BASE_URL } from 'constants/api'
 import { makeHttpRequest } from 'utils/http'
-import { isPreMarket, isAfterHours } from 'utils/time'
+import { isPreMarket, isAfterHours, isRegularMarket } from 'utils/time'
 
 import { LineChart as Chart } from 'components/Chart'
 import { Card } from 'components/Card'
@@ -124,6 +124,7 @@ export default function LineChart() {
   const [quoteCache, setQuoteCache] = useState<QuoteCache>({})
 
   const [preMarket, setPreMarket] = useState(false)
+  const [regularHours, setRegularHours] = useState(true)
   const [afterHours, setAfterHours] = useState(false)
 
   const { currencies } = useDefaultsFromURL()
@@ -143,7 +144,7 @@ export default function LineChart() {
         setCandlesticksLoading(false)
 
         if (!result || !result.success) {
-          throw new Error(`API returned an error: ${result?.message}`)
+          throw new Error('API returned an error')
         }
         if (!Array.isArray(result.data)) {
           throw new Error('API data is not an array')
@@ -211,27 +212,58 @@ export default function LineChart() {
     }
   }, [asset, chainId, candlesticksCache, quoteCache, fetchCandlesticks, fetchQuote])
 
-  const content = useMemo(() => {
+  const content: string = useMemo(() => {
     return asset ? '' : 'Select an asset to view the chart'
   }, [asset])
 
-  const lastPrice = useMemo(() => {
-    const close = candlesticks.length ? candlesticks[candlesticks.length - 1].close : null
-    return asset && asset.direction === Direction.LONG && parseInt(asset.price) ? Number(asset.price) : close
-  }, [candlesticks, asset])
+  const majorPrice: number | null = useMemo(() => {
+    // general note: if the API is down or faulty, the linechart will hide itself by default
+    // so we don't have to think of those edge cases.
 
-  const ytdChange = useMemo(() => {
-    if (!candlesticks.length || !lastPrice) return ''
+    if (!asset) return null
+
+    // quotes are only available for stocks, nor do special hours exist for non-stocks
+    // only show LONG price, else default to current candlestick price (only then fallback to SHORT price)
+    if (asset.sector !== Sector.STOCKS) {
+      const candleClose = candlesticks.length ? candlesticks[candlesticks.length - 1].close : null
+      if (!parseFloat(asset.price)) {
+        return candleClose
+      }
+      return asset.direction === Direction.LONG ? Number(asset.price) : candleClose ?? Number(asset.price)
+    }
+
+    // if no quote: default to asset price (we don't have to resort to candlesticks price
+    // because if there's no quote then the API won't return candlesticks either)
+    if (!quote) {
+      return parseFloat(asset.price) ? Number(asset.price) : null
+    }
+    const { close, current } = quote
+
+    // If regular hours, use oracle price
+    if (regularHours) {
+      if (!parseFloat(asset.price) || asset.direction === Direction.SHORT) {
+        return current
+      }
+      return Number(asset.price)
+    }
+
+    // Market is closed or is special hours
+    return close
+  }, [asset, candlesticks, quote, regularHours])
+
+  const ytdChange: string = useMemo(() => {
+    if (!candlesticks.length) return ''
     const zeroDayPrice = candlesticks[0].close
+    const lastPrice = candlesticks[candlesticks.length - 1].close
     const change = ((lastPrice - zeroDayPrice) / zeroDayPrice) * 100
     return `${change > 0 ? '+' : ''}${change.toFixed(2)}% Past Year`
-  }, [candlesticks, lastPrice])
+  }, [candlesticks])
 
   const [hoverPrice, setHoverPrice] = useState<number | null>(null)
   const majorPriceLabel = useMemo(() => {
-    const value = hoverPrice ?? lastPrice
+    const value = hoverPrice ?? majorPrice
     return value ? value.toFixed(2) + ' USD' : '-'
-  }, [lastPrice, hoverPrice])
+  }, [majorPrice, hoverPrice])
 
   const preMarketLabel = useMemo(() => {
     if (asset?.sector !== Sector.STOCKS || !quote || !preMarket) return null
@@ -258,6 +290,7 @@ export default function LineChart() {
     const fetchTime = () => {
       setPreMarket(isPreMarket())
       setAfterHours(isAfterHours())
+      setRegularHours(isRegularMarket())
     }
     fetchTime()
     setInterval(() => fetchTime(), 60 * 1000)
