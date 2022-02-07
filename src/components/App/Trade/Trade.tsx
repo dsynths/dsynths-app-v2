@@ -284,6 +284,19 @@ export default function Trade() {
     dispatch(setTradeState({ ...tradeState, showReview: false, attemptingTxn: false, error: undefined }))
   }, [dispatch, tradeState])
 
+  const showSelectIn = useMemo(() => {
+    // checking this else undefined === undefined returns true
+    if (!currencies[0] || !asset) {
+      return false
+    }
+    return currencies[0].wrapped.address.toLowerCase() === asset.contract.toLowerCase()
+  }, [asset, currencies])
+
+  const showSelectOut = useMemo(() => {
+    // we don't need to check for undefined because we allow that to be true
+    return currencies[1]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()
+  }, [asset, currencies])
+
   const feeLabel = useMemo(() => {
     if (!asset) {
       return null
@@ -387,7 +400,7 @@ export default function Trade() {
             currency={currencies[0]}
             value={formattedAmounts[0]}
             showMax
-            showSelect={currencies[0]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()}
+            showSelect={showSelectIn}
             onChange={(value) =>
               dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.A }))
             }
@@ -402,7 +415,7 @@ export default function Trade() {
               <InputBox
                 currency={currencies[1]}
                 value={formattedAmounts[1]}
-                showSelect={currencies[1]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()}
+                showSelect={showSelectOut}
                 onChange={(value) =>
                   dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.B }))
                 }

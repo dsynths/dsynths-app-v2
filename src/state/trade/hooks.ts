@@ -31,9 +31,11 @@ export default function useDefaultsFromURL(): {
     useCurrency(
       assets.some((o) => o.contract.toLowerCase() === contract)
         ? contract
-        : (chainId && DefaultSynth[chainId]) ?? DefaultSynth[1]
+        : chainId
+        ? DefaultSynth[chainId]
+        : DefaultSynth[1] // purely cosmetic, will revert to the correct on chain connect.
     ) || undefined
-  const quoteCurrency = useCurrency((chainId && Collateral[chainId]) ?? Collateral[1]) || undefined
+  const quoteCurrency = useCurrency(chainId ? Collateral[chainId] : Collateral[1]) || undefined
 
   function instanceOfCurrency(object: any): object is Currency {
     return 'isToken' in object
