@@ -28,16 +28,17 @@ interface MuonResponse {
       party: string
     }
     params: {
-      action: number
+      action: string
       chain: string
       tokenId: string
+      useMultiplier: boolean
     }
     result: {
-      action: number
+      action: string
       address: string
-      blockNumber: number
       chain: string
-      fee: number
+      expireBlock: number
+      multiplier: number
       price: string
     }
   }
@@ -53,11 +54,10 @@ interface MuonResponse {
       yParity: string
     }
     result: {
-      action: number
+      action: string
       address: string
-      blockNumber: number
       chain: string
-      fee: number
+      expireBlock: number
       price: string
     }
     signature: string
@@ -157,37 +157,35 @@ export default function useTradeCallback(
         throw new Error('Missing dependencies.')
       }
 
-      const action = tradeType === TradeType.OPEN ? 'open' : 'close'
+      const action = tradeType === TradeType.OPEN ? 'buy' : 'sell'
 
       const response: MuonResponse = await MuonClient.app('synchronizer')
         .method('signature', {
           tokenId: address,
           action,
           chain: MUON_NETWORK_NAMES[chainId],
+          useMultiplier: false,
         })
         .call()
 
-      console.log('Test test @ muon devs!')
-      console.log('Using Muon app: ', 'synchronizer')
-      console.log('Using Client : ', MuonClient)
-      console.log('With method: ', 'signature')
-      console.log('Trading tokenAddresss: ', address)
-      console.log('Using action: ', action)
-      console.log('On chain: ', chainId)
-      console.log('With chainName: ', MUON_NETWORK_NAMES[chainId])
-      console.log('Called Muon.....')
-      console.log('The response: ', response)
+      console.log('Muon request: ', {
+        tokenId: address,
+        action,
+        chain: MUON_NETWORK_NAMES[chainId],
+        useMultiplier: false,
+      })
+      console.log('Muon response: ', response)
 
       if (response.success === false) {
         throw new Error('Unable to fetch Muon signatures. Please try again later.')
       }
 
       const args = {
-        partnerID: account,
+        partnerID: '0x1164fe7a76D22EAA66f6A0aDcE3E3a30d9957A5f', // TODO fix this
         _user: account,
         registrar: address,
         amountIn: toHex(amountA.quotient),
-        expireBlock: response.data.result.blockNumber,
+        expireBlock: response.data.result.expireBlock,
         price: response.data.result.price,
         _reqId: response.reqId,
         sigs: response.sigs,
@@ -217,7 +215,7 @@ export default function useTradeCallback(
         error: 'Missing dependencies',
       }
     }
-    if (amountA?.equalTo(ZERO)) {
+    if (!amountA || amountA.equalTo(ZERO)) {
       return {
         state: TradeCallbackState.INVALID,
         callback: null,
