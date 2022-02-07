@@ -31,6 +31,6 @@ export const Synchronizer: AddressMap = {
 }
 
 export const SynchronizerV2: AddressMap = {
-  [SupportedChainId.RINKEBY]: '0xc059A6e09343F0Cd74Ca2B1136fD982964723950',
+  [SupportedChainId.RINKEBY]: '0xa4E7ed8548e4fB5d7E5a4fee907FD8C1430eEd0C',
   [SupportedChainId.FANTOM]: '0xc059A6e09343F0Cd74Ca2B1136fD982964723950',
 }
