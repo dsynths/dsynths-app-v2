@@ -33,7 +33,7 @@ export default function useDefaultsFromURL(): {
         ? contract
         : chainId
         ? DefaultSynth[chainId]
-        : DefaultSynth[1] // purely cosmetic, will revert to the correct on chain connect.
+        : DefaultSynth[1] // purely cosmetic, will revert to the correct chain on connect.
     ) || undefined
   const quoteCurrency = useCurrency(chainId ? Collateral[chainId] : Collateral[1]) || undefined
 
