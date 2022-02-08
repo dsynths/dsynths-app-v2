@@ -23,6 +23,13 @@ export const Collateral: AddressMap = {
   [SupportedChainId.FANTOM]: '0xDE12c7959E1a72bbe8a5f7A1dc8f8EeF9Ab011B3', // DEI
 }
 
+export const DefaultSynth: AddressMap = {
+  [SupportedChainId.MAINNET]: '0xc9f982e8f89E1c6626746e93E0B238701892b2f8', // TSLA
+  [SupportedChainId.BSC]: '0x0DA9E2D04b3A7F9C4424171Ee2EE23c88FaC2783', // TSLA
+  [SupportedChainId.HECO]: '0x6C503f804533C554a2dF47604D6630557b8bF1cA', // TSLA
+  [SupportedChainId.POLYGON]: '0xF4849682B4D8C966a82d9Af3f5ec26B0E2A8Bb97', // TSLA
+}
+
 export const Synchronizer: AddressMap = {
   [SupportedChainId.MAINNET]: '0x7a27a7BF25d64FAa090404F94606c580ce8E1D37',
   [SupportedChainId.BSC]: '0x3b62f3820e0b035cc4ad602dece6d796bc325325',

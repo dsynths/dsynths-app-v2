@@ -132,20 +132,6 @@ const ButtonRow = styled.div`
   `}
 `
 
-const WarningBlock = styled.div`
-  display: flex;
-  flex-flow: column nowrap;
-  text-align: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  border-radius: 10px;
-  color: ${({ theme }) => theme.text2};
-  background: ${({ theme }) => theme.bg1};
-  border: 1px solid ${({ theme }) => theme.border2};
-  padding: 0.6rem;
-  height: 40px;
-`
-
 const FeeWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
@@ -284,6 +270,19 @@ export default function Trade() {
     dispatch(setTradeState({ ...tradeState, showReview: false, attemptingTxn: false, error: undefined }))
   }, [dispatch, tradeState])
 
+  const showSelectIn = useMemo(() => {
+    // checking this else undefined === undefined returns true
+    if (!currencies[0] || !asset) {
+      return false
+    }
+    return currencies[0].wrapped.address.toLowerCase() === asset.contract.toLowerCase()
+  }, [asset, currencies])
+
+  const showSelectOut = useMemo(() => {
+    // we don't need to check for undefined because we allow that to be true
+    return currencies[1]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()
+  }, [asset, currencies])
+
   const feeLabel = useMemo(() => {
     if (!asset) {
       return null
@@ -294,14 +293,6 @@ export default function Trade() {
   const priceLabel = useMemo(() => {
     return asset ? `Oracle Price: ${formatDollarAmount(Number(asset.price))}$ / ${asset.id}` : ''
   }, [asset])
-
-  const warning = useMemo(() => {
-    return !account || !chainId
-      ? 'Please connect your wallet.'
-      : !isSupportedChainId
-      ? 'Please connect with one of our supported chains.'
-      : ''
-  }, [account, chainId, isSupportedChainId])
 
   function getApproveButton(): JSX.Element | null {
     if (
@@ -343,7 +334,7 @@ export default function Trade() {
       return <PrimaryButton onClick={toggleWalletModal}>Connect Wallet</PrimaryButton>
     }
     if (!isSupportedChainId) {
-      return <PrimaryButton onClick={toggleNetworkModal}>Click to select chain</PrimaryButton>
+      return <PrimaryButton onClick={toggleNetworkModal}>Switch to a supported chain</PrimaryButton>
     }
     if (!asset) {
       return <PrimaryButton>Select an asset</PrimaryButton>
@@ -387,28 +378,22 @@ export default function Trade() {
             currency={currencies[0]}
             value={formattedAmounts[0]}
             showMax
-            showSelect={currencies[0]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()}
+            showSelect={showSelectIn}
             onChange={(value) =>
               dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.A }))
             }
           />
-          {warning ? (
-            <WarningBlock>{warning}</WarningBlock>
-          ) : (
-            <>
-              <ArrowWrapper onClick={handleSwitchCurrencies}>
-                <ArrowBubble size={30} />
-              </ArrowWrapper>
-              <InputBox
-                currency={currencies[1]}
-                value={formattedAmounts[1]}
-                showSelect={currencies[1]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()}
-                onChange={(value) =>
-                  dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.B }))
-                }
-              />
-            </>
-          )}
+          <ArrowWrapper onClick={handleSwitchCurrencies}>
+            <ArrowBubble size={30} />
+          </ArrowWrapper>
+          <InputBox
+            currency={currencies[1]}
+            value={formattedAmounts[1]}
+            showSelect={showSelectOut}
+            onChange={(value) =>
+              dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.B }))
+            }
+          />
         </InputWrapper>
       </>
     )
@@ -417,7 +402,7 @@ export default function Trade() {
   return (
     <Wrapper border={isSpiritTheme}>
       {getMainContent()}
-      {marketIsOpen && !warning && (
+      {marketIsOpen && (
         <FeeWrapper>
           <div>{feeLabel}</div>
           <div>{priceLabel}</div>

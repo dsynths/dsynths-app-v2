@@ -8,6 +8,8 @@ import { useCurrencyBalance } from 'state/wallet/hooks'
 import { maxAmountSpend } from 'utils/currency'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import { useAssetByContract } from 'hooks/useAssetList'
+
+import DEI from '/public/static/images/tokens/dei.svg'
 import ImageWithFallback from 'components/ImageWithFallback'
 import AssetsModal from 'components/AssetsModal'
 import { ChevronDown } from 'components/Icons'
@@ -181,11 +183,16 @@ export default function InputBox({
     <>
       <Wrapper>
         <AssetPanel>
-          {!currency ? (
+          {!currency && showSelect ? (
             <AssetSelect onClick={() => setModalOpen(true)} select>
               Select an asset
               <ChevronDown size={15} />
             </AssetSelect>
+          ) : !currency ? (
+            <Row style={{ marginLeft: '5px' }}>
+              <ImageWithFallback src={DEI} width={30} height={30} alt="Loading" round />
+              DEI
+            </Row>
           ) : showSelect ? (
             <AssetSelect onClick={() => setModalOpen(true)}>
               <ImageWithFallback src={logo} width={30} height={30} alt={`${currency?.symbol} Logo`} round />
@@ -202,6 +209,12 @@ export default function InputBox({
             <Balance onClick={handleClick}>
               {balance ? balance.toSignificant(6) : '0.00'} {currency?.symbol}
               {showMax && <span>MAX</span>}
+            </Balance>
+          )}
+          {!currency && !showSelect && (
+            <Balance>
+              0.00 DEI
+              <span>MAX</span>
             </Balance>
           )}
         </AssetPanel>
