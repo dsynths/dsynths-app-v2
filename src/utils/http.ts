@@ -8,7 +8,11 @@ export const makeHttpRequest = async function (
 ) {
   try {
     const response = await fetch(url, options)
-    return await response.json()
+    if (response.ok) {
+      return await response.json()
+    } else {
+      throw new Error(response.statusText)
+    }
   } catch (err) {
     console.error(`Error fetching ${url}: `, err)
     return null

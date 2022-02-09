@@ -1,23 +1,25 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
 import styled from 'styled-components'
+import { useRouter } from 'next/router'
 
 import useDefaultsFromURL from 'state/trade/hooks'
+import { Sector } from 'state/details/reducer'
 import { useAssetByContract } from 'hooks/useAssetList'
 import { API_BASE_URL } from 'constants/api'
 import { makeHttpRequest } from 'utils/http'
+import { isPreMarket, isAfterHours, isRegularMarket } from 'utils/time'
 
 import { LineChart as Chart } from 'components/Chart'
 import { Card } from 'components/Card'
+import useWeb3React from 'hooks/useWeb3'
 import { Direction } from 'hooks/useTradePage'
-import { formatDollarAmount } from 'utils/numbers'
-import { useRouter } from 'next/router'
 
 const Wrapper = styled(Card)<{
   show: boolean
   border?: boolean
 }>`
   padding: 0;
-  height: ${({ show }) => (show ? '285px' : '0px')}; // exact infowrapper + last-child height
+  height: ${({ show }) => (show ? '285px' : '0px')};
   border: ${({ theme, border, show }) => (show && border ? `1px solid ${theme.border2}` : 'none')};
 
   -webkit-transition: height 0.4s linear;
@@ -28,7 +30,7 @@ const Wrapper = styled(Card)<{
 
   & > * {
     &:last-child {
-      height: 200px;
+      flex: 1;
     }
   }
 `
@@ -39,15 +41,13 @@ const InfoWrapper = styled.div`
   justify-content: space-between;
   gap: 6px;
   border-bottom: 1px solid ${({ theme }) => theme.border2};
-  padding: 0 20px;
-  height: 85px;
-  align-items: center;
+  padding: 10px 20px;
+  align-items: flex-start;
   margin-bottom: 4px;
 
   & > * {
     display: flex;
     flex-flow: column nowrap;
-    justify-content: flex-start;
     gap: 3px;
 
     &:last-child {
@@ -66,9 +66,21 @@ const BottomText = styled.div`
   color: ${({ theme }) => theme.text2};
 `
 
-type APIResponse = {
+const MarketSpan = styled.span<{
+  positive: boolean
+}>`
+  color: ${({ positive, theme }) => (positive ? theme.green1 : theme.red1)};
+`
+
+type CandlestickResponse = {
   success: boolean
   data: Candlestick[]
+  message: string
+} | null
+
+type QuoteResponse = {
+  success: boolean
+  data: Quote
   message: string
 } | null
 
@@ -81,18 +93,39 @@ interface Candlestick {
   volume: number
 }
 
-interface Cache {
+interface Quote {
+  timestamp: number
+  open: number
+  high: number
+  low: number
+  close: number
+  current: number
+  change: number
+}
+
+interface CandlesticksCache {
   [ticker: string]: Candlestick[]
 }
 
+interface QuoteCache {
+  [ticker: string]: Quote | null
+}
+
 export default function LineChart() {
-  // Prevent jumping on long/short switches + lessen load on API
-  const [cache, setCache] = useState<Cache>({})
+  const { chainId } = useWeb3React()
   const [cachedTicker, setCachedTicker] = useState('')
   const [cachedName, setCachedName] = useState('')
 
-  const [data, setData] = useState<Candlestick[]>([])
-  const [loading, setLoading] = useState(false)
+  const [candlesticks, setCandlesticks] = useState<Candlestick[]>([])
+  const [candlesticksCache, setCandlesticksCache] = useState<CandlesticksCache>({})
+  const [candlesticksLoading, setCandlesticksLoading] = useState(false)
+
+  const [quote, setQuote] = useState<Quote | null>(null)
+  const [quoteCache, setQuoteCache] = useState<QuoteCache>({})
+
+  const [preMarket, setPreMarket] = useState(false)
+  const [regularHours, setRegularHours] = useState(true)
+  const [afterHours, setAfterHours] = useState(false)
 
   const { currencies } = useDefaultsFromURL()
   const asset = useAssetByContract(currencies.baseCurrency?.wrapped.address ?? undefined)
@@ -106,77 +139,188 @@ export default function LineChart() {
     async (ticker: string) => {
       try {
         const { href: url } = new URL(`/${asset?.sector}/ohlc?ticker=${ticker}&period=y&resolution=D`, API_BASE_URL)
-        setLoading(true)
-        const result: APIResponse = await makeHttpRequest(url)
-        setLoading(false)
+        setCandlesticksLoading(true)
+        const result: CandlestickResponse = await makeHttpRequest(url)
+        setCandlesticksLoading(false)
 
         if (!result || !result.success) {
-          throw new Error(`API returned an error: ${result?.message}`)
+          throw new Error('API returned an error')
         }
         if (!Array.isArray(result.data)) {
           throw new Error('API data is not an array')
         }
 
-        setData(result.data)
-        setCache((prev) => ({
+        setCandlesticks(result.data)
+        setCandlesticksCache((prev) => ({
           ...prev,
           [ticker]: result.data,
         }))
       } catch (err) {
         console.error(err)
-        setData([])
-        setLoading(false)
+        setCandlesticks([])
+        setCandlesticksLoading(false)
+      }
+    },
+    [asset]
+  )
+
+  const fetchQuote = useCallback(
+    async (ticker: string) => {
+      try {
+        if (asset?.sector !== Sector.STOCKS) return null
+
+        const { href: url } = new URL(`/stocks/quote?ticker=${ticker}`, API_BASE_URL)
+        const result: QuoteResponse = await makeHttpRequest(url)
+
+        if (!result || !result.success) {
+          throw new Error(`API returned an error: ${result?.message}`)
+        }
+
+        setQuote(result.data)
+        setQuoteCache((prev) => ({
+          ...prev,
+          [ticker]: result.data,
+        }))
+      } catch (err) {
+        console.error(err)
+        setQuote(null)
       }
     },
     [asset]
   )
 
   useEffect(() => {
-    if (!asset) return
+    if (!asset) {
+      setCandlesticks([])
+      setQuote(null)
+      return
+    }
 
     setCachedTicker(asset.ticker)
     setCachedName(asset.name)
 
-    if (cache[asset.ticker]) {
-      setData(cache[asset.ticker])
-      return
+    if (candlesticksCache[asset.ticker]) {
+      setCandlesticks(candlesticksCache[asset.ticker])
+    } else {
+      fetchCandlesticks(asset.ticker)
     }
 
-    fetchCandlesticks(asset.ticker)
-  }, [asset, cache, fetchCandlesticks])
+    if (quoteCache[asset.ticker]) {
+      setQuote(quoteCache[asset.ticker])
+    } else {
+      fetchQuote(asset.ticker)
+    }
+  }, [asset, chainId, candlesticksCache, quoteCache, fetchCandlesticks, fetchQuote])
 
-  const content = useMemo(() => {
+  const content: string = useMemo(() => {
     return asset ? '' : 'Select an asset to view the chart'
   }, [asset])
 
-  const priceLabel = useMemo(() => {
-    const close = data.length ? data[data.length - 1].close : ''
-    const result = asset ? (asset.direction === Direction.SHORT ? close : !!asset.price ? asset.price : close) : ''
-    return result ? formatDollarAmount(Number(result)) : ''
-  }, [data, asset])
+  const majorPrice: number | null = useMemo(() => {
+    // general note: if the API is down or faulty, the linechart will hide itself by default
+    // so we don't have to think of those edge cases.
 
-  const priceChangeLabel = useMemo(() => {
-    if (!data.length) return ''
-    const currentPrice = data[data.length - 1].close
-    const zeroDayPrice = data[0].close
+    if (!asset) return null
 
-    const change = ((currentPrice - zeroDayPrice) / zeroDayPrice) * 100
+    // quotes are only available for stocks, nor do special hours exist for non-stocks
+    // only show LONG price, else default to current candlestick price (only then fallback to SHORT price)
+    if (asset.sector !== Sector.STOCKS) {
+      const candleClose = candlesticks.length ? candlesticks[candlesticks.length - 1].close : null
+      if (!parseFloat(asset.price)) {
+        return candleClose
+      }
+      return asset.direction === Direction.LONG ? Number(asset.price) : candleClose ?? Number(asset.price)
+    }
+
+    // if no quote: default to asset price (we don't have to resort to candlesticks price
+    // because if there's no quote then the API won't return candlesticks either)
+    if (!quote) {
+      return parseFloat(asset.price) ? Number(asset.price) : null
+    }
+    const { close, current } = quote
+
+    // If regular hours, use oracle price
+    if (regularHours) {
+      if (!parseFloat(asset.price) || asset.direction === Direction.SHORT) {
+        return current
+      }
+      return Number(asset.price)
+    }
+
+    // Market is closed or is special hours
+    return close
+  }, [asset, candlesticks, quote, regularHours])
+
+  const ytdChange: string = useMemo(() => {
+    if (!candlesticks.length) return ''
+    const zeroDayPrice = candlesticks[0].close
+    const lastPrice = candlesticks[candlesticks.length - 1].close
+    const change = ((lastPrice - zeroDayPrice) / zeroDayPrice) * 100
     return `${change > 0 ? '+' : ''}${change.toFixed(2)}% Past Year`
-  }, [data])
+  }, [candlesticks])
+
+  const [hoverPrice, setHoverPrice] = useState<number | null>(null)
+  const majorPriceLabel = useMemo(() => {
+    const value = hoverPrice ?? majorPrice
+    return value ? value.toFixed(2) + ' USD' : '-'
+  }, [majorPrice, hoverPrice])
+
+  const preMarketLabel = useMemo(() => {
+    if (asset?.sector !== Sector.STOCKS || !quote || !preMarket) return null
+    const change = `${quote.change > 0 ? '+' : ''}${quote.change.toFixed(2)}%`
+
+    return (
+      <div>
+        Pre-market {quote.current.toFixed(2)} <MarketSpan positive={quote.change > 0}>{change}</MarketSpan>
+      </div>
+    )
+  }, [asset, quote, preMarket])
+
+  const afterHoursLabel = useMemo(() => {
+    if (asset?.sector !== Sector.STOCKS || !quote || !afterHours) return null
+    const change = `${quote.change > 0 ? '+' : ''}${quote.change.toFixed(2)}%`
+    return (
+      <div>
+        After-hours {quote.current.toFixed(2)} <MarketSpan positive={quote.change > 0}>{change}</MarketSpan>
+      </div>
+    )
+  }, [asset, quote, afterHours])
+
+  useEffect(() => {
+    const fetchTime = () => {
+      setPreMarket(isPreMarket())
+      setAfterHours(isAfterHours())
+      setRegularHours(isRegularMarket())
+    }
+    fetchTime()
+    setInterval(() => fetchTime(), 60 * 1000)
+  }, [])
+
+  const onTooltipHover = (value: number, shouldReset: boolean) => {
+    setHoverPrice(shouldReset ? null : value)
+  }
 
   return (
-    <Wrapper show={!!data.length} border={isSpiritTheme}>
+    <Wrapper show={!!candlesticks.length} border={isSpiritTheme}>
       <InfoWrapper>
         <div>
           <UpperText>{cachedTicker}</UpperText>
           <BottomText>{cachedName}</BottomText>
         </div>
         <div>
-          <UpperText>{priceLabel}</UpperText>
-          <BottomText>{priceChangeLabel}</BottomText>
+          <UpperText>{majorPriceLabel}</UpperText>
+          <BottomText>{ytdChange}</BottomText>
+          {preMarketLabel && <BottomText>{preMarketLabel}</BottomText>}
+          {afterHoursLabel && <BottomText>{afterHoursLabel}</BottomText>}
         </div>
       </InfoWrapper>
-      <Chart data={data} dataKey="close" loading={loading} content={content} />
+      <Chart
+        data={candlesticks}
+        dataKey="close"
+        loading={candlesticksLoading}
+        content={content}
+        onTooltipHover={onTooltipHover}
+      />
     </Wrapper>
   )
 }

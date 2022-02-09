@@ -8,11 +8,13 @@ import {
   ThemeToggle,
   NavToggle,
   IconWrapper,
-  Trade as TradeIcon,
+  Info as InfoIcon,
   Markets as MarketsIcon,
-  Twitter,
-  Telegram,
-  Github,
+  Telegram as TelegramIcon,
+  Trade as TradeIcon,
+  Twitter as TwitterIcon,
+  Github as GithubIcon,
+  Wallet as WalletIcon,
 } from 'components/Icons'
 import { Card } from 'components/Card'
 
@@ -103,9 +105,9 @@ export default function Menu() {
           </Link>
           <Link href={'/portfolio'} passHref>
             <Row active={router.route === '/portfolio'}>
-              <div>Portfolio Manager</div>
+              <div>Portfolio</div>
               <IconWrapper>
-                <TradeIcon size={15} />
+                <WalletIcon size={15} />
               </IconWrapper>
             </Row>
           </Link>
@@ -125,11 +127,19 @@ export default function Menu() {
               <ThemeToggle />
             </Row>
           )}
+          <ExternalLink href="https://docs.deus.finance/synchronizer/overview">
+            <Row onClick={() => toggle()}>
+              <div>Documentation</div>
+              <IconWrapper>
+                <InfoIcon size={15} />
+              </IconWrapper>
+            </Row>
+          </ExternalLink>
           <ExternalLink href="https://twitter.com/dsynths">
             <Row onClick={() => toggle()}>
               <div>Twitter</div>
               <IconWrapper>
-                <Twitter size={15} />
+                <TwitterIcon size={15} />
               </IconWrapper>
             </Row>
           </ExternalLink>
@@ -137,7 +147,7 @@ export default function Menu() {
             <Row onClick={() => toggle()}>
               <div>Community</div>
               <IconWrapper>
-                <Telegram size={15} />
+                <TelegramIcon size={15} />
               </IconWrapper>
             </Row>
           </ExternalLink>
@@ -145,7 +155,7 @@ export default function Menu() {
             <Row onClick={() => toggle()}>
               <div>Github</div>
               <IconWrapper>
-                <Github size={15} />
+                <GithubIcon size={15} />
               </IconWrapper>
             </Row>
           </ExternalLink>

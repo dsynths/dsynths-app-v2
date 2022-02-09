@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { ResponsiveContainer, YAxis, AreaChart, Area } from 'recharts'
+import { ResponsiveContainer, YAxis, AreaChart, Area, Tooltip } from 'recharts'
+import useHover from 'hooks/useHover'
 
 const MarginWrapper = styled.div`
   width: calc(100% + 10px);
@@ -36,16 +37,32 @@ export function LineChart({
   dataKey,
   loading,
   content = '',
+  onTooltipHover,
 }: {
   data: any[]
   dataKey: string
   loading: boolean
   content?: string
+  onTooltipHover?: (value: number, shouldReset: boolean) => void
 }) {
   const theme = useTheme()
+  const hoverRef = useRef(null)
+  const isHover = useHover(hoverRef)
+
+  const onHover = (value: number) => {
+    if (onTooltipHover) {
+      onTooltipHover(value, false)
+    }
+  }
+
+  useEffect(() => {
+    if (onTooltipHover && !isHover) {
+      onTooltipHover(0, true)
+    }
+  }, [onTooltipHover, isHover])
 
   return (
-    <MarginWrapper>
+    <MarginWrapper ref={hoverRef}>
       <Container
         loading={loading}
         content={!data.length ? 'Chart is not available' : loading ? 'Loading...' : content}
@@ -54,6 +71,15 @@ export function LineChart({
       >
         <AreaChart data={data}>
           <YAxis dataKey={dataKey} type="number" domain={['dataMin', 'dataMax']} hide={true} />
+          {onTooltipHover && (
+            <Tooltip
+              cursor={{ opacity: 0.1 }}
+              formatter={onHover}
+              contentStyle={{
+                display: 'none',
+              }}
+            />
+          )}
           <Area
             dataKey={dataKey}
             type="monotone"

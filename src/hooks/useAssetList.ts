@@ -8,7 +8,6 @@ import { useConductedState } from 'state/conducted/reducer'
 import { useSignaturesState } from 'state/signatures/reducer'
 import { Sector, useDetailsState } from 'state/details/reducer'
 import { Direction } from './useTradePage'
-import { constructPercentage } from 'utils/prices'
 import { SupportedChainId } from 'constants/chains'
 import { getAddress } from '@ethersproject/address'
 
@@ -92,7 +91,7 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
         const shortSigs = signatures[chainId][short]
         const asset = details[id]
 
-        if (!asset || !quote || !quote.long || !quote.long.price || !quote.short || !quote.short.price) {
+        if (!asset || !quote || !quote.long || !quote.short) {
           return null
         }
 
@@ -106,8 +105,8 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
           contract: getAddress(long),
           sibling: short,
           symbol: asset.longSymbol,
-          price: quote.long.price.toFixed(6),
-          fee: constructPercentage(quote.long.fee),
+          price: quote.long.price,
+          fee: quote.long.fee,
           open: !!longSigs,
           token: new Token(chainId, getAddress(long), 18, asset.symbol, asset.name),
         }
@@ -122,8 +121,8 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
           contract: getAddress(short),
           sibling: long,
           symbol: asset.shortSymbol,
-          price: quote.short.price.toFixed(6),
-          fee: constructPercentage(quote.short.fee),
+          price: quote.short.price,
+          fee: quote.short.fee,
           open: !!shortSigs,
           token: new Token(chainId, getAddress(short), 18, asset.symbol, asset.name),
         }

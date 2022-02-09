@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 
 import useWeb3React from 'hooks/useWeb3'
 import { useCurrency } from 'hooks/useCurrency'
-import { Collateral } from 'constants/addresses'
+import { DefaultSynth, Collateral } from 'constants/addresses'
 import { useSubAssetList } from 'hooks/useAssetList'
 import { isAddress } from 'utils/validate'
 import { ParsedUrlQueryInput } from 'querystring'
@@ -29,8 +29,12 @@ export default function useDefaultsFromURL(): {
   }, [router])
 
   const baseCurrency =
-    useCurrency(assets.some((o) => o.contract.toLowerCase() === contract) ? contract : undefined) || undefined
-  const quoteCurrency = useCurrency((chainId && Collateral[chainId]) ?? Collateral[FALLBACK_CHAIN_ID]) || undefined
+    useCurrency(
+      assets.some((o) => o.contract.toLowerCase() === contract)
+        ? contract
+        : DefaultSynth[FALLBACK_CHAIN_ID]
+    ) || undefined
+  const quoteCurrency = useCurrency(chainId ? Collateral[chainId] : Collateral[1]) || undefined
 
   function instanceOfCurrency(object: any): object is Currency {
     return 'isToken' in object

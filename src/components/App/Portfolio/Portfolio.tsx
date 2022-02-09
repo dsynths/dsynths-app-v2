@@ -1,35 +1,70 @@
-import React, { useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
+import { useRouter } from 'next/router'
 import Link from 'next/link'
 import styled, { useTheme } from 'styled-components'
-import { Eye, EyeOff } from 'react-feather'
 import BigNumber from 'bignumber.js'
-import { useRouter } from 'next/router'
+import { Eye, EyeOff } from 'react-feather'
 
 import useWeb3React from 'hooks/useWeb3'
 import { useAssetByContract } from 'hooks/useAssetList'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
+import { Direction } from 'hooks/useTradePage'
+
+import { useAppDispatch } from 'state'
+import { Balance } from 'state/portfolio/reducer'
+import { updatePrice, updateEquity } from 'state/portfolio/actions'
+import { useActiveBalances, useShowEquity, useToggleEquity, useTotalEquity } from 'state/portfolio/hooks'
 import { ConductedStatus, useConductedState } from 'state/conducted/reducer'
 import { DetailsStatus, useDetailsState } from 'state/details/reducer'
 import { useWalletModalToggle } from 'state/application/hooks'
-import { TokenBalancesMap } from 'state/wallet/types'
 
-import { AssetMap, OwnedAsset } from 'pages/portfolio'
 import { formatDollarAmount } from 'utils/numbers'
+import { makeHttpRequest } from 'utils/http'
+import { SynchronizerChains } from 'constants/chains'
 
 import ImageWithFallback from 'components/ImageWithFallback'
 import { Loader } from 'components/Icons'
 import { Card } from 'components/Card'
 import { BaseButton, PrimaryButton } from 'components/Button'
 import { SynchronizerChains } from 'constants/chains'
+import { API_BASE_URL } from 'constants/api'
 
 const Wrapper = styled(Card)<{
   border?: boolean
 }>`
   border: ${({ theme, border }) => (border ? `1px solid ${theme.border2}` : 'none')};
+  padding: 1.25rem 0;
 
   ${({ theme }) => theme.mediaWidth.upToMedium`
-    padding: 10px;
+    padding: 0.75rem 0;
   `}
+`
+
+const HeaderContainer = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 12.5px;
+  padding: 0 1.25rem;
+
+  & > * {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    padding: 0 0.75rem;
+  `}
+`
+
+const EquityWrapper = styled.div`
+  &:hover {
+    cursor: pointer;
+    color: ${({ theme }) => theme.text2};
+  }
 `
 
 const Row = styled.div`
@@ -39,21 +74,36 @@ const Row = styled.div`
   gap: 1rem;
   align-items: center;
   width: 100%;
-  padding: 0.5rem 0;
+  padding: 0.5rem 1.25rem;
+
   &:hover {
     cursor: pointer;
     background: ${({ theme }) => theme.bg1};
   }
+
   & > * {
     &:last-child {
       margin-left: auto;
     }
   }
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    padding: 0.5 0.75rem;
+  `}
 `
 
-const NameWrapper = styled.div`
+const RowContent = styled.div`
   display: flex;
   flex-flow: column nowrap;
+`
+
+const NameWrapper = styled.div<{
+  long: boolean
+}>`
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 8px;
+  align-items: center;
   & > * {
     &:first-child {
       font-size: 0.9rem;
@@ -62,37 +112,24 @@ const NameWrapper = styled.div`
         font-size: 0.7rem;
       `}
     }
-    &:last-child {
+    &:nth-child(2) {
       font-size: 0.7rem;
       color: ${({ theme }) => theme.text2};
       ${({ theme }) => theme.mediaWidth.upToMedium`
         font-size: 0.6rem;
       `}
     }
-  }
-`
-
-const HeaderContainer = styled.div`
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: space-between;
-  margin-bottom: 5px;
-`
-const HeaderWrapper = styled.div<{
-  hover?: boolean
-}>`
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: flex-start;
-  align-items: center;
-
-  ${({ hover }) =>
-    hover &&
-    `
-    &:hover {
-      cursor: pointer;
+    &:last-child {
+      font-size: 0.5rem;
+      color: white;
+      padding: 0.1rem 0.2rem;
+      border-radius: 3px;
+      background: ${({ theme, long }) => (long ? theme.green1 : theme.red1)};
+      ${({ theme }) => theme.mediaWidth.upToMedium`
+        font-size: 0.4rem;
+      `}
     }
-  `}
+  }
 `
 
 const LoadingContainer = styled.div`
@@ -104,10 +141,7 @@ const LoadingContainer = styled.div`
 `
 
 const PrimaryLabel = styled.div`
-  font-weight: normal;
   font-size: 12.5px;
-  line-height: 20px;
-  margin-right: 8px;
   color: ${({ theme }) => theme.text1};
 
   & > span {
@@ -117,38 +151,57 @@ const PrimaryLabel = styled.div`
     }
   }
 `
+
 const SecondaryLabel = styled.div`
-  font-size: normal;
-  font-weight: normal;
   font-size: 12.5px;
-  line-height: 20px;
   color: ${({ theme }) => theme.text2};
 `
 
-export default function Portfolio({
-  balances,
-  assets,
-  totalEquity,
-  showEquity,
-  setShowEquity,
-}: {
-  balances: TokenBalancesMap
-  assets: AssetMap
-  totalEquity: BigNumber
-  showEquity: boolean
-  setShowEquity: () => void
-}) {
+const BalanceLabel = styled.div`
+  font-size: 10px;
+  color: ${({ theme }) => theme.text2};
+`
+
+interface Quote {
+  timestamp: number
+  open: number
+  high: number
+  low: number
+  close: number
+  current: number
+  change: number
+}
+
+type QuoteResponse = {
+  success: boolean
+  data: Quote
+  message: string
+} | null
+
+type sortableBalance = [string, Balance]
+function sortBalances(a: sortableBalance, b: sortableBalance) {
+  return parseFloat(a[1].equity) >= parseFloat(b[1].equity) ? -1 : 1
+}
+
+export default function Portfolio() {
   const { chainId, account } = useWeb3React()
   const theme = useTheme()
-
   const { status: conductedStatus } = useConductedState()
   const { status: detailsStatus } = useDetailsState()
   const toggleWalletModal = useWalletModalToggle()
 
+  const balances = useActiveBalances()
+  const contracts = useMemo(() => {
+    const sorted = Object.entries(balances).sort(sortBalances)
+    return sorted.map((list) => list[0])
+  }, [balances])
+
+  const toggleEquity = useToggleEquity()
+  const showEquity = useShowEquity()
+
   const isLoading: boolean = useMemo(() => {
-    const balancesLoading = !!Object.keys(balances).length
-    return !(balancesLoading && conductedStatus === ConductedStatus.OK && detailsStatus === DetailsStatus.OK)
-  }, [conductedStatus, detailsStatus, balances])
+    return !(conductedStatus === ConductedStatus.OK && detailsStatus === DetailsStatus.OK)
+  }, [conductedStatus, detailsStatus])
 
   const isSupportedChainId: boolean = useMemo(() => {
     if (!chainId || !account) return false
@@ -163,11 +216,6 @@ export default function Portfolio({
   const isSpiritTheme = useMemo(() => {
     return router.query?.theme === 'spirit'
   }, [router])
-
-  // temporarily notify user about the pricing issue during market-close hours
-  // const hasPricingIssue: boolean = useMemo(() => {
-  //   return assetList.map((asset) => !!asset.price).includes(false)
-  // }, [assetList])
 
   function getStatusLabel(): JSX.Element | null {
     if (!isWalletConnected) {
@@ -185,13 +233,13 @@ export default function Portfolio({
     if (isLoading) {
       return (
         <>
-          <PrimaryLabel>Loading assets</PrimaryLabel>
+          <PrimaryLabel style={{ marginRight: '8px' }}>Loading assets</PrimaryLabel>
           <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />
         </>
       )
     }
 
-    if (!assets.length) {
+    if (!contracts.length) {
       return (
         <PrimaryLabel>
           You don&apos;t own any synthetics. Click&nbsp;
@@ -208,23 +256,21 @@ export default function Portfolio({
   return (
     <Wrapper border={isSpiritTheme}>
       <HeaderContainer>
-        <HeaderWrapper>
-          <PrimaryLabel>Positions</PrimaryLabel>
-          <SecondaryLabel>{assets.length}</SecondaryLabel>
-        </HeaderWrapper>
-        <HeaderWrapper hover onClick={setShowEquity}>
-          <PrimaryLabel>Equity</PrimaryLabel>
-          <BaseButton padding="0" $borderRadius="0" width={'1rem'}>
-            {showEquity ? <Eye size="12.5px" /> : <EyeOff size="12.5px" />}
-          </BaseButton>
-        </HeaderWrapper>
+        <div>
+          Positions
+          <SecondaryLabel>{contracts.length}</SecondaryLabel>
+        </div>
+        <EquityWrapper onClick={toggleEquity}>
+          Equity
+          {showEquity ? <Eye size="12.5px" /> : <EyeOff size="12.5px" />}
+        </EquityWrapper>
       </HeaderContainer>
       {getStatusLabel() ? (
         <LoadingContainer>{getStatusLabel()}</LoadingContainer>
       ) : (
         <>
-          {assets.map((owned, index) => (
-            <AssetRow key={index} owned={owned} totalEquity={totalEquity} showEquity={showEquity} />
+          {contracts.map((contract, index) => (
+            <AssetRow key={index} contract={contract} />
           ))}
         </>
       )}
@@ -232,32 +278,92 @@ export default function Portfolio({
   )
 }
 
-function AssetRow({
-  owned: { contract, balance, equity },
-  totalEquity,
-  showEquity,
-}: {
-  owned: OwnedAsset
-  totalEquity: BigNumber
-  showEquity: boolean
-}) {
+function AssetRow({ contract }: { contract: string }) {
   // const { chainId } = useWeb3React()
+  const dispatch = useAppDispatch()
+  const router = useRouter()
   const asset = useAssetByContract(contract)
   const logo = useCurrencyLogo(asset?.id, asset?.symbol)
+  const balances = useActiveBalances()
+  const showEquity = useShowEquity()
+  const totalEquity = useTotalEquity()
 
-  const equityLabel = useMemo(() => {
+  const formattedBalance: string = useMemo(() => {
+    const balance = balances[contract]['balance']
+    return new BigNumber(balance).toPrecision(9, 1) // ROUND_DOWN
+  }, [balances, contract])
+
+  const equity: BigNumber = useMemo(() => {
+    const { balance, price } = balances[contract]
+    return new BigNumber(balance).times(price)
+  }, [balances, contract])
+
+  const fetchQuote = useCallback(async (ticker) => {
+    try {
+      const { href: url } = new URL(`/stocks/quote?ticker=${ticker}`, API_BASE_URL)
+      const result: QuoteResponse = await makeHttpRequest(url)
+      if (!result || !result.success) {
+        throw new Error(`API returned an error: ${result?.message}`)
+      }
+
+      return result.data
+    } catch (err) {
+      console.error(err)
+      return null
+    }
+  }, [])
+
+  useEffect(() => {
+    const getPrice = async () => {
+      if (!contract || !asset) return
+
+      // If within normal trading hours
+      if (parseFloat(asset.price)) {
+        dispatch(updatePrice({ contract, price: asset.price }))
+        return
+      }
+
+      // Try to use API price (this will only be called once)
+      const quote = await fetchQuote(asset.ticker)
+      if (!quote) return
+      dispatch(updatePrice({ contract, price: quote.current.toString() }))
+    }
+    getPrice()
+  }, [dispatch, contract, asset, fetchQuote])
+
+  useEffect(() => {
+    dispatch(updateEquity({ contract, equity: equity.toString() }))
+  }, [dispatch, contract, equity])
+
+  const equityLabel: string = useMemo(() => {
+    if (!showEquity && !parseFloat(totalEquity)) {
+      return '-- %'
+    }
     return showEquity ? formatDollarAmount(equity.toNumber()) : `${equity.div(totalEquity).times(100).toFixed(2)}%`
   }, [equity, totalEquity, showEquity])
 
+  const buildUrl = useCallback(
+    (contract: string) => {
+      const queryString = Object.keys(router.query)
+        .map((key) => key + '=' + router.query[key])
+        .join('&')
+      return `/trade?assetId=${contract}&${queryString}`
+    },
+    [router]
+  )
+
   return (
-    <Link href={`/trade?assetId=${contract}`} passHref>
+    <Link href={buildUrl(contract)} passHref>
       <Row>
-        <ImageWithFallback src={logo} width={30} height={30} alt={`${asset?.symbol}`} />
-        <NameWrapper>
-          <div>{asset?.symbol}</div>
-          <div>{asset?.name}</div>
-        </NameWrapper>
-        {showEquity && <PrimaryLabel>{balance?.toSignificant(6)}</PrimaryLabel>}
+        <ImageWithFallback src={logo} width={30} height={30} alt={`${asset?.symbol}`} round />
+        <RowContent>
+          <NameWrapper long={asset?.direction === Direction.LONG}>
+            <div>{asset?.symbol}</div>
+            <div>{asset?.name}</div>
+            <div>{asset?.direction}</div>
+          </NameWrapper>
+          {showEquity && <BalanceLabel>{formattedBalance}</BalanceLabel>}
+        </RowContent>
         <PrimaryLabel>{equityLabel}</PrimaryLabel>
       </Row>
     </Link>

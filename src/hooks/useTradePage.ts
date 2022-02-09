@@ -40,7 +40,7 @@ export default function useTradePage(
   }, [currencies, typedValue, typedField])
 
   const price = useMemo(() => {
-    if (!asset || !asset.price || !baseCurrency || !quoteCurrency) return undefined
+    if (!asset || !parseInt(asset.price) || !baseCurrency || !quoteCurrency) return undefined
 
     const base = CurrencyAmount.fromRawAmount(
       baseCurrency,
