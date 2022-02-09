@@ -16,6 +16,7 @@ import { useCurrencyBalance } from 'state/wallet/hooks'
 import { MobileModal, Modal, ModalHeader } from 'components/Modal'
 import ImageWithFallback from 'components/ImageWithFallback'
 import { Loader } from 'components/Icons'
+import { FALLBACK_CHAIN_ID } from 'constants/chains'
 
 const SearchWrapper = styled.div`
   display: flex;
@@ -110,7 +111,7 @@ function fuzzySearch(options: SelectSearchOption[]): any {
 }
 
 export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: () => void }) {
-  const assetList = useLongAssetsList()
+  const assetList = useLongAssetsList(FALLBACK_CHAIN_ID)
   const { setURLCurrency } = useDefaultsFromURL()
 
   const assets: SelectSearchOption[] = useMemo(() => {

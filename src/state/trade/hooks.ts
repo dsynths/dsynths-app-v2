@@ -8,6 +8,7 @@ import { Collateral } from 'constants/addresses'
 import { useSubAssetList } from 'hooks/useAssetList'
 import { isAddress } from 'utils/validate'
 import { ParsedUrlQueryInput } from 'querystring'
+import { FALLBACK_CHAIN_ID } from 'constants/chains'
 
 export default function useDefaultsFromURL(): {
   currencies: {
@@ -29,7 +30,7 @@ export default function useDefaultsFromURL(): {
 
   const baseCurrency =
     useCurrency(assets.some((o) => o.contract.toLowerCase() === contract) ? contract : undefined) || undefined
-  const quoteCurrency = useCurrency((chainId && Collateral[chainId]) ?? Collateral[1]) || undefined
+  const quoteCurrency = useCurrency((chainId && Collateral[chainId]) ?? Collateral[FALLBACK_CHAIN_ID]) || undefined
 
   function instanceOfCurrency(object: any): object is Currency {
     return 'isToken' in object

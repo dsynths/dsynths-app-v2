@@ -19,7 +19,6 @@ import { formatDollarAmount } from 'utils/numbers'
 import ImageWithFallback from 'components/ImageWithFallback'
 import { Loader } from 'components/Icons'
 import { Card } from 'components/Card'
-// import ChainLabel from 'components/Icons/ChainLabel'
 import { BaseButton, PrimaryButton } from 'components/Button'
 import { SynchronizerChains } from 'constants/chains'
 
@@ -259,7 +258,6 @@ function AssetRow({
           <div>{asset?.name}</div>
         </NameWrapper>
         {showEquity && <PrimaryLabel>{balance?.toSignificant(6)}</PrimaryLabel>}
-        {/* <ChainLabel chainId={chainId} /> */}
         <PrimaryLabel>{equityLabel}</PrimaryLabel>
       </Row>
     </Link>

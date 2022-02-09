@@ -1,75 +1,18 @@
 import { useCallback, useMemo } from 'react'
 import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { BigintIsh, JSBI, Currency, CurrencyAmount, NativeCurrency, Token, ZERO } from '@sushiswap/core-sdk'
+import { getAddress } from '@ethersproject/address'
 
 import useWeb3React from './useWeb3'
-import { useSynchronizerContract, useSynchronizerV2Contract } from './useContract'
-import useSynchronizer from './useSynchronizer'
+import { useSynchronizerContract } from './useContract'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { TradeType } from 'state/trade/reducer'
-import { MuonClient, MUON_NETWORK_NAMES } from 'constants/oracle'
+import { MuonClient, MUON_NETWORK_NAMES, MuonResponse } from 'constants/oracle'
 import { calculateGasMargin } from 'utils/web3'
 
 export enum TradeCallbackState {
   INVALID = 'INVALID',
   VALID = 'VALID',
-}
-
-interface MuonResponse {
-  success?: boolean
-  app: string
-  cid: string
-  confirmed: boolean
-  confirmedAt: number
-  data: {
-    init: {
-      none: string
-      nonceAddress: string
-      party: string
-    }
-    params: {
-      action: string
-      chain: string
-      tokenId: string
-      useMultiplier: boolean
-    }
-    result: {
-      action: string
-      address: string
-      chain: string
-      expireBlock: number
-      multiplier: number
-      price: string
-    }
-  }
-  method: string
-  nSign: number
-  owner: string
-  peerId: string
-  reqId: string
-  signatures: {
-    owner: string
-    ownerPubKey: {
-      x: string
-      yParity: string
-    }
-    result: {
-      action: string
-      address: string
-      chain: string
-      expireBlock: number
-      price: string
-    }
-    signature: string
-    timestamp: number
-  }[]
-  sigs: Array<{
-    nonce: string
-    owner: string
-    signature: string
-  }>
-  startedAt: number
-  _id: string
 }
 
 export function toHex(bigintIsh: BigintIsh) {
@@ -95,65 +38,17 @@ export default function useTradeCallback(
   const { chainId, account, library } = useWeb3React()
   const addTransaction = useTransactionAdder()
   const Synchronizer = useSynchronizerContract()
-  const SynchronizerV2 = useSynchronizerV2Contract()
 
-  const {
-    checksummedAddress: address,
-    isProxyTrade,
-    isV2Trade,
-    fetchSignatures,
-    sortSignatures,
-  } = useSynchronizer(currencyA, currencyB, tradeType)
-
-  const constructV1Call = useCallback(async () => {
-    try {
-      if (!account || !address || !Synchronizer || !amountA || !amountB) {
-        throw new Error('Missing dependencies.')
-      }
-
-      const signatures = await fetchSignatures()
-      const { price, data } = sortSignatures(signatures)
-
-      const signsMethod = tradeType === TradeType.OPEN ? 'buy' : 'sell'
-      const blockNosMapping = data.map((node) => node.blockNo.toString())
-      const priceMapping = data.map((node) => node.price)
-      const vMapping = data.map((node) => node.signs[signsMethod].v.toString())
-      const rMapping = data.map((node) => node.signs[signsMethod].r.toString())
-      const sMapping = data.map((node) => node.signs[signsMethod].s.toString())
-
-      const args = {
-        _user: account,
-        multiplier: data[0].multiplier.toString(),
-        registrar: address,
-        amount: tradeType === TradeType.OPEN ? toHex(amountB.quotient) : toHex(amountA.quotient),
-        fee: data[0].fee.toString(),
-        blockNos: blockNosMapping,
-        prices: priceMapping,
-        v: vMapping,
-        r: rMapping,
-        s: sMapping,
-      }
-
-      const methodName =
-        tradeType === TradeType.OPEN ? (isProxyTrade ? 'buy' : 'buyFor') : isProxyTrade ? 'sell' : 'sellFor'
-
-      const value = isProxyTrade ? await Synchronizer.calculateXdaiAmount(price, args.fee, args.amount) : 0
-
-      return {
-        address: Synchronizer.address,
-        calldata: Synchronizer.interface.encodeFunctionData(methodName, Object.values(args)) ?? '',
-        value,
-      }
-    } catch (error) {
-      return {
-        error,
-      }
+  const address = useMemo(() => {
+    if (!currencyA || !currencyB) {
+      return undefined
     }
-  }, [fetchSignatures, sortSignatures, isProxyTrade, tradeType, account, address, Synchronizer, amountA, amountB])
+    return tradeType === TradeType.OPEN ? getAddress(currencyB.wrapped.address) : getAddress(currencyA.wrapped.address)
+  }, [currencyA, currencyB, tradeType])
 
-  const constructV2Call = useCallback(async () => {
+  const constructCall = useCallback(async () => {
     try {
-      if (!account || !chainId || !(chainId in MUON_NETWORK_NAMES) || !address || !amountA || !SynchronizerV2) {
+      if (!account || !chainId || !(chainId in MUON_NETWORK_NAMES) || !address || !amountA || !Synchronizer) {
         throw new Error('Missing dependencies.')
       }
 
@@ -196,8 +91,8 @@ export default function useTradeCallback(
       console.log('Contract arguments: ', args)
 
       return {
-        address: SynchronizerV2.address,
-        calldata: SynchronizerV2.interface.encodeFunctionData(methodName, Object.values(args)) ?? '',
+        address: Synchronizer.address,
+        calldata: Synchronizer.interface.encodeFunctionData(methodName, Object.values(args)) ?? '',
         value: 0,
       }
     } catch (error) {
@@ -205,10 +100,10 @@ export default function useTradeCallback(
         error,
       }
     }
-  }, [chainId, account, address, amountA, SynchronizerV2, tradeType])
+  }, [chainId, account, address, amountA, Synchronizer, tradeType])
 
   return useMemo(() => {
-    if (!account || !chainId || !library || (!Synchronizer && !SynchronizerV2) || !currencyA || !currencyB) {
+    if (!account || !chainId || !library || !Synchronizer || !currencyA || !currencyB) {
       return {
         state: TradeCallbackState.INVALID,
         callback: null,
@@ -227,7 +122,7 @@ export default function useTradeCallback(
       error: null,
       callback: async function onTrade(): Promise<string> {
         console.log('onTrade callback')
-        const call = isV2Trade ? await constructV2Call() : await constructV1Call()
+        const call = await constructCall()
         const { address, calldata, value } = call
 
         if ('error' in call) {
@@ -297,18 +192,5 @@ export default function useTradeCallback(
           })
       },
     }
-  }, [
-    account,
-    chainId,
-    library,
-    addTransaction,
-    isV2Trade,
-    constructV1Call,
-    constructV2Call,
-    Synchronizer,
-    amountA,
-    amountB,
-    currencyA,
-    currencyB,
-  ])
+  }, [account, chainId, library, addTransaction, constructCall, Synchronizer, amountA, amountB, currencyA, currencyB])
 }

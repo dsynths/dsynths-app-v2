@@ -1,7 +1,6 @@
 import { Card } from 'components/Card'
 import useWeb3React from 'hooks/useWeb3'
 import styled, { useTheme } from 'styled-components'
-import ChainLabel from 'components/Icons/ChainLabel'
 import { PrimaryButton } from 'components/Button'
 import Link from 'next/link'
 import { Loader } from 'components/Icons'
@@ -83,7 +82,6 @@ export default function AssetCard() {
       </TitleContainer>
       <AssetContainer>
         <EquityContainer>${balance?.multiply(assetOraclePrice)?.toSignificant(6)}</EquityContainer>
-        {chainId && <ChainLabel chainId={chainId} />}
       </AssetContainer>
       <SecondaryLabel>
         {balance ? (

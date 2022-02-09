@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 
 import { NetworkButton, useSearch, InputField, Table } from 'components/App/Markets'
-import { SupportedChainId, SynchronizerChains } from 'constants/chains'
+import { FALLBACK_CHAIN_ID, SynchronizerChains } from 'constants/chains'
 import { ChainInfo } from 'constants/chainInfo'
 import { SubAsset } from 'hooks/useAssetList'
 import { Modal, ModalHeader } from 'components/Modal'
@@ -41,18 +41,18 @@ const ModalContent = styled.div`
   justify-content: flex-start;
   gap: 20px;
   padding: 20px;
+`
 
-  & > * {
-    & > span {
-      color: ${({ theme }) => theme.primary2};
-    }
-  }
+const Label = styled.span<{
+  warning?: boolean
+}>`
+  color: ${({ theme, warning }) => (warning ? theme.red1 : theme.primary3)};
 `
 
 export default function Markets() {
   const { chainId } = useWeb3React()
   const router = useRouter()
-  const [selectedChain, setSelectedChain] = useState(SupportedChainId.MAINNET)
+  const [selectedChain, setSelectedChain] = useState(FALLBACK_CHAIN_ID)
   const [showModal, setShowModal] = useState(false)
   const [modalAsset, setModalAsset] = useState<SubAsset>()
   const [chainHasSwitched, setChainHasSwitched] = useState(false)
@@ -100,15 +100,19 @@ export default function Markets() {
     setShowModal(false)
   }
 
+  function getNetworkReference() {
+    return chainId && chainId in ChainInfo ? ChainInfo[chainId]['label'] : 'wrong'
+  }
+
   function getModalContent() {
     if (chainId && modalAsset) {
       return (
         <>
           {chainId !== modalAsset.chainId && (
             <div>
-              You are currently connected to the <span>{ChainInfo[chainId]['label']}</span> network. In order to trade $
-              {modalAsset.ticker} on the <span>{ChainInfo[modalAsset.chainId]['label']}</span> network you have to
-              switch chains first.
+              You&apos;re currently connected to the <Label warning>{getNetworkReference()}</Label> network. In order to
+              trade ${modalAsset.ticker} on the <Label>{ChainInfo[modalAsset.chainId]['label']}</Label> network you have
+              to switch chains first.
             </div>
           )}
           {window.web3 && window.ethereum && (
@@ -143,8 +147,8 @@ export default function Markets() {
       return (
         <>
           <div>
-            You are not connected to a wallet. In order to trade {modalAsset.ticker} on the{' '}
-            <span>{ChainInfo[modalAsset.chainId]['label']}</span> network you have to connect your wallet first.
+            You&apos;re not connected to a wallet. In order to trade {modalAsset.ticker} on the{' '}
+            <Label>{ChainInfo[modalAsset.chainId]['label']}</Label> network you have to connect your wallet first.
           </div>
           <PrimaryButton onClick={walletToggle}>Connect Wallet</PrimaryButton>
         </>

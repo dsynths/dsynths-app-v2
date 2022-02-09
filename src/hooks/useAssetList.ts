@@ -159,8 +159,8 @@ export function useLongAssetsList(targetChainId?: SupportedChainId) {
   return useMemo(() => assetList.map((asset) => asset.long).sort(sortAlphabetically), [assetList])
 }
 
-export function useAssetByContract(contract: string | undefined) {
-  const subAssetList = useSubAssetList()
+export function useAssetByContract(contract: string | undefined, targetChainId?: SupportedChainId) {
+  const subAssetList = useSubAssetList(targetChainId)
   return useMemo(() => {
     if (!contract) return undefined
     const asset: SubAsset | undefined = find(
@@ -171,13 +171,13 @@ export function useAssetByContract(contract: string | undefined) {
   }, [contract, subAssetList])
 }
 
-export function useAssetContractMap() {
-  const subAssetList = useSubAssetList()
+export function useAssetContractMap(targetChainId?: SupportedChainId) {
+  const subAssetList = useSubAssetList(targetChainId)
   return useMemo(() => subAssetList.map((asset) => asset.contract), [subAssetList])
 }
 
-export function useTokensFromMap() {
-  const subAssetList = useSubAssetList()
+export function useTokensFromMap(targetChainId?: SupportedChainId) {
+  const subAssetList = useSubAssetList(targetChainId)
   return useMemo(
     () =>
       subAssetList.reduce((acc: TokenMap, asset) => {
@@ -188,7 +188,7 @@ export function useTokensFromMap() {
   )
 }
 
-export function useTokens() {
-  const subAssetList = useSubAssetList()
+export function useTokens(targetChainId?: SupportedChainId) {
+  const subAssetList = useSubAssetList(targetChainId)
   return useMemo(() => subAssetList.map((asset) => asset.token), [subAssetList])
 }
