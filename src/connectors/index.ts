@@ -51,7 +51,7 @@ export const portis = new PortisConnector({
 // mainnet only
 export const walletlink = new WalletLinkConnector({
   url: NETWORK_URLS[1],
-  appName: 'DEUS Finance',
+  appName: 'dSynths',
   appLogoUrl: require('/public/static/images/AppLogo.png'),
   supportedChainIds: SUPPORTED_CHAIN_IDS,
 })
