@@ -10,6 +10,7 @@ import useApproveCallback, { ApprovalState } from 'hooks/useApproveCallback'
 import useTradeCallback from 'hooks/useTradeCallback'
 import useTradePage, { Direction, PrimaryError } from 'hooks/useTradePage'
 import { useAssetByContract } from 'hooks/useAssetList'
+import useRpcChangerCallback from 'hooks/useRpcChangerCallback'
 import {
   setTradeState,
   setShowReview,
@@ -21,12 +22,12 @@ import {
 import useDefaultsFromURL from 'state/trade/hooks'
 import { useNetworkModalToggle, useWalletModalToggle } from 'state/application/hooks'
 import { Synchronizer } from 'constants/addresses'
-import { SynchronizerChains } from 'constants/chains'
+import { FALLBACK_CHAIN_ID, SynchronizerChains } from 'constants/chains'
 import { formatDollarAmount } from 'utils/numbers'
 
 import InputBox from './InputBox'
 import { Card } from 'components/Card'
-import { ArrowBubble } from 'components/Icons'
+import { ArrowBubble, Network } from 'components/Icons'
 import { PrimaryButton } from 'components/Button'
 import { DotFlashing } from 'components/Icons'
 import ConfirmTradeModal from 'components/TransactionConfirmationModal/ConfirmTrade'
@@ -43,6 +44,17 @@ const Wrapper = styled(Card)<{
   ${({ theme }) => theme.mediaWidth.upToMedium`
     padding: 1rem;
   `}
+`
+
+const SwitchBlock = styled(Wrapper)`
+  justify-content: space-between;
+  gap: 20px;
+
+  & > p {
+    text-align: center;
+    font-size: 1.1rem;
+    padding: 0px 30px;
+  }
 `
 
 const DirectionWrapper = styled.div`
@@ -153,6 +165,7 @@ export default function Trade() {
   const tradeState = useTradeState()
   const toggleWalletModal = useWalletModalToggle()
   const toggleNetworkModal = useNetworkModalToggle()
+  const rpcChangerCallback = useRpcChangerCallback()
 
   const [tradeType, setTradeType] = useState<TradeType>(TradeType.OPEN)
   const [direction, setDirection] = useState(Direction.LONG)
@@ -270,6 +283,11 @@ export default function Trade() {
     }
     return currencies[0].wrapped.address.toLowerCase() === asset.contract.toLowerCase()
   }, [asset, currencies])
+
+  const showOverlay: boolean = useMemo(() => {
+    if (!chainId) return false
+    return !SynchronizerChains.includes(chainId)
+  }, [chainId])
 
   const showSelectOut = useMemo(() => {
     // we don't need to check for undefined because we allow that to be true
@@ -389,6 +407,19 @@ export default function Trade() {
           />
         </InputWrapper>
       </>
+    )
+  }
+
+  if (showOverlay) {
+    return (
+      <SwitchBlock border={isJadeTheme}>
+        <Network size={30} style={{ margin: '10px auto' }} />
+        <p>
+          You are connected to a chain that we don&apos;t support. Please connect to the Fantom network in order to
+          trade.
+        </p>
+        <PrimaryButton onClick={() => rpcChangerCallback(FALLBACK_CHAIN_ID)}>Switch to Fantom Mainnet</PrimaryButton>
+      </SwitchBlock>
     )
   }
 

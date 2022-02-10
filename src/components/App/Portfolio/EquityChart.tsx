@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import styled from 'styled-components'
 
 import { useIsJadeTheme } from 'hooks/useTheme'
@@ -6,6 +6,8 @@ import { useShowEquity, useTotalEquity } from 'state/portfolio/hooks'
 import { formatDollarAmount } from 'utils/numbers'
 import { LineChart as Chart } from 'components/Chart'
 import { Card } from 'components/Card'
+import useWeb3React from 'hooks/useWeb3'
+import { SynchronizerChains } from 'constants/chains'
 
 const Wrapper = styled(Card)<{
   border?: boolean
@@ -70,15 +72,21 @@ const data = [
 ]
 
 export default function EquityChart() {
+  const { chainId, account } = useWeb3React()
   const isJadeTheme = useIsJadeTheme()
   const showEquity = useShowEquity()
   const totalEquity = useTotalEquity()
+
+  const isSupportedChainId: boolean = useMemo(() => {
+    if (!chainId || !account) return false
+    return SynchronizerChains.includes(chainId)
+  }, [chainId, account])
 
   return (
     <Wrapper border={isJadeTheme}>
       <InfoWrapper>
         <div>Overview</div>
-        {showEquity && <div>{formatDollarAmount(Number(totalEquity))}</div>}
+        {showEquity && isSupportedChainId && <div>{formatDollarAmount(Number(totalEquity))}</div>}
       </InfoWrapper>
       <Chart data={data} dataKey="value" loading={false} content={'PNL chart coming soon!'} />
     </Wrapper>

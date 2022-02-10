@@ -12,6 +12,8 @@ import { truncateAddress } from 'utils/account'
 import WalletModal from 'components/WalletModal'
 import { NavButton } from 'components/Button'
 import { Connected as ConnectedIcon } from 'components/Icons'
+import { FALLBACK_CHAIN_ID, SynchronizerChains } from 'constants/chains'
+import useRpcChangerCallback from 'hooks/useRpcChangerCallback'
 
 const ConnectButton = styled(NavButton)``
 
@@ -41,10 +43,23 @@ function newTransactionsFirst(a: TransactionDetails, b: TransactionDetails) {
 }
 
 function Web3StatusInner() {
-  const { account, error } = useWeb3React()
+  const { chainId, account, error } = useWeb3React()
   const toggleWalletModal = useWalletModalToggle()
+  const rpcChangerCallback = useRpcChangerCallback()
 
-  if (account) {
+  const showCallbackError: boolean = useMemo(() => {
+    if (!chainId || !account) return false
+    return !SynchronizerChains.includes(chainId)
+  }, [chainId, account])
+
+  if (showCallbackError) {
+    return (
+      <ErrorButton onClick={() => rpcChangerCallback(FALLBACK_CHAIN_ID)}>
+        <Activity />
+        <Text>Wrong Network</Text>
+      </ErrorButton>
+    )
+  } else if (account) {
     return (
       <ConnectedButton onClick={toggleWalletModal}>
         <ConnectedIcon />

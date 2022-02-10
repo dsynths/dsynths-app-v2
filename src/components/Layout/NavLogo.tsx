@@ -39,7 +39,7 @@ export default function NavLogo() {
   )
 
   return (
-    <Link href={buildUrl('/trade')} passHref>
+    <Link href={buildUrl('trade')} passHref>
       <Wrapper>
         <div>
           <Image src={'/static/images/dSynthsLogo.svg'} alt="App Logo" width={30} height={30} />

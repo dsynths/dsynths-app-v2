@@ -12,6 +12,7 @@ import { Direction } from 'hooks/useTradePage'
 
 import { useAppDispatch } from 'state'
 import { useIsJadeTheme } from 'hooks/useTheme'
+import useRpcChangerCallback from 'hooks/useRpcChangerCallback'
 import { Balance } from 'state/portfolio/reducer'
 import { updatePrice, updateEquity } from 'state/portfolio/actions'
 import { useActiveBalances, useShowEquity, useToggleEquity, useTotalEquity } from 'state/portfolio/hooks'
@@ -21,11 +22,11 @@ import { useWalletModalToggle } from 'state/application/hooks'
 
 import { formatDollarAmount } from 'utils/numbers'
 import { makeHttpRequest } from 'utils/http'
-import { SynchronizerChains } from 'constants/chains'
+import { FALLBACK_CHAIN_ID, SynchronizerChains } from 'constants/chains'
 import { API_BASE_URL } from 'constants/api'
 
 import ImageWithFallback from 'components/ImageWithFallback'
-import { Loader } from 'components/Icons'
+import { Loader, Network } from 'components/Icons'
 import { Card } from 'components/Card'
 import { PrimaryButton } from 'components/Button'
 
@@ -71,8 +72,11 @@ const Row = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
-  gap: 1rem;
   align-items: center;
+`
+
+const RowWrapper = styled(Row)`
+  gap: 1rem;
   width: 100%;
   padding: 0.5rem 1.25rem;
 
@@ -132,12 +136,25 @@ const NameWrapper = styled.div<{
   }
 `
 
-const LoadingContainer = styled.div`
+const StatusWrapper = styled.div`
   display: flex;
-  flex-flow: row nowrap;
-  justify-content: center;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
   align-items: center;
-  padding: 1rem;
+  padding: 0 1rem;
+`
+
+const SwitchBlock = styled.div`
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+  gap: 20px;
+
+  & > p {
+    text-align: center;
+    font-size: 1.1rem;
+    padding: 0px 30px;
+  }
 `
 
 const PrimaryLabel = styled.div`
@@ -190,6 +207,7 @@ export default function Portfolio() {
   const { status: detailsStatus } = useDetailsState()
   const toggleWalletModal = useWalletModalToggle()
   const isJadeTheme = useIsJadeTheme()
+  const rpcChangerCallback = useRpcChangerCallback()
 
   const balances = useActiveBalances()
   const contracts = useMemo(() => {
@@ -215,23 +233,28 @@ export default function Portfolio() {
 
   function getStatusLabel(): JSX.Element | null {
     if (!isWalletConnected) {
-      return (
-        <>
-          <PrimaryButton onClick={() => toggleWalletModal()}>Connect Wallet</PrimaryButton>
-        </>
-      )
+      return <PrimaryButton onClick={() => toggleWalletModal()}>Connect Wallet</PrimaryButton>
     }
 
     if (!isSupportedChainId) {
-      return <PrimaryLabel>Please connect to one of our supported networks.</PrimaryLabel>
+      return (
+        <SwitchBlock>
+          <Network size={30} style={{ margin: '10px auto' }} />
+          <p>
+            You are connected to a chain that we don&apos;t support. Please connect to the Fantom network in order view
+            your portfolio.
+          </p>
+          <PrimaryButton onClick={() => rpcChangerCallback(FALLBACK_CHAIN_ID)}>Switch to Fantom Mainnet</PrimaryButton>
+        </SwitchBlock>
+      )
     }
 
     if (isLoading) {
       return (
-        <>
+        <Row>
           <PrimaryLabel style={{ marginRight: '8px' }}>Loading assets</PrimaryLabel>
           <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />
-        </>
+        </Row>
       )
     }
 
@@ -254,7 +277,7 @@ export default function Portfolio() {
       <HeaderContainer>
         <div>
           Positions
-          <SecondaryLabel>{contracts.length}</SecondaryLabel>
+          <SecondaryLabel>{isSupportedChainId ? contracts.length : 0}</SecondaryLabel>
         </div>
         <EquityWrapper onClick={toggleEquity}>
           Equity
@@ -262,7 +285,7 @@ export default function Portfolio() {
         </EquityWrapper>
       </HeaderContainer>
       {getStatusLabel() ? (
-        <LoadingContainer>{getStatusLabel()}</LoadingContainer>
+        <StatusWrapper>{getStatusLabel()}</StatusWrapper>
       ) : (
         <>
           {contracts.map((contract, index) => (
@@ -275,7 +298,6 @@ export default function Portfolio() {
 }
 
 function AssetRow({ contract }: { contract: string }) {
-  // const { chainId } = useWeb3React()
   const dispatch = useAppDispatch()
   const router = useRouter()
   const asset = useAssetByContract(contract)
@@ -350,7 +372,7 @@ function AssetRow({ contract }: { contract: string }) {
 
   return (
     <Link href={buildUrl(contract)} passHref>
-      <Row>
+      <RowWrapper>
         <ImageWithFallback src={logo} width={30} height={30} alt={`${asset?.symbol}`} round />
         <RowContent>
           <NameWrapper long={asset?.direction === Direction.LONG}>
@@ -361,7 +383,7 @@ function AssetRow({ contract }: { contract: string }) {
           {showEquity && <BalanceLabel>{formattedBalance}</BalanceLabel>}
         </RowContent>
         <PrimaryLabel>{equityLabel}</PrimaryLabel>
-      </Row>
+      </RowWrapper>
     </Link>
   )
 }

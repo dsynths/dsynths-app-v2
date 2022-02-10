@@ -25,7 +25,7 @@ import { Card } from 'components/Card'
 
 import { NavButton } from 'components/Button'
 import { ExternalLink } from 'components/Link'
-import Web3Network from 'components/Web3Network'
+import { ArrowRight } from 'react-feather'
 
 const Container = styled.div`
   overflow: hidden;
@@ -91,7 +91,6 @@ export default function Menu() {
       </NavButton>
       <div>
         <InlineModal isOpen={isOpen}>
-          <Web3Network />
           <Link href={buildUrl('trade')} passHref>
             <Row onClick={() => toggle()} active={router.route === '/trade'}>
               <div>Trade</div>
@@ -126,7 +125,7 @@ export default function Menu() {
           )}
           <ExternalLink href="https://docs.deus.finance/synchronizer/overview">
             <Row onClick={() => toggle()}>
-              <div>Documentation</div>
+              <div>Docs</div>
               <IconWrapper>
                 <InfoIcon size={15} />
               </IconWrapper>
@@ -153,6 +152,14 @@ export default function Menu() {
               <div>Github</div>
               <IconWrapper>
                 <GithubIcon size={15} />
+              </IconWrapper>
+            </Row>
+          </ExternalLink>
+          <ExternalLink href="https://legacy.dsynths.com">
+            <Row onClick={() => toggle()}>
+              <div>Legacy App</div>
+              <IconWrapper>
+                <ArrowRight size={15} />
               </IconWrapper>
             </Row>
           </ExternalLink>

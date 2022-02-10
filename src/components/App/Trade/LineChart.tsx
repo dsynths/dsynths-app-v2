@@ -133,12 +133,12 @@ export default function LineChart() {
   const asset = useAssetByContract(currencies.baseCurrency?.wrapped.address ?? undefined)
 
   const fetchCandlesticks = useCallback(
-    async (ticker: string) => {
+    async (ticker: string, sector: Sector) => {
       try {
-        if (!asset || !ticker || candlesticksLoading) return []
+        if (candlesticksLoading) return []
 
         const { href: url } = new URL(
-          `/${asset.sector.toLowerCase()}/ohlc?ticker=${ticker}&period=y&resolution=D`,
+          `/${sector.toLowerCase()}/ohlc?ticker=${ticker}&period=y&resolution=D`,
           API_BASE_URL
         )
         setCandlesticksLoading(true)
@@ -168,9 +168,9 @@ export default function LineChart() {
   )
 
   const fetchQuote = useCallback(
-    async (ticker: string) => {
+    async (ticker: string, sector: Sector) => {
       try {
-        if (!asset || asset.sector !== Sector.STOCKS || !ticker || quoteLoading) return null
+        if (sector !== Sector.STOCKS || quoteLoading) return null
 
         const { href: url } = new URL(`/stocks/quote?ticker=${ticker}`, API_BASE_URL)
         setQuoteLoading(true)
@@ -196,25 +196,21 @@ export default function LineChart() {
   )
 
   useEffect(() => {
-    if (!asset) {
-      setCandlesticks([])
-      setQuote(null)
-      return
+    const { name, ticker, sector } = asset ?? { name: 'Tesla Inc.', ticker: 'TSLA', sector: Sector.STOCKS }
+
+    setCachedTicker(ticker)
+    setCachedName(name)
+
+    if (candlesticksCache[ticker]) {
+      setCandlesticks(candlesticksCache[ticker])
+    } else {
+      fetchCandlesticks(ticker, sector)
     }
 
-    setCachedTicker(asset.ticker)
-    setCachedName(asset.name)
-
-    if (candlesticksCache[asset.ticker]) {
-      setCandlesticks(candlesticksCache[asset.ticker])
+    if (quoteCache[ticker]) {
+      setQuote(quoteCache[ticker])
     } else {
-      fetchCandlesticks(asset.ticker)
-    }
-
-    if (quoteCache[asset.ticker]) {
-      setQuote(quoteCache[asset.ticker])
-    } else {
-      fetchQuote(asset.ticker)
+      fetchQuote(ticker, sector)
     }
   }, [asset, chainId, candlesticksCache, quoteCache, fetchCandlesticks, fetchQuote])
 
@@ -226,17 +222,17 @@ export default function LineChart() {
     // general note: if the API is down or faulty, the linechart will hide itself by default
     // so we don't have to think of those edge cases.
 
-    if (!asset) return null
-
     // quotes are only available for stocks, nor do special hours exist for non-stocks
     // only show LONG price, else default to current candlestick price (only then fallback to SHORT price)
-    if (asset.sector !== Sector.STOCKS) {
+    if (asset?.sector !== Sector.STOCKS) {
       const candleClose = candlesticks.length ? candlesticks[candlesticks.length - 1].close : null
-      if (!parseFloat(asset.price)) {
+      if (!asset || !parseFloat(asset.price)) {
         return candleClose
       }
       return asset.direction === Direction.LONG ? Number(asset.price) : candleClose ?? Number(asset.price)
     }
+
+    if (!asset) return null
 
     // if no quote: default to asset price (we don't have to resort to candlesticks price
     // because if there's no quote then the API won't return candlesticks either)
