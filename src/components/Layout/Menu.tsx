@@ -9,7 +9,6 @@ import { Z_INDEX } from 'theme'
 import { useIsDedicatedTheme } from 'hooks/useTheme'
 import { useDarkModeManager } from 'state/user/hooks'
 
-import { NavButton } from 'components/Button'
 import {
   ThemeToggle,
   NavToggle,
@@ -24,6 +23,7 @@ import {
 } from 'components/Icons'
 import { Card } from 'components/Card'
 
+import { NavButton } from 'components/Button'
 import { ExternalLink } from 'components/Link'
 import Web3Network from 'components/Web3Network'
 
@@ -100,7 +100,7 @@ export default function Menu() {
               </IconWrapper>
             </Row>
           </Link>
-          <Link href={'/portfolio'} passHref>
+          <Link href={buildUrl('portfolio')} passHref>
             <Row active={router.route === '/portfolio'}>
               <div>Portfolio</div>
               <IconWrapper>
