@@ -144,7 +144,7 @@ export default function Markets() {
             }}
           >
             {!chainHasSwitched ? (
-              <div>Click to switch</div>
+              <div>Switch to {ChainInfo[modalAsset.chainId]['label']}</div>
             ) : (
               <>
                 Redirecting
