@@ -138,7 +138,7 @@ export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; on
   const onDismissProxy = (assetId?: string) => {
     searchProps.onBlur()
     onDismiss()
-    assetId && router.push(buildUrl(`/trade?assetId=${assetId}`))
+    assetId && router.push(buildUrl(`trade?assetId=${assetId}`))
   }
 
   function getModalContent() {
