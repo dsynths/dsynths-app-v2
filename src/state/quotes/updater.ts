@@ -7,7 +7,10 @@ export default function Updater() {
   const thunkDispatch: AppThunkDispatch = useAppDispatch()
 
   useEffect(() => {
-    thunkDispatch(fetchQuotes()) // TODO: how often should we refresh?
+    // TODO: find out why this triggers a request to our API
+    const loop = setInterval(() => thunkDispatch(fetchQuotes()), 5 * 1000)
+    thunkDispatch(fetchQuotes())
+    return () => clearInterval(loop)
   }, [thunkDispatch])
 
   return null
