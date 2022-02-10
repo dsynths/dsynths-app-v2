@@ -214,10 +214,6 @@ export default function LineChart() {
     }
   }, [asset, chainId, candlesticksCache, quoteCache, fetchCandlesticks, fetchQuote])
 
-  const content: string = useMemo(() => {
-    return asset ? '' : 'Select an asset to view the chart'
-  }, [asset])
-
   const majorPrice: number | null = useMemo(() => {
     // general note: if the API is down or faulty, the linechart will hide itself by default
     // so we don't have to think of those edge cases.
@@ -316,13 +312,7 @@ export default function LineChart() {
           {afterHoursLabel && <BottomText>{afterHoursLabel}</BottomText>}
         </div>
       </InfoWrapper>
-      <Chart
-        data={candlesticks}
-        dataKey="close"
-        loading={candlesticksLoading}
-        content={content}
-        onTooltipHover={onTooltipHover}
-      />
+      <Chart data={candlesticks} dataKey="close" loading={candlesticksLoading} onTooltipHover={onTooltipHover} />
     </Wrapper>
   )
 }
