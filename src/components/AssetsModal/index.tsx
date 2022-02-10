@@ -10,7 +10,6 @@ import { SubAsset, useLongAssetsList } from 'hooks/useAssetList'
 import { useCurrency } from 'hooks/useCurrency'
 import useWeb3React from 'hooks/useWeb3'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
-import useDefaultsFromURL from 'state/trade/hooks'
 import { useCurrencyBalance } from 'state/wallet/hooks'
 
 import { MobileModal, Modal, ModalHeader } from 'components/Modal'
