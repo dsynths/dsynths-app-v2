@@ -10,8 +10,9 @@ import ERC20_ABI from 'constants/abi/ERC20.json'
 import ERC20_BYTES32_ABI from 'constants/abi/ERC20'
 import MULTICALL2_ABI from 'constants/abi/MULTICALL2.json'
 import SynchronizerABI from 'constants/abi/SYNCHRONIZER.json'
+import PartnerManagerABI from 'constants/abi/PARTNER_MANAGER.json'
 import { Providers } from 'constants/providers'
-import { Multicall2, Synchronizer } from 'constants/addresses'
+import { Multicall2, PartnerManager, Synchronizer } from 'constants/addresses'
 
 export function useContract<T extends Contract = Contract>(
   addressOrAddressMap: string | null | undefined,
@@ -47,6 +48,12 @@ export function useSynchronizerContract() {
   const { chainId } = useWeb3React()
   const address = useMemo(() => (chainId ? Synchronizer[chainId] : undefined), [chainId])
   return useContract(address, SynchronizerABI)
+}
+
+export function usePartnerManager() {
+  const { chainId } = useWeb3React()
+  const address = useMemo(() => (chainId ? PartnerManager[chainId] : undefined), [chainId])
+  return useContract(address, PartnerManagerABI)
 }
 
 export function useMulticall2Contract() {

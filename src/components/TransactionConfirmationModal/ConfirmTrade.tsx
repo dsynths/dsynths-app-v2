@@ -3,6 +3,7 @@ import styled, { useTheme } from 'styled-components'
 import { Currency, CurrencyAmount, NativeCurrency, Token } from '@sushiswap/core-sdk'
 
 import { TradeType } from 'state/trade/reducer'
+import { usePlatformFeeCallback, usePartnerFeeCallback } from 'state/synchronizer/hooks'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import { SubAsset } from 'hooks/useAssetList'
 import { Direction } from 'hooks/useTradePage'
@@ -19,6 +20,7 @@ const MainWrapper = styled.div`
   justify-content: flex-start;
   gap: 0.5rem;
   padding: 1.5rem 1.25rem;
+  overflow: visible;
 `
 
 const BottomWrapper = styled(MainWrapper)`
@@ -53,14 +55,20 @@ const TokenRow = styled.div`
   }
 `
 
-const InfoRow = styled.div`
+const InfoRow = styled.div<{
+  z?: boolean
+}>`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
   gap: 5px;
   font-size: 0.8rem;
+  overflow: visible;
 
   & > * {
+    overflow: visible;
+    position: relative;
+    z-index: 0;
     &:last-child {
       color: ${({ theme }) => theme.text3};
     }
@@ -74,6 +82,44 @@ const Disclaimer = styled.div`
   font-size: 0.7rem;
   border-radius: 5px;
   padding: 0.7rem;
+`
+
+const FeeLabel = styled.div`
+  display: inline-flex;
+  position: relative;
+  border-bottom: 1px dotted ${({ theme }) => theme.text3};
+  text-align: right;
+
+  & > span {
+    visibility: hidden;
+    background: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    top: 150%;
+    right: 0;
+    margin-left: -100%;
+    font-size: 8px;
+
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: transparent transparent black transparent;
+    }
+  }
+
+  &:hover {
+    & > span {
+      visibility: visible;
+    }
+  }
 `
 
 export default function ConfirmTrade({
@@ -108,17 +154,28 @@ export default function ConfirmTrade({
   const theme = useTheme()
   const logoIn = useCurrencyLogo(tradeType === TradeType.OPEN ? undefined : asset?.id, currencyIn?.symbol)
   const logoOut = useCurrencyLogo(tradeType === TradeType.CLOSE ? undefined : asset?.id, currencyOut?.symbol)
+  const getPlatformFee = usePlatformFeeCallback()
+  const getPartnerFee = usePartnerFeeCallback()
 
-  const feeLabel = useMemo(() => {
-    if (!amountIn || !amountOut || !asset) return ''
-    const amount =
-      tradeType === TradeType.OPEN
-        ? amountIn.multiply(asset.fee).toSignificant()
-        : amountOut.multiply(asset.fee).toSignificant()
-    return `Fee: ${asset.fee.toSignificant()}% / ${amount} DEI`
+  const feeAmount: string | null = useMemo(() => {
+    if (!amountIn || !amountOut || !asset) return null
+    return tradeType === TradeType.OPEN
+      ? amountIn.multiply(asset.fee).toExact()
+      : amountOut.multiply(asset.fee).toExact()
   }, [amountIn, amountOut, asset, tradeType])
 
-  // HELLO
+  const feeLabel = useMemo(() => {
+    if (!asset || !feeAmount) return ''
+    return `${asset.fee.toSignificant()}% / ${feeAmount} DEI`
+  }, [asset, feeAmount])
+
+  const feeToolTip = useMemo(() => {
+    if (!asset) return null
+    const platformFee = getPlatformFee(asset.sector).times(100)
+    const partnerFee = getPartnerFee(asset.sector).times(100)
+    return `${platformFee.toString()}% protocol + ${partnerFee.toString()}% dSynths`
+  }, [asset, getPlatformFee, getPartnerFee])
+
   const priceLabel = useMemo(() => {
     return asset ? `${formatDollarAmount(Number(asset.price))}$ / ${asset.id}` : ''
   }, [asset])
@@ -163,7 +220,7 @@ export default function ConfirmTrade({
           <MainWrapper>
             {getInputsOutputs()}
             <InfoRow style={{ marginTop: '10px' }}>
-              <div>Minimum {currencyOut?.symbol} Received: </div>
+              <div>{currencyOut?.symbol} Received: </div>
               <div>
                 {amountOut?.toSignificant()} {currencyOut?.symbol}
               </div>
@@ -178,7 +235,9 @@ export default function ConfirmTrade({
             </InfoRow>
             <InfoRow>
               <div>Protocol Fee: </div>
-              <div>{feeLabel}</div>
+              <FeeLabel>
+                {feeLabel} <span>{feeToolTip}</span>
+              </FeeLabel>
             </InfoRow>
             <InfoRow>
               <div>Trade</div>
@@ -191,7 +250,7 @@ export default function ConfirmTrade({
         bottomContent={
           <BottomWrapper>
             <Disclaimer>
-              Amounts estimated, you will receive at least {amountOut?.toSignificant()} {currencyOut?.symbol}.
+              Amounts are estimated, you will receive at least {amountOut?.toSignificant()} {currencyOut?.symbol}.
             </Disclaimer>
             <PrimaryButton onClick={onConfirm}>Confirm</PrimaryButton>
           </BottomWrapper>

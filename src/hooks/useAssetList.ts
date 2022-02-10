@@ -1,15 +1,17 @@
 import { useMemo } from 'react'
 import { Percent, Token } from '@sushiswap/core-sdk'
 import find from 'lodash/find'
+import { getAddress } from '@ethersproject/address'
 
 import useWeb3React from 'hooks/useWeb3'
 import { useQuotesState } from 'state/quotes/reducer'
 import { useConductedState } from 'state/conducted/reducer'
 import { useSignaturesState } from 'state/signatures/reducer'
 import { Sector, useDetailsState } from 'state/details/reducer'
+import { useTotalFeeCallback } from 'state/synchronizer/hooks'
 import { Direction } from './useTradePage'
 import { SupportedChainId } from 'constants/chains'
-import { getAddress } from '@ethersproject/address'
+import { constructPercentage } from 'utils/prices'
 
 /**
  * @param id Identifier according to the oracle
@@ -76,6 +78,11 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
   const { quotes } = useQuotesState()
   const { signatures } = useSignaturesState()
   const { details } = useDetailsState()
+  const getFee = useTotalFeeCallback()
+
+  const [stockFee, cryptoFee, forexFee] = useMemo(() => {
+    return [getFee(Sector.STOCKS).toNumber(), getFee(Sector.CRYPTO).toNumber(), getFee(Sector.FOREX).toNumber()]
+  }, [getFee])
 
   const chainId = useMemo(() => {
     return targetChainId ?? connectedChainId
@@ -95,6 +102,8 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
           return null
         }
 
+        const fee = asset.sector === Sector.STOCKS ? stockFee : asset.sector === Sector.CRYPTO ? cryptoFee : forexFee
+
         const longAsset: SubAsset = {
           id,
           chainId,
@@ -106,7 +115,7 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
           sibling: short,
           symbol: asset.longSymbol,
           price: quote.long.price,
-          fee: quote.long.fee,
+          fee: constructPercentage(fee),
           open: !!longSigs,
           token: new Token(chainId, getAddress(long), 18, asset.symbol, asset.name),
         }
@@ -122,7 +131,7 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
           sibling: long,
           symbol: asset.shortSymbol,
           price: quote.short.price,
-          fee: quote.short.fee,
+          fee: constructPercentage(fee),
           open: !!shortSigs,
           token: new Token(chainId, getAddress(short), 18, asset.symbol, asset.name),
         }
@@ -134,7 +143,7 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
         }
       })
       .filter(notEmpty)
-  }, [chainId, details, conducted, quotes, signatures])
+  }, [chainId, details, conducted, quotes, signatures, stockFee, cryptoFee, forexFee])
 }
 
 /**

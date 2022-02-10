@@ -21,13 +21,12 @@ import { useWalletModalToggle } from 'state/application/hooks'
 import { formatDollarAmount } from 'utils/numbers'
 import { makeHttpRequest } from 'utils/http'
 import { SynchronizerChains } from 'constants/chains'
+import { API_BASE_URL } from 'constants/api'
 
 import ImageWithFallback from 'components/ImageWithFallback'
 import { Loader } from 'components/Icons'
 import { Card } from 'components/Card'
-import { BaseButton, PrimaryButton } from 'components/Button'
-import { SynchronizerChains } from 'constants/chains'
-import { API_BASE_URL } from 'constants/api'
+import { PrimaryButton } from 'components/Button'
 
 const Wrapper = styled(Card)<{
   border?: boolean

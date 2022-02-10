@@ -9,6 +9,7 @@ import { useTransactionAdder } from 'state/transactions/hooks'
 import { TradeType } from 'state/trade/reducer'
 import { MuonClient, MUON_NETWORK_NAMES, MuonResponse } from 'constants/oracle'
 import { calculateGasMargin } from 'utils/web3'
+import { PartnerId } from 'constants/addresses'
 
 export enum TradeCallbackState {
   INVALID = 'INVALID',
@@ -39,16 +40,26 @@ export default function useTradeCallback(
   const addTransaction = useTransactionAdder()
   const Synchronizer = useSynchronizerContract()
 
-  const address = useMemo(() => {
+  const registrar = useMemo(() => {
     if (!currencyA || !currencyB) {
       return undefined
     }
     return tradeType === TradeType.OPEN ? getAddress(currencyB.wrapped.address) : getAddress(currencyA.wrapped.address)
   }, [currencyA, currencyB, tradeType])
 
+  const partnerId = useMemo(() => (!chainId ? undefined : PartnerId[chainId]), [chainId])
+
   const constructCall = useCallback(async () => {
     try {
-      if (!account || !chainId || !(chainId in MUON_NETWORK_NAMES) || !address || !amountA || !Synchronizer) {
+      if (
+        !account ||
+        !chainId ||
+        !(chainId in MUON_NETWORK_NAMES) ||
+        !registrar ||
+        !partnerId ||
+        !amountA ||
+        !Synchronizer
+      ) {
         throw new Error('Missing dependencies.')
       }
 
@@ -56,7 +67,7 @@ export default function useTradeCallback(
 
       const response: MuonResponse = await MuonClient.app('synchronizer')
         .method('signature', {
-          tokenId: address,
+          tokenId: registrar,
           action,
           chain: MUON_NETWORK_NAMES[chainId],
           useMultiplier: false,
@@ -64,7 +75,7 @@ export default function useTradeCallback(
         .call()
 
       console.log('Muon request: ', {
-        tokenId: address,
+        tokenId: registrar,
         action,
         chain: MUON_NETWORK_NAMES[chainId],
         useMultiplier: false,
@@ -76,9 +87,9 @@ export default function useTradeCallback(
       }
 
       const args = {
-        partnerID: '0x1164fe7a76D22EAA66f6A0aDcE3E3a30d9957A5f', // TODO fix this
+        partnerId,
         _user: account,
-        registrar: address,
+        registrar,
         amountIn: toHex(amountA.quotient),
         expireBlock: response.data.result.expireBlock,
         price: response.data.result.price,
@@ -100,7 +111,7 @@ export default function useTradeCallback(
         error,
       }
     }
-  }, [chainId, account, address, amountA, Synchronizer, tradeType])
+  }, [chainId, account, registrar, partnerId, amountA, Synchronizer, tradeType])
 
   return useMemo(() => {
     if (!account || !chainId || !library || !Synchronizer || !currencyA || !currencyB) {

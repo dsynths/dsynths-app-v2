@@ -15,12 +15,7 @@ export default function useWeb3React(): Web3ReactContextInterface<Web3Provider> 
   const context = useWeb3ReactCore<Web3Provider>()
   const contextNetwork = useWeb3ReactCore<Web3Provider>(NETWORK_CONTEXT_NAME)
 
-  return context.active
-    ? context
-    : {
-        ...contextNetwork,
-        chainId: FALLBACK_CHAIN_ID,
-      }
+  return context.active ? context : contextNetwork
 }
 
 export function useEagerConnect() {

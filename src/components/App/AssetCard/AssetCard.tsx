@@ -57,7 +57,7 @@ const SecondaryLabel = styled.div`
 `
 
 export default function AssetCard() {
-  const { chainId, account } = useWeb3React()
+  const { account } = useWeb3React()
   const theme = useTheme()
   const router = useRouter()
 

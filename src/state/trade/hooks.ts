@@ -18,7 +18,7 @@ export default function useDefaultsFromURL(): {
   setURLCurrency: (currencyOrContract: Currency | string) => void
 } {
   const { chainId } = useWeb3React()
-  const assets = useSubAssetList()
+  const assets = useSubAssetList(chainId)
   const router = useRouter()
 
   const [theme, contract] = useMemo(() => {
@@ -30,9 +30,7 @@ export default function useDefaultsFromURL(): {
 
   const baseCurrency =
     useCurrency(
-      assets.some((o) => o.contract.toLowerCase() === contract)
-        ? contract
-        : DefaultSynth[FALLBACK_CHAIN_ID]
+      assets.some((o) => o.contract.toLowerCase() === contract) ? contract : chainId ? DefaultSynth[chainId] : undefined
     ) || undefined
   const quoteCurrency = useCurrency(chainId ? Collateral[chainId] : Collateral[1]) || undefined
 
