@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo } from 'react'
-import { useRouter } from 'next/router'
 import Link from 'next/link'
 import styled, { useTheme } from 'styled-components'
 import BigNumber from 'bignumber.js'
@@ -11,6 +10,7 @@ import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import { Direction } from 'hooks/useTradePage'
 
 import { useAppDispatch } from 'state'
+import { useIsJadeTheme } from 'hooks/useTheme'
 import { Balance } from 'state/portfolio/reducer'
 import { updatePrice, updateEquity } from 'state/portfolio/actions'
 import { useActiveBalances, useShowEquity, useToggleEquity, useTotalEquity } from 'state/portfolio/hooks'
@@ -188,6 +188,7 @@ export default function Portfolio() {
   const { status: conductedStatus } = useConductedState()
   const { status: detailsStatus } = useDetailsState()
   const toggleWalletModal = useWalletModalToggle()
+  const isJadeTheme = useIsJadeTheme()
 
   const balances = useActiveBalances()
   const contracts = useMemo(() => {
@@ -210,11 +211,6 @@ export default function Portfolio() {
   const isWalletConnected: boolean = useMemo(() => {
     return !!account
   }, [account])
-
-  const router = useRouter()
-  const isSpiritTheme = useMemo(() => {
-    return router.query?.theme === 'spirit'
-  }, [router])
 
   function getStatusLabel(): JSX.Element | null {
     if (!isWalletConnected) {
@@ -253,7 +249,7 @@ export default function Portfolio() {
   }
 
   return (
-    <Wrapper border={isSpiritTheme}>
+    <Wrapper border={isJadeTheme}>
       <HeaderContainer>
         <div>
           Positions

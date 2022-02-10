@@ -51,7 +51,7 @@ const black = '#000000'
 export enum SupportedThemes {
   LIGHT = 'light',
   DARK = 'dark',
-  SPIRIT = 'spirit',
+  JADE = 'jade',
 }
 
 function colors(themeName: SupportedThemes): Colors {
@@ -167,8 +167,8 @@ function colors(themeName: SupportedThemes): Colors {
       success: '#27AE60',
       warning: '#FF8F00',
     },
-    [SupportedThemes.SPIRIT]: {
-      themeName: SupportedThemes.SPIRIT,
+    [SupportedThemes.JADE]: {
+      themeName: SupportedThemes.JADE,
 
       // base
       white,
@@ -239,7 +239,7 @@ function shadows(themeName: SupportedThemes): Shadows {
       boxShadow1: '0px 0px 4px rgba(0, 0, 0, 0.125)',
       boxShadow2: '0px 5px 5px rgba(0, 0, 0, 0.15)',
     },
-    [SupportedThemes.SPIRIT]: {
+    [SupportedThemes.JADE]: {
       shadow1: '#000',
       boxShadow1: '',
       boxShadow2: '',

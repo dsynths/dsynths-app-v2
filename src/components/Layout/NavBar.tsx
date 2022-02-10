@@ -1,8 +1,12 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { isMobileOnly as isMobile } from 'react-device-detect'
+
+import { Z_INDEX } from 'theme'
+import { useIsDedicatedTheme } from 'hooks/useTheme'
+import { useDarkModeManager } from 'state/user/hooks'
 
 import Web3Network from 'components/Web3Network'
 import Web3Status from 'components/Web3Status'
@@ -11,9 +15,6 @@ import { NavButton } from 'components/Button'
 import AssetsModal from 'components/AssetsModal'
 import Menu from './Menu'
 import NavLogo from './NavLogo'
-
-import { Z_INDEX } from 'theme'
-import { useDarkModeManager } from 'state/user/hooks'
 
 const Wrapper = styled.div`
   padding: 0px 2rem;
@@ -70,9 +71,10 @@ const Items = styled.div`
   `}
   ${({ theme }) => theme.mediaWidth.upToMedium`
     & > * {
-      &:nth-child(2),
-      &:nth-child(4) {
-        display: none;
+      display: none;
+      &:last-child,
+      &:nth-last-child(2) {
+        display: flex;
       }
     }
   `}
@@ -109,14 +111,10 @@ const SearchText = styled.div`
 `
 
 export default function NavBar() {
+  const router = useRouter()
   const [, toggleDarkMode] = useDarkModeManager()
   const [assetModalOpen, setAssetModalOpen] = useState<boolean>(false)
-
-  // allow the default light/dark theme toggle if there isn't any custom theme defined via url
-  const router = useRouter()
-  const isDedicatedTheme = useMemo(() => {
-    return router.query?.theme
-  }, [router])
+  const isDedicatedTheme = useIsDedicatedTheme()
 
   const buildUrl = useCallback(
     (path: string) => {
@@ -128,7 +126,7 @@ export default function NavBar() {
   function getMobileContent() {
     return (
       <MobileWrapper>
-        {isDedicatedTheme ? <div style={{ width: '40px' }} /> : <NavLogo />}
+        <NavLogo />
         <Web3Status />
         <Menu />
       </MobileWrapper>
@@ -138,7 +136,7 @@ export default function NavBar() {
   function getDefaultContent() {
     return (
       <DefaultWrapper>
-        {isDedicatedTheme ? <div style={{ width: '40px' }} /> : <NavLogo />}
+        <NavLogo />
         <Routes>
           <Link href={buildUrl('trade')} passHref>
             <NavLink active={router.route === '/trade'}>Trade</NavLink>
@@ -160,8 +158,8 @@ export default function NavBar() {
               <ThemeToggle size={20} />
             </NavButton>
           )}
-          <Web3Status />
           <Web3Network />
+          <Web3Status />
           <Menu />
         </Items>
       </DefaultWrapper>

@@ -1,7 +1,13 @@
-import React, { useState, useRef, useMemo, useCallback } from 'react'
+import React, { useState, useRef, useCallback } from 'react'
+import { useRouter } from 'next/router'
 import styled from 'styled-components'
 import Link from 'next/link'
 import { isMobile } from 'react-device-detect'
+
+import useOnOutsideClick from 'hooks/useOnOutsideClick'
+import { Z_INDEX } from 'theme'
+import { useIsDedicatedTheme } from 'hooks/useTheme'
+import { useDarkModeManager } from 'state/user/hooks'
 
 import { NavButton } from 'components/Button'
 import {
@@ -18,10 +24,6 @@ import {
 } from 'components/Icons'
 import { Card } from 'components/Card'
 
-import useOnOutsideClick from 'hooks/useOnOutsideClick'
-import { Z_INDEX } from 'theme'
-import { useDarkModeManager } from 'state/user/hooks'
-import { useRouter } from 'next/router'
 import { ExternalLink } from 'components/Link'
 import Web3Network from 'components/Web3Network'
 
@@ -69,16 +71,11 @@ export default function Menu() {
   const ref = useRef(null)
   const [isOpen, setIsOpen] = useState(false)
   const [darkMode, toggleDarkMode] = useDarkModeManager()
+  const isDedicatedTheme = useIsDedicatedTheme()
+  const router = useRouter()
 
   const toggle = () => setIsOpen((prev) => !prev)
   useOnOutsideClick(ref, () => setIsOpen(false))
-
-  // Get custom theme name from url, if any
-  // Allow the default light/dark theme toggle if there isn't any custom theme defined via url
-  const router = useRouter()
-  const isDedicatedTheme = useMemo(() => {
-    return router.query?.theme
-  }, [router])
 
   const buildUrl = useCallback(
     (path: string) => {
