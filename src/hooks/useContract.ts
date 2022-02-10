@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { isAddress } from '@ethersproject/address'
 import { Contract } from '@ethersproject/contracts'
 import { AddressZero } from '@ethersproject/constants'
+import { Web3Provider } from '@ethersproject/providers'
 
 import useWeb3React from './useWeb3'
 
@@ -9,14 +10,9 @@ import ERC20_ABI from 'constants/abi/ERC20.json'
 import ERC20_BYTES32_ABI from 'constants/abi/ERC20'
 import MULTICALL2_ABI from 'constants/abi/MULTICALL2.json'
 import SynchronizerABI from 'constants/abi/SYNCHRONIZER.json'
-import SynchronizerV2ABI from 'constants/abi/SYNCHRONIZER_V2.json'
-import SynchronizerProxyABI from 'constants/abi/SYNCHRONIZER_PROXY.json'
-
+import PartnerManagerABI from 'constants/abi/PARTNER_MANAGER.json'
 import { Providers } from 'constants/providers'
-import { Multicall2, Synchronizer, SynchronizerV2 } from 'constants/addresses'
-import { SupportedChainId } from 'constants/chains'
-import { Web3Provider } from '@ethersproject/providers'
-import { ProxyChains } from 'constants/chains'
+import { Multicall2, PartnerManager, Synchronizer } from 'constants/addresses'
 
 export function useContract<T extends Contract = Contract>(
   addressOrAddressMap: string | null | undefined,
@@ -50,18 +46,14 @@ export function useBytes32TokenContract(tokenAddress?: string, withSignerIfPossi
 
 export function useSynchronizerContract() {
   const { chainId } = useWeb3React()
-  const address = useMemo(() => Synchronizer[chainId ?? 1], [chainId])
-  const ABI = useMemo(
-    () => (chainId ? (ProxyChains.includes(chainId) ? SynchronizerProxyABI : SynchronizerABI) : undefined),
-    [chainId]
-  )
-  return useContract(address, ABI)
+  const address = useMemo(() => (chainId ? Synchronizer[chainId] : undefined), [chainId])
+  return useContract(address, SynchronizerABI)
 }
 
-export function useSynchronizerV2Contract() {
+export function usePartnerManager() {
   const { chainId } = useWeb3React()
-  const address = useMemo(() => (chainId ? SynchronizerV2[chainId] : undefined), [chainId])
-  return useContract(address, SynchronizerV2ABI)
+  const address = useMemo(() => (chainId ? PartnerManager[chainId] : undefined), [chainId])
+  return useContract(address, PartnerManagerABI)
 }
 
 export function useMulticall2Contract() {
@@ -83,7 +75,7 @@ function getContract(
   ABI: any,
   library: Web3Provider,
   account?: string,
-  targetChainId?: SupportedChainId
+  targetChainId?: number
 ): Contract | null {
   if (!isAddress(address) || address === AddressZero) {
     throw new Error(`Invalid 'address' parameter '${address}'.`)

@@ -122,6 +122,7 @@ export default function LineChart() {
 
   const [quote, setQuote] = useState<Quote | null>(null)
   const [quoteCache, setQuoteCache] = useState<QuoteCache>({})
+  const [quoteLoading, setQuoteLoading] = useState(false)
 
   const [preMarket, setPreMarket] = useState(false)
   const [regularHours, setRegularHours] = useState(true)
@@ -138,13 +139,18 @@ export default function LineChart() {
   const fetchCandlesticks = useCallback(
     async (ticker: string) => {
       try {
-        const { href: url } = new URL(`/${asset?.sector}/ohlc?ticker=${ticker}&period=y&resolution=D`, API_BASE_URL)
+        if (!asset || !ticker || candlesticksLoading) return []
+
+        const { href: url } = new URL(
+          `/${asset.sector.toLowerCase()}/ohlc?ticker=${ticker}&period=y&resolution=D`,
+          API_BASE_URL
+        )
         setCandlesticksLoading(true)
         const result: CandlestickResponse = await makeHttpRequest(url)
         setCandlesticksLoading(false)
 
         if (!result || !result.success) {
-          throw new Error('API returned an error')
+          throw new Error(result?.message)
         }
         if (!Array.isArray(result.data)) {
           throw new Error('API data is not an array')
@@ -161,19 +167,22 @@ export default function LineChart() {
         setCandlesticksLoading(false)
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [asset]
   )
 
   const fetchQuote = useCallback(
     async (ticker: string) => {
       try {
-        if (asset?.sector !== Sector.STOCKS) return null
+        if (!asset || asset.sector !== Sector.STOCKS || !ticker || quoteLoading) return null
 
         const { href: url } = new URL(`/stocks/quote?ticker=${ticker}`, API_BASE_URL)
+        setQuoteLoading(true)
         const result: QuoteResponse = await makeHttpRequest(url)
+        setQuoteLoading(false)
 
         if (!result || !result.success) {
-          throw new Error(`API returned an error: ${result?.message}`)
+          throw new Error(result?.message)
         }
 
         setQuote(result.data)
@@ -186,6 +195,7 @@ export default function LineChart() {
         setQuote(null)
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [asset]
   )
 

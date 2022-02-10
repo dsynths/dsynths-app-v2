@@ -21,13 +21,12 @@ import { useWalletModalToggle } from 'state/application/hooks'
 import { formatDollarAmount } from 'utils/numbers'
 import { makeHttpRequest } from 'utils/http'
 import { SynchronizerChains } from 'constants/chains'
+import { API_BASE_URL } from 'constants/api'
 
 import ImageWithFallback from 'components/ImageWithFallback'
 import { Loader } from 'components/Icons'
 import { Card } from 'components/Card'
 import { PrimaryButton } from 'components/Button'
-import { API_BASE_URL } from 'constants/api'
-// import ChainLabel from 'components/Icons/ChainLabel'
 
 const Wrapper = styled(Card)<{
   border?: boolean
@@ -363,7 +362,6 @@ function AssetRow({ contract }: { contract: string }) {
             <div>{asset?.direction}</div>
           </NameWrapper>
           {showEquity && <BalanceLabel>{formattedBalance}</BalanceLabel>}
-          {/* <ChainLabel chainId={chainId} /> */}
         </RowContent>
         <PrimaryLabel>{equityLabel}</PrimaryLabel>
       </Row>

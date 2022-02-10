@@ -80,6 +80,7 @@ export function useCurrency(currencyId?: string | null): Currency | null | undef
 
   const { native, wnative } = useMemo(
     () => ({
+      // @ts-ignore TYPE NEEDS FIXING
       native: chainId && chainId in NATIVE ? NATIVE[chainId] : undefined,
       wnative: chainId && chainId in WNATIVE ? WNATIVE[chainId] : undefined,
     }),

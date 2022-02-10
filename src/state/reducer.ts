@@ -7,6 +7,7 @@ import multicall from './multicall/reducer'
 import portfolio from './portfolio/reducer'
 import quotes from './quotes/reducer'
 import signatures from './signatures/reducer'
+import synchronizer from './synchronizer/reducer'
 import trade from './trade/reducer'
 import transactions from './transactions/reducer'
 import user from './user/reducer'
@@ -19,6 +20,7 @@ const reducer = combineReducers({
   portfolio,
   quotes,
   signatures,
+  synchronizer,
   trade,
   transactions,
   user,

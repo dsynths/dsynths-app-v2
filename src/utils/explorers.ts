@@ -1,5 +1,5 @@
 import { ChainInfo } from 'constants/chainInfo'
-import { SupportedChainId } from 'constants/chains'
+import { FALLBACK_CHAIN_ID, SupportedChainId } from 'constants/chains'
 
 export enum ExplorerDataType {
   TRANSACTION = 'transaction',
@@ -13,7 +13,8 @@ export enum ExplorerDataType {
  * @param data the data to return a link for
  */
 export function getExplorerLink(chainId: SupportedChainId, type: ExplorerDataType, data: string): string {
-  const base = ChainInfo[chainId]['blockExplorerUrl']
+  const base =
+    chainId in ChainInfo ? ChainInfo[chainId]['blockExplorerUrl'] : ChainInfo[FALLBACK_CHAIN_ID]['blockExplorerUrl']
   switch (type) {
     case ExplorerDataType.TRANSACTION:
       return `${base}/tx/${data}`

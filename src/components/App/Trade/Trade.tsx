@@ -1,7 +1,9 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react'
+import { useRouter } from 'next/router'
 import { useAppDispatch } from 'state'
 import styled from 'styled-components'
 import { ZERO } from '@sushiswap/core-sdk'
+import { TrendingDown, TrendingUp } from 'react-feather'
 
 import useWeb3React from 'hooks/useWeb3'
 import useApproveCallback, { ApprovalState } from 'hooks/useApproveCallback'
@@ -18,19 +20,16 @@ import {
 } from 'state/trade/reducer'
 import useDefaultsFromURL from 'state/trade/hooks'
 import { useNetworkModalToggle, useWalletModalToggle } from 'state/application/hooks'
-import { Synchronizer, SynchronizerV2 } from 'constants/addresses'
+import { Synchronizer } from 'constants/addresses'
 import { SynchronizerChains } from 'constants/chains'
+import { formatDollarAmount } from 'utils/numbers'
 
-import { Card } from 'components/Card'
 import InputBox from './InputBox'
+import { Card } from 'components/Card'
 import { ArrowBubble } from 'components/Icons'
 import { PrimaryButton } from 'components/Button'
 import { DotFlashing } from 'components/Icons'
 import ConfirmTradeModal from 'components/TransactionConfirmationModal/ConfirmTrade'
-import { TrendingDown, TrendingUp } from 'react-feather'
-import { useRouter } from 'next/router'
-import useSynchronizer from 'hooks/useSynchronizer'
-import { formatDollarAmount } from 'utils/numbers'
 
 const Wrapper = styled(Card)<{
   border?: boolean
@@ -171,8 +170,6 @@ export default function Trade() {
 
   const asset = useAssetByContract(baseCurrency?.wrapped.address ?? undefined)
 
-  const { isV2Trade } = useSynchronizer(currencies[0], currencies[1], tradeType)
-
   const { formattedAmounts, parsedAmounts, error } = useTradePage(
     baseCurrency,
     quoteCurrency,
@@ -191,8 +188,8 @@ export default function Trade() {
     if (!isSupportedChainId || !chainId) {
       return undefined
     }
-    return isV2Trade ? SynchronizerV2[chainId] : Synchronizer[chainId]
-  }, [chainId, isSupportedChainId, isV2Trade])
+    return Synchronizer[chainId]
+  }, [chainId, isSupportedChainId])
 
   const [approvalState, approveCallback1] = useApproveCallback(currencies[0], spender)
 

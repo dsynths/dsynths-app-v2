@@ -2,39 +2,56 @@ import { INFURA_KEY } from './keys'
 
 export enum SupportedChainId {
   MAINNET = 1,
+  ROPSTEN = 3,
   RINKEBY = 4,
-  BSC = 56,
+  GOERLI = 5,
+  KOVAN = 42,
+
+  TELOS = 40,
   XDAI = 100,
+  FUSE = 122,
+  CELO = 42220,
+
+  BSC = 56,
+  BSC_TESTNET = 97,
+
+  OKEX_TESTNET = 65,
+  OKEX = 66,
+
   HECO = 128,
+  HECO_TESTNET = 256,
+
   POLYGON = 137,
+  POLYGON_TESTNET = 80001,
+
   FANTOM = 250,
-  // AVALANCHE = 43114, // temp disabled due to error, awaiting for @web3-react v8 to go out of beta. https://github.com/NoahZinsmeister/web3-react/issues/322#issuecomment-1010382663
+  FANTOM_TESTNET = 4002,
+
+  MOONRIVER = 1285,
+  MOONBEAM_TESTNET = 1287,
+
+  ARBITRUM = 42161,
+  ARBITRUM_TESTNET = 79377087078960,
+
+  AVALANCHE_TESTNET = 43113,
+  AVALANCHE = 43114,
+
+  HARMONY = 1666600000,
+  HARMONY_TESTNET = 1666700000,
+
+  PALM = 11297108109,
+  PALM_TESTNET = 11297108099,
 }
 
 export const SUPPORTED_CHAIN_IDS: SupportedChainId[] = Object.values(SupportedChainId).filter(
   (id) => typeof id === 'number'
 ) as SupportedChainId[]
 
-export const SynchronizerChains = [
-  SupportedChainId.MAINNET,
-  // SupportedChainId.RINKEBY,
-  SupportedChainId.BSC,
-  SupportedChainId.HECO,
-  SupportedChainId.POLYGON,
-  // SupportedChainId.FANTOM,
-]
+export const SynchronizerChains = [SupportedChainId.RINKEBY, SupportedChainId.FANTOM]
 
-export const SynchronizerV2Chains = [SupportedChainId.FANTOM, SupportedChainId.RINKEBY]
+export const FALLBACK_CHAIN_ID = SupportedChainId.FANTOM
 
-export const ProxyChains = [SupportedChainId.XDAI]
-
-export const NETWORK_URLS = {
-  [SupportedChainId.MAINNET]: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
+export const NETWORK_URLS: { [chainId: number]: string } = {
   [SupportedChainId.RINKEBY]: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
-  [SupportedChainId.BSC]: 'https://bsc-dataseed1.binance.org',
-  [SupportedChainId.XDAI]: 'https://rpc.xdaichain.com',
-  [SupportedChainId.HECO]: 'https://http-mainnet.hecochain.com',
-  [SupportedChainId.POLYGON]: 'https://polygon-rpc.com',
   [SupportedChainId.FANTOM]: 'https://rpc.ftm.tools',
-  // [SupportedChainId.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
 }

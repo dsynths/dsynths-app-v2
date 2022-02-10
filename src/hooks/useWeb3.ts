@@ -6,7 +6,7 @@ import { isMobile } from 'react-device-detect'
 import { injected } from '../connectors'
 
 import { Web3ReactContextInterface } from '@web3-react/core/dist/types'
-import { SupportedChainId } from 'constants/chains'
+import { FALLBACK_CHAIN_ID, SupportedChainId } from 'constants/chains'
 import { NETWORK_CONTEXT_NAME } from 'constants/misc'
 
 export default function useWeb3React(): Web3ReactContextInterface<Web3Provider> & {
@@ -14,6 +14,7 @@ export default function useWeb3React(): Web3ReactContextInterface<Web3Provider> 
 } {
   const context = useWeb3ReactCore<Web3Provider>()
   const contextNetwork = useWeb3ReactCore<Web3Provider>(NETWORK_CONTEXT_NAME)
+
   return context.active ? context : contextNetwork
 }
 

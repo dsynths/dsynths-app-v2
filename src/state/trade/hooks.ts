@@ -8,6 +8,7 @@ import { DefaultSynth, Collateral } from 'constants/addresses'
 import { useSubAssetList } from 'hooks/useAssetList'
 import { isAddress } from 'utils/validate'
 import { ParsedUrlQueryInput } from 'querystring'
+import { FALLBACK_CHAIN_ID } from 'constants/chains'
 
 export default function useDefaultsFromURL(): {
   currencies: {
@@ -17,7 +18,7 @@ export default function useDefaultsFromURL(): {
   setURLCurrency: (currencyOrContract: Currency | string) => void
 } {
   const { chainId } = useWeb3React()
-  const assets = useSubAssetList()
+  const assets = useSubAssetList(chainId)
   const router = useRouter()
 
   const [theme, contract] = useMemo(() => {
@@ -29,11 +30,7 @@ export default function useDefaultsFromURL(): {
 
   const baseCurrency =
     useCurrency(
-      assets.some((o) => o.contract.toLowerCase() === contract)
-        ? contract
-        : chainId
-        ? DefaultSynth[chainId]
-        : DefaultSynth[1] // purely cosmetic, will revert to the correct chain on connect.
+      assets.some((o) => o.contract.toLowerCase() === contract) ? contract : chainId ? DefaultSynth[chainId] : undefined
     ) || undefined
   const quoteCurrency = useCurrency(chainId ? Collateral[chainId] : Collateral[1]) || undefined
 
