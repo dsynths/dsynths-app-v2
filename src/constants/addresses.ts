@@ -20,8 +20,8 @@ export const DefaultSynth: AddressMap = {
 }
 
 export const Synchronizer: AddressMap = {
-  [SupportedChainId.RINKEBY]: '0xa4E7ed8548e4fB5d7E5a4fee907FD8C1430eEd0C',
-  [SupportedChainId.FANTOM]: '0x5442a8c3FAc51454FB806a5B8bfe7121C8fAB678',
+  [SupportedChainId.RINKEBY]: '0xa4E7ed8548e4fB5d7E5a4fee907FD8C1430eEd0C', // TODO change this
+  [SupportedChainId.FANTOM]: '0x5442a8c3FAc51454FB806a5B8bfe7121C8fAB678', // TODO change this
 }
 
 export const PartnerManager: AddressMap = {
@@ -31,5 +31,5 @@ export const PartnerManager: AddressMap = {
 
 export const PartnerId: AddressMap = {
   [SupportedChainId.RINKEBY]: '0x1164fe7a76D22EAA66f6A0aDcE3E3a30d9957A5f', // TODO change this
-  [SupportedChainId.FANTOM]: '0x9dBFCF31baC3636A731C49eCdAA91531025a164b', // TODO change this
+  [SupportedChainId.FANTOM]: '0x33F0Ef226d443bC0bae66b452F919f244163dC08', // TODO change this
 }
