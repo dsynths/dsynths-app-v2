@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react'
-import { useRouter } from 'next/router'
 import { useAppDispatch } from 'state'
 import styled from 'styled-components'
 import { ZERO } from '@sushiswap/core-sdk'
 import { TrendingDown, TrendingUp } from 'react-feather'
 
+import { useIsJadeTheme } from 'hooks/useTheme'
 import useWeb3React from 'hooks/useWeb3'
 import useApproveCallback, { ApprovalState } from 'hooks/useApproveCallback'
 import useTradeCallback from 'hooks/useTradeCallback'
@@ -145,6 +145,7 @@ const FeeWrapper = styled.div`
 export default function Trade() {
   const dispatch = useAppDispatch()
   const { chainId, account } = useWeb3React()
+  const isJadeTheme = useIsJadeTheme()
   const {
     currencies: { baseCurrency, quoteCurrency },
     setURLCurrency,
@@ -152,17 +153,12 @@ export default function Trade() {
   const tradeState = useTradeState()
   const toggleWalletModal = useWalletModalToggle()
   const toggleNetworkModal = useNetworkModalToggle()
-  const router = useRouter()
 
   const [tradeType, setTradeType] = useState<TradeType>(TradeType.OPEN)
   const [direction, setDirection] = useState(Direction.LONG)
   const { attemptingTxn, showReview, error: tradeStateError } = tradeState
   const [txHash, setTxHash] = useState<string>('')
   const [awaitingApproveConfirmation, setAwaitingApproveConfirmation] = useState<boolean>(false)
-
-  const isSpiritTheme = useMemo(() => {
-    return router.query?.theme === 'spirit'
-  }, [router])
 
   const currencies = useMemo(() => {
     return tradeType === TradeType.OPEN ? [quoteCurrency, baseCurrency] : [baseCurrency, quoteCurrency]
@@ -397,7 +393,7 @@ export default function Trade() {
   }
 
   return (
-    <Wrapper border={isSpiritTheme}>
+    <Wrapper border={isJadeTheme}>
       {getMainContent()}
       {marketIsOpen && (
         <FeeWrapper>

@@ -6,7 +6,7 @@ import { isMobile } from 'react-device-detect'
 import { injected } from '../connectors'
 
 import { Web3ReactContextInterface } from '@web3-react/core/dist/types'
-import { FALLBACK_CHAIN_ID, SupportedChainId } from 'constants/chains'
+import { SupportedChainId } from 'constants/chains'
 import { NETWORK_CONTEXT_NAME } from 'constants/misc'
 
 export default function useWeb3React(): Web3ReactContextInterface<Web3Provider> & {

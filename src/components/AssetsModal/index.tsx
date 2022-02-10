@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import styled from 'styled-components'
 import { FixedSizeList as List } from 'react-window'
 import Fuse from 'fuse.js'
@@ -10,13 +10,14 @@ import { SubAsset, useLongAssetsList } from 'hooks/useAssetList'
 import { useCurrency } from 'hooks/useCurrency'
 import useWeb3React from 'hooks/useWeb3'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
-import useDefaultsFromURL from 'state/trade/hooks'
 import { useCurrencyBalance } from 'state/wallet/hooks'
 
 import { MobileModal, Modal, ModalHeader } from 'components/Modal'
 import ImageWithFallback from 'components/ImageWithFallback'
 import { Loader } from 'components/Icons'
 import { FALLBACK_CHAIN_ID } from 'constants/chains'
+import { useRouter } from 'next/router'
+import { useIsDedicatedTheme } from 'hooks/useTheme'
 
 const SearchWrapper = styled.div`
   display: flex;
@@ -112,7 +113,8 @@ function fuzzySearch(options: SelectSearchOption[]): any {
 
 export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: () => void }) {
   const assetList = useLongAssetsList(FALLBACK_CHAIN_ID)
-  const { setURLCurrency } = useDefaultsFromURL()
+  const router = useRouter()
+  const isDedicatedTheme = useIsDedicatedTheme()
 
   const assets: SelectSearchOption[] = useMemo(() => {
     return assetList.map((o) => ({ ...o, value: o.contract }))
@@ -126,9 +128,17 @@ export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; on
     allowEmpty: true,
   })
 
-  const onDismissProxy = () => {
+  const buildUrl = useCallback(
+    (path: string) => {
+      return isDedicatedTheme ? `/${path}&theme=${router.query.theme}` : `/${path}`
+    },
+    [router, isDedicatedTheme]
+  )
+
+  const onDismissProxy = (assetId?: string) => {
     searchProps.onBlur()
     onDismiss()
+    assetId && router.push(buildUrl(`trade?assetId=${assetId}`))
   }
 
   function getModalContent() {
@@ -165,8 +175,7 @@ export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; on
                         asset={asset}
                         style={style}
                         onClick={() => {
-                          setURLCurrency(asset.contract)
-                          onDismissProxy()
+                          onDismissProxy(asset.contract)
                         }}
                         {...optionProps}
                       />

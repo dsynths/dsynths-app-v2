@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
 import styled from 'styled-components'
-import { useRouter } from 'next/router'
 
 import useDefaultsFromURL from 'state/trade/hooks'
 import { Sector } from 'state/details/reducer'
@@ -8,6 +7,7 @@ import { useAssetByContract } from 'hooks/useAssetList'
 import { API_BASE_URL } from 'constants/api'
 import { makeHttpRequest } from 'utils/http'
 import { isPreMarket, isAfterHours, isRegularMarket } from 'utils/time'
+import { useIsJadeTheme } from 'hooks/useTheme'
 
 import { LineChart as Chart } from 'components/Chart'
 import { Card } from 'components/Card'
@@ -113,6 +113,7 @@ interface QuoteCache {
 
 export default function LineChart() {
   const { chainId } = useWeb3React()
+  const isJadeTheme = useIsJadeTheme()
   const [cachedTicker, setCachedTicker] = useState('')
   const [cachedName, setCachedName] = useState('')
 
@@ -130,11 +131,6 @@ export default function LineChart() {
 
   const { currencies } = useDefaultsFromURL()
   const asset = useAssetByContract(currencies.baseCurrency?.wrapped.address ?? undefined)
-
-  const router = useRouter()
-  const isSpiritTheme = useMemo(() => {
-    return router.query?.theme === 'spirit'
-  }, [router])
 
   const fetchCandlesticks = useCallback(
     async (ticker: string) => {
@@ -311,7 +307,7 @@ export default function LineChart() {
   }
 
   return (
-    <Wrapper show={!!candlesticks.length} border={isSpiritTheme}>
+    <Wrapper show={!!candlesticks.length} border={isJadeTheme}>
       <InfoWrapper>
         <div>
           <UpperText>{cachedTicker}</UpperText>

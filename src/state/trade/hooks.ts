@@ -8,7 +8,6 @@ import { DefaultSynth, Collateral } from 'constants/addresses'
 import { useSubAssetList } from 'hooks/useAssetList'
 import { isAddress } from 'utils/validate'
 import { ParsedUrlQueryInput } from 'querystring'
-import { FALLBACK_CHAIN_ID } from 'constants/chains'
 
 export default function useDefaultsFromURL(): {
   currencies: {

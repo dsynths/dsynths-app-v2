@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import styled from 'styled-components'
-import { useRouter } from 'next/router'
 
+import { useIsJadeTheme } from 'hooks/useTheme'
 import { useShowEquity, useTotalEquity } from 'state/portfolio/hooks'
 import { formatDollarAmount } from 'utils/numbers'
 import { LineChart as Chart } from 'components/Chart'
@@ -70,16 +70,12 @@ const data = [
 ]
 
 export default function EquityChart() {
-  const router = useRouter()
-  const isSpiritTheme = useMemo(() => {
-    return router.query?.theme === 'spirit'
-  }, [router])
-
+  const isJadeTheme = useIsJadeTheme()
   const showEquity = useShowEquity()
   const totalEquity = useTotalEquity()
 
   return (
-    <Wrapper border={isSpiritTheme}>
+    <Wrapper border={isJadeTheme}>
       <InfoWrapper>
         <div>Overview</div>
         {showEquity && <div>{formatDollarAmount(Number(totalEquity))}</div>}

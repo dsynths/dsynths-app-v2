@@ -9,7 +9,7 @@
       "state": ["./state"],
       "state/*": ["./state/*"],
       "theme": ["./theme"],
-      "theme/*": ["./theme"],
+      "theme/*": ["./theme/*"],
       "utils/*": ["./utils/*"]
     },
     "target": "es5",
