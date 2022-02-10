@@ -1,18 +1,19 @@
 import React, { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { Currency, CurrencyAmount, NativeCurrency, Token } from '@sushiswap/core-sdk'
+import ReactTooltip from 'react-tooltip'
 
 import { TradeType } from 'state/trade/reducer'
 import { usePlatformFeeCallback, usePartnerFeeCallback } from 'state/synchronizer/hooks'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import { SubAsset } from 'hooks/useAssetList'
 import { Direction } from 'hooks/useTradePage'
+import { formatDollarAmount } from 'utils/numbers'
 
 import { PrimaryButton } from 'components/Button'
-import { IconWrapper, ChevronDown } from 'components/Icons'
+import { IconWrapper, ChevronDown, Info } from 'components/Icons'
 import TransactionConfirmationModal, { ConfirmationContent, TransactionErrorContent } from './index'
 import ImageWithFallback from 'components/ImageWithFallback'
-import { formatDollarAmount } from 'utils/numbers'
 
 const MainWrapper = styled.div`
   display: flex;
@@ -55,9 +56,7 @@ const TokenRow = styled.div`
   }
 `
 
-const InfoRow = styled.div<{
-  z?: boolean
-}>`
+const InfoRow = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
@@ -84,41 +83,15 @@ const Disclaimer = styled.div`
   padding: 0.7rem;
 `
 
+const FeeToolTip = styled(ReactTooltip)`
+  opacity: 1 !important;
+  padding: 3px 7px !important;
+  font-size: 0.6rem !important;
+`
+
 const FeeLabel = styled.div`
-  display: inline-flex;
-  position: relative;
-  border-bottom: 1px dotted ${({ theme }) => theme.text3};
-  text-align: right;
-
-  & > span {
-    visibility: hidden;
-    background: black;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-    position: absolute;
-    top: 150%;
-    right: 0;
-    margin-left: -100%;
-    font-size: 8px;
-
-    &:after {
-      content: '';
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      margin-left: -5px;
-      border-width: 5px;
-      border-style: solid;
-      border-color: transparent transparent black transparent;
-    }
-  }
-
   &:hover {
-    & > span {
-      visibility: visible;
-    }
+    cursor: pointer;
   }
 `
 
@@ -173,7 +146,7 @@ export default function ConfirmTrade({
     if (!asset) return null
     const platformFee = getPlatformFee(asset.sector).times(100)
     const partnerFee = getPartnerFee(asset.sector).times(100)
-    return `${platformFee.toString()}% protocol + ${partnerFee.toString()}% dSynths`
+    return `${platformFee.toString()}% DEUS DAO <br/> ${partnerFee.toString()}% dSynths`
   }, [asset, getPlatformFee, getPartnerFee])
 
   const priceLabel = useMemo(() => {
@@ -234,9 +207,10 @@ export default function ConfirmTrade({
               <div>0%</div>
             </InfoRow>
             <InfoRow>
-              <div>Protocol Fee: </div>
-              <FeeLabel>
-                {feeLabel} <span>{feeToolTip}</span>
+              <FeeToolTip id="fee" place="bottom" type="info" effect="solid" multiline backgroundColor="black" />
+              <div>Fee: </div>
+              <FeeLabel data-for="fee" data-tip={feeToolTip}>
+                {feeLabel} <Info size={10} />
               </FeeLabel>
             </InfoRow>
             <InfoRow>
@@ -250,7 +224,8 @@ export default function ConfirmTrade({
         bottomContent={
           <BottomWrapper>
             <Disclaimer>
-              Amounts are estimated, you will receive at least {amountOut?.toSignificant()} {currencyOut?.symbol}.
+              Output amounts are estimated. You will spend exactly {amountIn?.toSignificant()} {currencyIn?.symbol} for
+              an estimated {amountOut?.toSignificant()} {currencyOut?.symbol}.
             </Disclaimer>
             <PrimaryButton onClick={onConfirm}>Confirm</PrimaryButton>
           </BottomWrapper>

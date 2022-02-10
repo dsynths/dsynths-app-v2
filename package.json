@@ -48,6 +48,7 @@
     "react-select-search": "^3.0.9",
     "react-spring": "^9.3.0",
     "react-toastify": "^8.1.0",
+    "react-tooltip": "^4.2.21",
     "react-virtualized-auto-sizer": "^1.0.6",
     "react-window": "^1.8.6",
     "rebass": "^4.0.7",
