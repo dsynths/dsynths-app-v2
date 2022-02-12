@@ -3,6 +3,7 @@ import { useAppDispatch } from 'state'
 import styled from 'styled-components'
 import { ZERO } from '@sushiswap/core-sdk'
 import { TrendingDown, TrendingUp } from 'react-feather'
+import ReactTooltip from 'react-tooltip'
 
 import { useIsJadeTheme } from 'hooks/useTheme'
 import useWeb3React from 'hooks/useWeb3'
@@ -27,7 +28,7 @@ import { formatDollarAmount } from 'utils/numbers'
 
 import InputBox from './InputBox'
 import { Card } from 'components/Card'
-import { ArrowBubble, Network } from 'components/Icons'
+import { ArrowBubble, Network, Info } from 'components/Icons'
 import { PrimaryButton } from 'components/Button'
 import { DotFlashing } from 'components/Icons'
 import ConfirmTradeModal from 'components/TransactionConfirmationModal/ConfirmTrade'
@@ -44,6 +45,18 @@ const Wrapper = styled(Card)<{
   ${({ theme }) => theme.mediaWidth.upToMedium`
     padding: 1rem;
   `}
+`
+
+const PriceToolTip = styled(ReactTooltip)`
+  opacity: 1 !important;
+  padding: 3px 7px !important;
+  font-size: 0.6rem !important;
+`
+
+const PriceLabel = styled.div`
+  & #tool-tip:hover {
+    cursor: pointer;
+  }
 `
 
 const SwitchBlock = styled(Wrapper)`
@@ -429,7 +442,10 @@ export default function Trade() {
       {marketIsOpen && (
         <FeeWrapper>
           <div>{feeLabel}</div>
-          <div>{priceLabel}</div>
+          <PriceToolTip id="price" place="bottom" type="info" effect="solid" multiline backgroundColor="black" />
+          <PriceLabel data-for="price" data-tip="Price is inclusive of Short Premium">
+            {priceLabel} {direction === Direction.SHORT ? <Info id="tool-tip" size={8} /> : null}
+          </PriceLabel>
         </FeeWrapper>
       )}
       <ButtonRow>
