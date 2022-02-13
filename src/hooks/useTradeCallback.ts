@@ -88,11 +88,11 @@ export default function useTradeCallback(
 
       const args = {
         partnerId,
-        _user: account,
+        receipient: account,
         registrar,
         amountIn: toHex(amountA.quotient),
-        expireBlock: response.data.result.expireBlock,
         price: response.data.result.price,
+        expireBlock: response.data.result.expireBlock,
         _reqId: response.reqId,
         sigs: response.sigs,
       }

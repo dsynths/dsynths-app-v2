@@ -15,21 +15,21 @@ export const Collateral: AddressMap = {
 }
 
 export const DefaultSynth: AddressMap = {
-  [SupportedChainId.RINKEBY]: '0xF62505Aaa2650E9FAcab5FDEf749FBe16c6cc080', // BTC (TODO update this on official launch)
-  [SupportedChainId.FANTOM]: '0x3A80584Cede024eFd4dE73C8E1f55fA0d8544b54', // AAPL (TODO update this on official launch)
+  [SupportedChainId.RINKEBY]: '0xF62505Aaa2650E9FAcab5FDEf749FBe16c6cc080', // DEPRECATED
+  [SupportedChainId.FANTOM]: '0xD5725f2F5807B629d08eAdd8c2D65A85B64C64bA', // TSLA
 }
 
 export const Synchronizer: AddressMap = {
-  [SupportedChainId.RINKEBY]: '0xa4E7ed8548e4fB5d7E5a4fee907FD8C1430eEd0C', // TODO change this
-  [SupportedChainId.FANTOM]: '0x5442a8c3FAc51454FB806a5B8bfe7121C8fAB678', // TODO change this
+  [SupportedChainId.RINKEBY]: '0xa4E7ed8548e4fB5d7E5a4fee907FD8C1430eEd0C', // DEPRECATED
+  [SupportedChainId.FANTOM]: '0x71EB0bCFeB9610a79af007531aEeeE7848e76E71',
 }
 
 export const PartnerManager: AddressMap = {
-  [SupportedChainId.RINKEBY]: '0x1164fe7a76D22EAA66f6A0aDcE3E3a30d9957A5f', // TODO change this
-  [SupportedChainId.FANTOM]: '0xc01bc169894dd066ea50008c19b389a88e1c11fc', // TODO change this
+  [SupportedChainId.RINKEBY]: '0x1164fe7a76D22EAA66f6A0aDcE3E3a30d9957A5f', // DEPRECATED
+  [SupportedChainId.FANTOM]: '0x6796a6b39f2c8FF2bEfa223aC6eeD13a4d693ba4',
 }
 
 export const PartnerId: AddressMap = {
-  [SupportedChainId.RINKEBY]: '0x1164fe7a76D22EAA66f6A0aDcE3E3a30d9957A5f', // TODO change this
-  [SupportedChainId.FANTOM]: '0x33F0Ef226d443bC0bae66b452F919f244163dC08', // TODO change this
+  [SupportedChainId.RINKEBY]: '0x1164fe7a76D22EAA66f6A0aDcE3E3a30d9957A5f', // DEPRECATED
+  [SupportedChainId.FANTOM]: '0xAAA873675482875f0A16f134fDA0492518901d71',
 }
