@@ -3,7 +3,6 @@ import { useAppDispatch } from 'state'
 import styled from 'styled-components'
 import { ZERO } from '@sushiswap/core-sdk'
 import { TrendingDown, TrendingUp } from 'react-feather'
-import ReactTooltip from 'react-tooltip'
 
 import { useIsJadeTheme } from 'hooks/useTheme'
 import useWeb3React from 'hooks/useWeb3'
@@ -29,9 +28,10 @@ import { formatDollarAmount } from 'utils/numbers'
 import InputBox from './InputBox'
 import { Card } from 'components/Card'
 import { ArrowBubble, Network, Info } from 'components/Icons'
-import { PrimaryButton } from 'components/Button'
+import { BaseButton, PrimaryButton } from 'components/Button'
 import { DotFlashing } from 'components/Icons'
 import ConfirmTradeModal from 'components/TransactionConfirmationModal/ConfirmTrade'
+import { ExternalLink } from 'components/Link'
 
 const Wrapper = styled(Card)<{
   border?: boolean
@@ -47,16 +47,12 @@ const Wrapper = styled(Card)<{
   `}
 `
 
-const PriceToolTip = styled(ReactTooltip)`
-  opacity: 1 !important;
-  padding: 3px 7px !important;
+const LabelButton = styled(BaseButton)`
+  gap: 2px;
+  padding: 4px 6px !important;
   font-size: 0.6rem !important;
-`
-
-const PriceLabel = styled.div`
-  & #tool-tip:hover {
-    cursor: pointer;
-  }
+  background: ${({ theme }) => theme.red2};
+  border-radius: 4px;
 `
 
 const SwitchBlock = styled(Wrapper)`
@@ -241,6 +237,7 @@ export default function Trade() {
   }, [currencies, approvalState])
 
   const marketIsOpen = useMemo(() => {
+    return true
     return !!asset?.open
   }, [asset])
 
@@ -259,7 +256,7 @@ export default function Trade() {
   }
 
   const onTrade = useCallback(() => {
-    if (parsedAmounts[0]?.greaterThan(ZERO) && parsedAmounts[1]?.greaterThan(ZERO)) {
+    if (parsedAmounts[0]?.greaterThan(ZERO) && parsedAmounts[0]?.greaterThan(ZERO)) {
       dispatch(setShowReview(true))
     }
   }, [dispatch, parsedAmounts])
@@ -442,10 +439,17 @@ export default function Trade() {
       {marketIsOpen && (
         <FeeWrapper>
           <div>{feeLabel}</div>
-          <PriceToolTip id="price" place="bottom" type="info" effect="solid" multiline backgroundColor="black" />
-          <PriceLabel data-for="price" data-tip="Price is inclusive of Short Premium">
-            {priceLabel} {direction === Direction.SHORT ? <Info id="tool-tip" size={8} /> : null}
-          </PriceLabel>
+          <div>
+            {direction === Direction.SHORT ? (
+              <LabelButton>
+                Short Premium{' '}
+                <ExternalLink href="https://docs.deus.finance/synchronizer/short-premium">
+                  <Info size={8} />
+                </ExternalLink>
+              </LabelButton>
+            ) : null}{' '}
+            {priceLabel}
+          </div>
         </FeeWrapper>
       )}
       <ButtonRow>
