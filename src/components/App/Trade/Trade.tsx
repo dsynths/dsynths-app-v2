@@ -253,7 +253,6 @@ export default function Trade() {
   }, [currencies, approvalState])
 
   const marketIsOpen = useMemo(() => {
-    return true
     return !!asset?.open
   }, [asset])
 
@@ -272,7 +271,7 @@ export default function Trade() {
   }
 
   const onTrade = useCallback(() => {
-    if (parsedAmounts[0]?.greaterThan(ZERO) && parsedAmounts[0]?.greaterThan(ZERO)) {
+    if (parsedAmounts[0]?.greaterThan(ZERO) && parsedAmounts[1]?.greaterThan(ZERO)) {
       dispatch(setShowReview(true))
     }
   }, [dispatch, parsedAmounts])
