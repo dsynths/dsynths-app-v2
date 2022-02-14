@@ -102,6 +102,11 @@ export function useAssetList(targetChainId?: SupportedChainId): Asset[] {
           return null
         }
 
+        // TEMPORARY
+        if (asset.symbol === 'XAG' || asset.symbol === 'XAU') {
+          return null
+        }
+
         const fee = asset.sector === Sector.STOCKS ? stockFee : asset.sector === Sector.CRYPTO ? cryptoFee : forexFee
 
         const longAsset: SubAsset = {
