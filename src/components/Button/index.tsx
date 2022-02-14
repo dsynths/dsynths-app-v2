@@ -1,7 +1,4 @@
 import styled from 'styled-components'
-import { Button as RebassButton, ButtonProps as ButtonPropsOriginal } from 'rebass/styled-components'
-
-type ButtonProps = Omit<ButtonPropsOriginal, 'css'>
 
 export const BaseButton = styled.div<{
   active?: boolean

@@ -153,6 +153,7 @@ const FeeWrapper = styled.div`
   align-items: center;
   width: 100%;
   margin-top: 20px;
+  height: 15px; // prevents short premium jumping
 
   & > * {
     &:last-child {
