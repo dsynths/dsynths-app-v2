@@ -10,6 +10,7 @@ import { useCurrencyBalance } from 'state/wallet/hooks'
 import { maxAmountSpend } from 'utils/currency'
 import { tryParseAmount } from 'utils/parse'
 import { ONE_HUNDRED_PERCENT } from 'utils/prices'
+import BigNumber from 'bignumber.js'
 
 export enum PrimaryError {
   ACCOUNT = 'ACCOUNT',
@@ -40,7 +41,8 @@ export default function useTradePage(
   }, [currencies, typedValue, typedField])
 
   const price = useMemo(() => {
-    if (!asset || !parseInt(asset.price) || !baseCurrency || !quoteCurrency) return undefined
+    if (!asset || !parseFloat(asset.price) || !baseCurrency || !quoteCurrency) return undefined
+    let fixedPrice = parseFloat(asset.price).toFixed(quoteCurrency.decimals)
 
     const base = CurrencyAmount.fromRawAmount(
       baseCurrency,
@@ -48,9 +50,9 @@ export default function useTradePage(
     )
     const quote = CurrencyAmount.fromRawAmount(
       quoteCurrency,
-      JSBI.BigInt(parseUnits(asset.price, quoteCurrency.decimals).toString())
+      JSBI.BigInt(parseUnits(fixedPrice, quoteCurrency.decimals).toString())
     )
-    return new Price({ baseAmount: quote, quoteAmount: base })
+    return new Price({ baseAmount: base, quoteAmount: quote })
   }, [asset, baseCurrency, quoteCurrency])
 
   // Computed counter amount by typedAmount and its corresponding price
@@ -60,20 +62,23 @@ export default function useTradePage(
 
     // inputfield
     if (typedField === TypedField.A && tradeType === TradeType.OPEN) {
-      const exactIn = typedAmount.divide(ONE_HUNDRED_PERCENT.add(fee))
-      return price.quote(exactIn)
+      const feeAmount = typedAmount.multiply(fee)
+      const collateralAmount = typedAmount.subtract(feeAmount)
+      return price.invert().quote(collateralAmount)
     }
 
     if (typedField === TypedField.A && tradeType === TradeType.CLOSE) {
-      return price.invert().quote(typedAmount).multiply(ONE_HUNDRED_PERCENT.subtract(fee))
+      const collateralAmount = price.quote(typedAmount)
+      const feeAmount = collateralAmount.multiply(fee)
+      return collateralAmount.subtract(feeAmount)
     }
 
     // outputfield
     if (tradeType === TradeType.OPEN) {
-      return price.invert().quote(typedAmount).multiply(ONE_HUNDRED_PERCENT.add(fee))
+      return price.quote(typedAmount).divide(ONE_HUNDRED_PERCENT.subtract(fee))
     }
     if (tradeType === TradeType.CLOSE) {
-      return price.quote(typedAmount).divide(ONE_HUNDRED_PERCENT.subtract(fee))
+      return price.invert().quote(typedAmount).divide(ONE_HUNDRED_PERCENT.subtract(fee))
     }
   }, [typedAmount, typedField, tradeType, price, asset])
 
