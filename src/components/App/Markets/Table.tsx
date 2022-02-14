@@ -130,7 +130,7 @@ function TableRow({ asset, onSelect }: { asset: SubAsset; onSelect: (asset: SubA
   const logo = useCurrencyLogo(asset.id, undefined)
 
   const price = useMemo(() => {
-    return parseInt(asset.price) ? formatDollarAmount(Number(asset.price), 2, false) : 'Market Closed'
+    return parseFloat(asset.price) ? formatDollarAmount(Number(asset.price), 2, false) : 'Market Closed'
   }, [asset])
 
   return (
