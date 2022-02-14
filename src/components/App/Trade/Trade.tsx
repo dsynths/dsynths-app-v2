@@ -169,7 +169,7 @@ const LabelButton = styled(BaseButton)`
   gap: 2px;
   padding: 1px 4px;
   font-size: 0.6rem;
-  color: ${({ theme }) => theme.text2};
+  color: white;
   background: ${({ theme }) => theme.red3};
   border-radius: 4px;
   font-weight: normal;
