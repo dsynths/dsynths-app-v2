@@ -27,10 +27,11 @@ import { formatDollarAmount } from 'utils/numbers'
 
 import InputBox from './InputBox'
 import { Card } from 'components/Card'
-import { ArrowBubble, Network } from 'components/Icons'
-import { PrimaryButton } from 'components/Button'
+import { ArrowBubble, Network, Info } from 'components/Icons'
+import { BaseButton, PrimaryButton } from 'components/Button'
 import { DotFlashing } from 'components/Icons'
 import ConfirmTradeModal from 'components/TransactionConfirmationModal/ConfirmTrade'
+import { ExternalLink } from 'components/Link'
 
 const Wrapper = styled(Card)<{
   border?: boolean
@@ -152,6 +153,30 @@ const FeeWrapper = styled.div`
   align-items: center;
   width: 100%;
   margin-top: 20px;
+  height: 15px; // prevents short premium jumping
+
+  & > * {
+    &:last-child {
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      gap: 5px;
+    }
+  }
+`
+
+const LabelButton = styled(BaseButton)`
+  gap: 2px;
+  padding: 1px 4px;
+  font-size: 0.6rem;
+  color: ${({ theme }) => theme.text2};
+  background: ${({ theme }) => theme.red3};
+  border-radius: 4px;
+  font-weight: normal;
+  opacity: 0.7;
+  &:hover {
+    opacity: 0.8;
+  }
 `
 
 export default function Trade() {
@@ -228,6 +253,7 @@ export default function Trade() {
   }, [currencies, approvalState])
 
   const marketIsOpen = useMemo(() => {
+    return true
     return !!asset?.open
   }, [asset])
 
@@ -246,7 +272,7 @@ export default function Trade() {
   }
 
   const onTrade = useCallback(() => {
-    if (parsedAmounts[0]?.greaterThan(ZERO) && parsedAmounts[1]?.greaterThan(ZERO)) {
+    if (parsedAmounts[0]?.greaterThan(ZERO) && parsedAmounts[0]?.greaterThan(ZERO)) {
       dispatch(setShowReview(true))
     }
   }, [dispatch, parsedAmounts])
@@ -429,7 +455,16 @@ export default function Trade() {
       {marketIsOpen && (
         <FeeWrapper>
           <div>{feeLabel}</div>
-          <div>{priceLabel}</div>
+          <div>
+            {direction === Direction.SHORT && (
+              <ExternalLink href="https://docs.deus.finance/synchronizer/short-premium">
+                <LabelButton>
+                  Short Premium <Info size={8} />
+                </LabelButton>
+              </ExternalLink>
+            )}
+            {priceLabel}
+          </div>
         </FeeWrapper>
       )}
       <ButtonRow>

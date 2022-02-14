@@ -1,22 +1,14 @@
 import styled from 'styled-components'
-import { Button as RebassButton, ButtonProps as ButtonPropsOriginal } from 'rebass/styled-components'
 
-type ButtonProps = Omit<ButtonPropsOriginal, 'css'>
-
-export const BaseButton = styled(RebassButton)<
-  {
-    padding?: string
-    width?: string
-    $borderRadius?: string
-    active?: boolean
-    disabled?: boolean
-  } & ButtonProps
->`
-  padding: ${({ padding }) => padding ?? '1rem'};
-  width: ${({ width }) => width ?? '100%'};
+export const BaseButton = styled.div<{
+  active?: boolean
+  disabled?: boolean
+}>`
+  padding: 1rem;
+  width: 100%;
   font-weight: 500;
   text-align: center;
-  border-radius: ${({ $borderRadius }) => $borderRadius ?? '20px'};
+  border-radius: 20px;
   outline: none;
   border: 1px solid transparent;
   color: ${({ theme }) => theme.text1};
