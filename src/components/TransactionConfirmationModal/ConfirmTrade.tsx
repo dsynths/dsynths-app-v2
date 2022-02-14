@@ -9,6 +9,7 @@ import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import { SubAsset } from 'hooks/useAssetList'
 import { Direction } from 'hooks/useTradePage'
 import { formatDollarAmount } from 'utils/numbers'
+import { useIsPartner } from 'hooks/usePartnerId'
 
 import { PrimaryButton } from 'components/Button'
 import { IconWrapper, ChevronDown, Info } from 'components/Icons'
@@ -129,12 +130,13 @@ export default function ConfirmTrade({
   const logoOut = useCurrencyLogo(tradeType === TradeType.CLOSE ? undefined : asset?.id, currencyOut?.symbol)
   const getPlatformFee = usePlatformFeeCallback()
   const getPartnerFee = usePartnerFeeCallback()
+  const isPartner = useIsPartner()
 
   const feeAmount: string | null = useMemo(() => {
     if (!amountIn || !amountOut || !asset) return null
     return tradeType === TradeType.OPEN
-      ? amountIn.multiply(asset.fee).toExact()
-      : amountOut.multiply(asset.fee).toExact()
+      ? amountIn.multiply(asset.fee).toSignificant()
+      : amountOut.multiply(asset.fee).toSignificant()
   }, [amountIn, amountOut, asset, tradeType])
 
   const feeLabel = useMemo(() => {
@@ -142,12 +144,16 @@ export default function ConfirmTrade({
     return `${asset.fee.toSignificant()}% / ${feeAmount} DEI`
   }, [asset, feeAmount])
 
+  const partnerName = useMemo(() => {
+    return isPartner ? 'Partner' : 'dSynths'
+  }, [isPartner])
+
   const feeToolTip = useMemo(() => {
     if (!asset) return null
     const platformFee = getPlatformFee(asset.sector).times(100)
     const partnerFee = getPartnerFee(asset.sector).times(100)
-    return `${platformFee.toString()}% DEUS DAO <br/> ${partnerFee.toString()}% dSynths`
-  }, [asset, getPlatformFee, getPartnerFee])
+    return `${platformFee.toString()}% DEUS DAO <br/> ${partnerFee.toString()}% ${partnerName}`
+  }, [asset, getPlatformFee, getPartnerFee, partnerName])
 
   const priceLabel = useMemo(() => {
     return asset ? `${formatDollarAmount(Number(asset.price))}$ / ${asset.id}` : ''

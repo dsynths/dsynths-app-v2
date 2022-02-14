@@ -4,11 +4,11 @@ import { useAppDispatch } from 'state'
 import useWeb3React from 'hooks/useWeb3'
 import { useSingleContractMultipleMethods } from 'state/multicall/hooks'
 import { usePartnerManager } from 'hooks/useContract'
+import { usePartnerId } from 'hooks/usePartnerId'
 
 import { updatePlatformFee, updatePartnerFee } from './reducer'
-import { SynchronizerChains } from 'constants/chains'
-import { PartnerId } from 'constants/addresses'
 import { Sector } from 'state/details/reducer'
+import { SynchronizerChains } from 'constants/chains'
 
 export default function Updater(): null {
   const { chainId } = useWeb3React()
@@ -20,7 +20,7 @@ export default function Updater(): null {
     [chainId]
   )
 
-  const address = useMemo(() => (!isSupported || !chainId ? undefined : PartnerId[chainId]), [isSupported, chainId])
+  const address = usePartnerId()
   const feeCalls = useMemo(
     () =>
       !isSupported

@@ -13,11 +13,15 @@ export interface SynchronizerState {
     [Sector.STOCKS]: string
     [Sector.CRYPTO]: string
     [Sector.FOREX]: string
+    [Sector.COMMODITIES]: string
+    [Sector.MISC]: string
   }
   platformFee: {
     [Sector.STOCKS]: string
     [Sector.CRYPTO]: string
     [Sector.FOREX]: string
+    [Sector.COMMODITIES]: string
+    [Sector.MISC]: string
   }
 }
 
@@ -27,11 +31,15 @@ const initialState = {
     [Sector.STOCKS]: '0',
     [Sector.CRYPTO]: '0',
     [Sector.FOREX]: '0',
+    [Sector.COMMODITIES]: '0',
+    [Sector.MISC]: '0',
   },
   platformFee: {
     [Sector.STOCKS]: '0',
     [Sector.CRYPTO]: '0',
     [Sector.FOREX]: '0',
+    [Sector.COMMODITIES]: '0',
+    [Sector.MISC]: '0',
   },
 }
 

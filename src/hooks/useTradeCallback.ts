@@ -10,6 +10,7 @@ import { TradeType } from 'state/trade/reducer'
 import { MuonClient, MUON_NETWORK_NAMES, MuonResponse } from 'constants/oracle'
 import { calculateGasMargin } from 'utils/web3'
 import { PartnerId } from 'constants/addresses'
+import { usePartnerId } from './usePartnerId'
 
 export enum TradeCallbackState {
   INVALID = 'INVALID',
@@ -39,6 +40,7 @@ export default function useTradeCallback(
   const { chainId, account, library } = useWeb3React()
   const addTransaction = useTransactionAdder()
   const Synchronizer = useSynchronizerContract()
+  const partnerId = usePartnerId()
 
   const registrar = useMemo(() => {
     if (!currencyA || !currencyB) {
@@ -46,8 +48,6 @@ export default function useTradeCallback(
     }
     return tradeType === TradeType.OPEN ? getAddress(currencyB.wrapped.address) : getAddress(currencyA.wrapped.address)
   }, [currencyA, currencyB, tradeType])
-
-  const partnerId = useMemo(() => (!chainId ? undefined : PartnerId[chainId]), [chainId])
 
   const constructCall = useCallback(async () => {
     try {

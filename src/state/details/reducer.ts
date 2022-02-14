@@ -14,6 +14,8 @@ export enum Sector {
   STOCKS = 'STOCKS',
   CRYPTO = 'CRYPTO',
   FOREX = 'FOREX',
+  COMMODITIES = 'COMMODITIES',
+  MISC = 'MISC',
 }
 
 interface DetailsState {

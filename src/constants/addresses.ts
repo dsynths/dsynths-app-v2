@@ -29,7 +29,7 @@ export const PartnerManager: AddressMap = {
   [SupportedChainId.FANTOM]: '0x6796a6b39f2c8FF2bEfa223aC6eeD13a4d693ba4',
 }
 
-export const PartnerId: AddressMap = {
-  [SupportedChainId.RINKEBY]: '0x1164fe7a76D22EAA66f6A0aDcE3E3a30d9957A5f', // DEPRECATED
-  [SupportedChainId.FANTOM]: '0xAAA873675482875f0A16f134fDA0492518901d71',
+export const PartnerId: { [partner: string]: string } = {
+  DSYNTHS: '0xAAA873675482875f0A16f134fDA0492518901d71',
+  JADE: '0x68cfee37A785b4C8659B1A86473C9ccb3Ed93F1c', // THIS IS TEMPORARY
 }
