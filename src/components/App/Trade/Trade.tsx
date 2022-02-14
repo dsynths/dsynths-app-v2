@@ -47,14 +47,6 @@ const Wrapper = styled(Card)<{
   `}
 `
 
-const LabelButton = styled(BaseButton)`
-  gap: 2px;
-  padding: 4px 6px !important;
-  font-size: 0.6rem !important;
-  background: ${({ theme }) => theme.red2};
-  border-radius: 4px;
-`
-
 const SwitchBlock = styled(Wrapper)`
   justify-content: space-between;
   gap: 20px;
@@ -161,6 +153,29 @@ const FeeWrapper = styled.div`
   align-items: center;
   width: 100%;
   margin-top: 20px;
+
+  & > * {
+    &:last-child {
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      gap: 5px;
+    }
+  }
+`
+
+const LabelButton = styled(BaseButton)`
+  gap: 2px;
+  padding: 1px 4px;
+  font-size: 0.6rem;
+  color: ${({ theme }) => theme.text2};
+  background: ${({ theme }) => theme.red3};
+  border-radius: 4px;
+  font-weight: normal;
+  opacity: 0.7;
+  &:hover {
+    opacity: 0.8;
+  }
 `
 
 export default function Trade() {
@@ -440,14 +455,13 @@ export default function Trade() {
         <FeeWrapper>
           <div>{feeLabel}</div>
           <div>
-            {direction === Direction.SHORT ? (
-              <LabelButton>
-                Short Premium{' '}
-                <ExternalLink href="https://docs.deus.finance/synchronizer/short-premium">
-                  <Info size={8} />
-                </ExternalLink>
-              </LabelButton>
-            ) : null}{' '}
+            {direction === Direction.SHORT && (
+              <ExternalLink href="https://docs.deus.finance/synchronizer/short-premium">
+                <LabelButton>
+                  Short Premium <Info size={8} />
+                </LabelButton>
+              </ExternalLink>
+            )}
             {priceLabel}
           </div>
         </FeeWrapper>
