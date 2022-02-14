@@ -6,6 +6,7 @@ import { useSelect, SelectSearchOption } from 'react-select-search'
 import { useLongAssetsList } from 'hooks/useAssetList'
 import useDefaultsFromURL from 'state/trade/hooks'
 import { Search as SearchIcon } from 'components/Icons'
+import { Sector } from 'state/details/reducer'
 
 const SearchWrapper = styled.div`
   display: flex;
@@ -59,13 +60,13 @@ function fuzzySearch(options: SelectSearchOption[]): any {
   }
 }
 
-export function useSearch(selectedChain: number) {
-  const assetList = useLongAssetsList(selectedChain)
+export function useSearch(selectedSector: Sector) {
+  const assetList = useLongAssetsList()
   const { setURLCurrency } = useDefaultsFromURL()
 
   const assets: SelectSearchOption[] = useMemo(() => {
-    return assetList.map((o) => ({ ...o, value: o.contract }))
-  }, [assetList])
+    return assetList.filter((o) => o.sector === selectedSector).map((o) => ({ ...o, value: o.contract }))
+  }, [assetList, selectedSector])
 
   const [snapshot, searchProps, optionProps] = useSelect({
     options: assets,

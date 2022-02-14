@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-export const NetworkButton = styled.div<{
+export const SectorButton = styled.div<{
   active: boolean
 }>`
   display: flex;
@@ -18,5 +18,3 @@ export const NetworkButton = styled.div<{
     font-size: 0.9rem;
   `}
 `
-
-export const TradeButton = styled.button``

@@ -18,6 +18,8 @@ export enum Sector {
   MISC = 'MISC',
 }
 
+export const Sectors = [Sector.STOCKS, Sector.CRYPTO, Sector.FOREX]
+
 interface DetailsState {
   status: DetailsStatus
   details: {
@@ -50,7 +52,7 @@ export const fetchDetails = createAsyncThunk('details/fetchDetails', async () =>
   return Object.entries(response).reduce((acc: DetailsState['details'], [symbol, data]) => {
     acc[symbol] = {
       name: data.name,
-      sector: data.sector === 'stock' || data.sector === 'xDai-stock' ? Sector.STOCKS : Sector.CRYPTO,
+      sector: data.sector === 'stock' ? Sector.STOCKS : data.sector === 'crypto' ? Sector.CRYPTO : Sector.FOREX,
       symbol: data.symbol,
       shortSymbol: data.short_symbol,
       longSymbol: data.long_symbol,
