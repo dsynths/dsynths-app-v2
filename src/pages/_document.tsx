@@ -46,6 +46,7 @@ class MyDocument extends Document {
               name="description"
               content="Trade stocks and commodities in a decentralized fashion. No KYC - No Signup."
             />
+            <script defer data-domain="app.dsynths.com" src="https://plausible.io/js/plausible.js"></script>
 
             <link rel="preconnect" href="https://fonts.googleapis.com" />
             <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
