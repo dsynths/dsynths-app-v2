@@ -30,6 +30,6 @@ export const PartnerManager: AddressMap = {
 }
 
 export const PartnerId: { [partner: string]: string } = {
-  DSYNTHS: '0xAAA873675482875f0A16f134fDA0492518901d71',
-  JADE: '0x49A923d809170cd5f555c13C512EEeEEe7AfDf7e', // THIS IS TEMPORARY
+  DSYNTHS: '0x302041dbeB23bc42eb33E85f1c0aE8d5bEDa716A',
+  JADE: '0x25749d05eCd6F55ad090D505Ba538bA1B85614Ac', // THIS IS TEMPORARY
 }

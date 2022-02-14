@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 
-import { NetworkButton, useSearch, InputField, Table } from 'components/App/Markets'
-import { FALLBACK_CHAIN_ID, SynchronizerChains } from 'constants/chains'
+import { SectorButton, useSearch, InputField, Table } from 'components/App/Markets'
 import { ChainInfo } from 'constants/chainInfo'
 import { SubAsset } from 'hooks/useAssetList'
 import { Modal, ModalHeader } from 'components/Modal'
@@ -12,6 +11,7 @@ import { PrimaryButton } from 'components/Button'
 import useRpcChangerCallback from 'hooks/useRpcChangerCallback'
 import { useWalletModalToggle } from 'state/application/hooks'
 import { IconWrapper, Loader } from 'components/Icons'
+import { Sectors } from 'state/details/reducer'
 
 const Container = styled.div`
   display: flex;
@@ -26,7 +26,7 @@ const Container = styled.div`
   `}
 `
 
-const NetworkRow = styled.div`
+const SectorRow = styled.div`
   display: flex;
   width: 100%;
   flex-flow: row nowrap;
@@ -52,15 +52,13 @@ const Label = styled.span<{
 export default function Markets() {
   const { chainId, account } = useWeb3React()
   const router = useRouter()
-  const [selectedChain, setSelectedChain] = useState(
-    chainId && SynchronizerChains.includes(chainId) ? chainId : FALLBACK_CHAIN_ID
-  )
+  const [selectedSector, setSelectedSector] = useState(Sectors[0])
 
   const [showModal, setShowModal] = useState(false)
   const [modalAsset, setModalAsset] = useState<SubAsset>()
   const [chainHasSwitched, setChainHasSwitched] = useState(false)
   const [navigateReady, setNavigateReady] = useState(false)
-  const { snapshot, searchProps } = useSearch(selectedChain)
+  const { snapshot, searchProps } = useSearch(selectedSector)
   const rpcChangerCallback = useRpcChangerCallback()
   const walletToggle = useWalletModalToggle()
 
@@ -83,14 +81,14 @@ export default function Markets() {
 
   const onSelect = useCallback(
     (asset: SubAsset) => {
-      if (!chainId || selectedChain !== chainId) {
+      if (!chainId) {
         setModalAsset(asset)
         setShowModal(true)
       } else {
         router.push(buildUrl(asset.contract))
       }
     },
-    [chainId, selectedChain, router, buildUrl]
+    [chainId, router, buildUrl]
   )
 
   useEffect(() => {
@@ -165,13 +163,13 @@ export default function Markets() {
         <ModalHeader title={modalAsset?.name} onClose={onDismiss} />
         <ModalContent>{getModalContent()}</ModalContent>
       </Modal>
-      <NetworkRow>
-        {SynchronizerChains.map((chainId, index) => (
-          <NetworkButton key={index} active={chainId == selectedChain} onClick={() => setSelectedChain(chainId)}>
-            {ChainInfo[chainId]['label']}
-          </NetworkButton>
+      <SectorRow>
+        {Sectors.map((sector, index) => (
+          <SectorButton key={index} active={sector == selectedSector} onClick={() => setSelectedSector(sector)}>
+            {sector}
+          </SectorButton>
         ))}
-      </NetworkRow>
+      </SectorRow>
       <InputField searchProps={searchProps} />
       <Table options={snapshot.options as unknown as SubAsset[]} onSelect={onSelect} />
     </Container>
