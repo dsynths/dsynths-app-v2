@@ -176,6 +176,10 @@ export default function LineChart() {
       } catch (err) {
         console.error(err)
         setCandlesticks([])
+        setCandlesticksCache((prev) => ({
+          ...prev,
+          [ticker]: [],
+        }))
         setCandlesticksLoading(false)
       }
     },
@@ -205,6 +209,10 @@ export default function LineChart() {
       } catch (err) {
         console.error(err)
         setQuote(null)
+        setQuoteCache((prev) => ({
+          ...prev,
+          [ticker]: null,
+        }))
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -223,7 +231,7 @@ export default function LineChart() {
       fetchCandlesticks(ticker, sector)
     }
 
-    if (quoteCache[ticker]) {
+    if (ticker in quoteCache) {
       setQuote(quoteCache[ticker])
     } else {
       fetchQuote(ticker, sector)
