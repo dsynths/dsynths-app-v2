@@ -1,7 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
 import Image from 'next/image'
-import { isMobile } from 'react-device-detect'
 
 import { Trade as TradeComponent, LineChart } from 'components/App/Trade'
 import DeusLogo from '/public/static/images/tokens/deus.svg'

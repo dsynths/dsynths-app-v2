@@ -92,7 +92,7 @@ export default function Updater(): null {
         })
       )
     }
-  }, [feeResponse])
+  }, [dispatch, feeResponse])
 
   return null
 }
