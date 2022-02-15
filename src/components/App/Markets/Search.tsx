@@ -86,7 +86,7 @@ export function useSearch(selectedSector: Sector) {
   }
 }
 
-export function InputField({ searchProps }: { searchProps: any }) {
+export function InputField({ searchProps, placeholder }: { searchProps: any; placeholder: string }) {
   return (
     <SearchWrapper>
       <Input
@@ -94,7 +94,7 @@ export function InputField({ searchProps }: { searchProps: any }) {
         title="Search a ticker"
         autoFocus
         type="text"
-        placeholder="Search for a stock or crypto..."
+        placeholder={placeholder}
         spellCheck="false"
         onBlur={() => null}
       />

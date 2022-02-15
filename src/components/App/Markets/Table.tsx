@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import styled from 'styled-components'
 
 import { SubAsset } from 'hooks/useAssetList'
@@ -78,13 +78,9 @@ const ImageWrapper = styled.div`
   width: 30px;
 `
 
+const itemsPerPage = 10
 export default function Table({ options, onSelect }: { options: SubAsset[]; onSelect: (asset: SubAsset) => void }) {
-  const itemsPerPage = 10
   const [offset, setOffset] = useState(0)
-
-  useEffect(() => {
-    setOffset(0)
-  }, [options])
 
   const paginatedOptions = useMemo(() => {
     return options.slice(offset, offset + itemsPerPage)

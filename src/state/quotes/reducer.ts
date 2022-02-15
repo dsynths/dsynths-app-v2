@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
-import { AppState, useAppSelector } from 'state'
 import { INFO_BASE_URL, ORACLE_NETWORK_NAMES } from 'constants/oracle'
 import { makeHttpRequest } from 'utils/http'
 
@@ -37,7 +36,7 @@ interface Quotes {
   }
 }
 
-interface QuotesState {
+export interface QuotesState {
   status: QuotesStatus
   quotes: {
     [chainId: number]: Quotes
@@ -112,7 +111,3 @@ const quotesSlice = createSlice({
 
 const { reducer } = quotesSlice
 export default reducer
-
-export function useQuotesState(): QuotesState {
-  return useAppSelector((state: AppState) => state.quotes)
-}

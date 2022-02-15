@@ -4,7 +4,7 @@ import find from 'lodash/find'
 import { getAddress } from '@ethersproject/address'
 
 import useWeb3React from 'hooks/useWeb3'
-import { useQuotesState } from 'state/quotes/reducer'
+import { useQuotesState } from 'state/quotes/hooks'
 import { useConductedState } from 'state/conducted/reducer'
 import { useSignaturesState } from 'state/signatures/reducer'
 import { Sector, useDetailsState } from 'state/details/reducer'

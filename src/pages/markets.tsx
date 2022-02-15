@@ -1,17 +1,18 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
-
-import { SectorButton, useSearch, InputField, Table } from 'components/App/Markets'
-import { ChainInfo } from 'constants/chainInfo'
-import { SubAsset } from 'hooks/useAssetList'
-import { Modal, ModalHeader } from 'components/Modal'
 import { useRouter } from 'next/router'
-import useWeb3React from 'hooks/useWeb3'
-import { PrimaryButton } from 'components/Button'
-import useRpcChangerCallback from 'hooks/useRpcChangerCallback'
+
 import { useWalletModalToggle } from 'state/application/hooks'
+import { Sector, Sectors } from 'state/details/reducer'
+import { SubAsset } from 'hooks/useAssetList'
+import useWeb3React from 'hooks/useWeb3'
+import useRpcChangerCallback from 'hooks/useRpcChangerCallback'
+import { ChainInfo } from 'constants/chainInfo'
+
+import { Modal, ModalHeader } from 'components/Modal'
+import { SectorButton, useSearch, InputField, Table } from 'components/App/Markets'
 import { IconWrapper, Loader } from 'components/Icons'
-import { Sectors } from 'state/details/reducer'
+import { PrimaryButton } from 'components/Button'
 
 const Container = styled.div`
   display: flex;
@@ -97,6 +98,12 @@ export default function Markets() {
     }
   }, [navigateReady, modalAsset, buildUrl, router])
 
+  const placeholder = useMemo(() => {
+    const sector =
+      selectedSector === Sector.STOCKS ? 'stock' : selectedSector === Sector.CRYPTO ? 'crypto' : 'forex currency'
+    return `Search for a ${sector}...`
+  }, [selectedSector])
+
   function onDismiss() {
     setShowModal(false)
   }
@@ -170,7 +177,7 @@ export default function Markets() {
           </SectorButton>
         ))}
       </SectorRow>
-      <InputField searchProps={searchProps} />
+      <InputField searchProps={searchProps} placeholder={placeholder} />
       <Table options={snapshot.options as unknown as SubAsset[]} onSelect={onSelect} />
     </Container>
   )

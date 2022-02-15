@@ -49,6 +49,9 @@ const InputField = styled.input<{
   background: transparent;
   font-size: 1.1rem;
   color: ${({ theme }) => theme.text1};
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+    font-size: 1rem;
+  `};
 
   &:focus,
   &:hover {
@@ -204,7 +207,7 @@ function ActiveAssetsModal({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: 
             title="Search a ticker"
             autoFocus
             type="text"
-            placeholder="Search for a stock or crypto..."
+            placeholder="Search for a stock, crypto or forex currency..."
             spellCheck="false"
             onBlur={() => null}
           />

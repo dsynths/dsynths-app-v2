@@ -8,7 +8,7 @@ export default function Updater() {
 
   useEffect(() => {
     // TODO: find out why this triggers a request to our API
-    const loop = setInterval(() => thunkDispatch(fetchQuotes()), 5 * 1000)
+    const loop = setInterval(() => thunkDispatch(fetchQuotes()), 60 * 1000)
     thunkDispatch(fetchQuotes())
     return () => clearInterval(loop)
   }, [thunkDispatch])
