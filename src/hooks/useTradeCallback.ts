@@ -9,7 +9,6 @@ import { useTransactionAdder } from 'state/transactions/hooks'
 import { TradeType } from 'state/trade/reducer'
 import { MuonClient, MUON_NETWORK_NAMES, MuonResponse } from 'constants/oracle'
 import { calculateGasMargin } from 'utils/web3'
-import { PartnerId } from 'constants/addresses'
 import { usePartnerId } from './usePartnerId'
 
 export enum TradeCallbackState {

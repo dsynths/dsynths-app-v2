@@ -10,7 +10,6 @@ import { useCurrencyBalance } from 'state/wallet/hooks'
 import { maxAmountSpend } from 'utils/currency'
 import { tryParseAmount } from 'utils/parse'
 import { ONE_HUNDRED_PERCENT } from 'utils/prices'
-import BigNumber from 'bignumber.js'
 
 export enum PrimaryError {
   ACCOUNT = 'ACCOUNT',
@@ -42,7 +41,7 @@ export default function useTradePage(
 
   const price = useMemo(() => {
     if (!asset || !parseFloat(asset.price) || !baseCurrency || !quoteCurrency) return undefined
-    let fixedPrice = parseFloat(asset.price).toFixed(quoteCurrency.decimals)
+    const fixedPrice = parseFloat(asset.price).toFixed(quoteCurrency.decimals)
 
     const base = CurrencyAmount.fromRawAmount(
       baseCurrency,

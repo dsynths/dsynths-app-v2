@@ -7,6 +7,7 @@ import { useLongAssetsList } from 'hooks/useAssetList'
 import useDefaultsFromURL from 'state/trade/hooks'
 import { Search as SearchIcon } from 'components/Icons'
 import { Sector } from 'state/details/reducer'
+import { FALLBACK_CHAIN_ID } from 'constants/chains'
 
 const SearchWrapper = styled.div`
   display: flex;
@@ -61,7 +62,7 @@ function fuzzySearch(options: SelectSearchOption[]): any {
 }
 
 export function useSearch(selectedSector: Sector) {
-  const assetList = useLongAssetsList()
+  const assetList = useLongAssetsList(FALLBACK_CHAIN_ID)
   const { setURLCurrency } = useDefaultsFromURL()
 
   const assets: SelectSearchOption[] = useMemo(() => {
