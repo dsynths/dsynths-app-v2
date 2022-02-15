@@ -34,7 +34,7 @@ class MyDocument extends Document {
         <Head>
           <>
             <meta charSet="utf-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
             <meta name="theme-color" content="#00000" />
 
             <link rel="shortcut icon" type="image/png" href="/favicon.ico" />

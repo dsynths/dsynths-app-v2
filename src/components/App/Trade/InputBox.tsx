@@ -98,7 +98,7 @@ const InputField = styled.input`
   padding: 20px 1.25rem;
   border: none;
   background: transparent;
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: ${({ theme }) => theme.text2};
 
   &:focus,
