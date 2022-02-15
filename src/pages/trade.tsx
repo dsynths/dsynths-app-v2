@@ -36,7 +36,7 @@ const DeusBanner = styled.div`
 export default function Trade() {
   return (
     <Container>
-      {!isMobile && <LineChart />}
+      <LineChart />
       <TradeComponent />
       <DeusBanner>
         <Image src={DeusLogo} alt="DEUS Logo" width="15px" height="15px" />

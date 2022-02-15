@@ -366,6 +366,9 @@ export default function Trade() {
     if (!!getApproveButton()) {
       return null
     }
+    if (!marketIsOpen) {
+      return <PrimaryButton disabled>Market is closed</PrimaryButton>
+    }
     if (error === PrimaryError.ACCOUNT) {
       return <PrimaryButton onClick={toggleWalletModal}>Connect Wallet</PrimaryButton>
     }
@@ -375,9 +378,7 @@ export default function Trade() {
     if (!asset) {
       return <PrimaryButton>Select an asset</PrimaryButton>
     }
-    if (!marketIsOpen) {
-      return <PrimaryButton disabled>Market is closed</PrimaryButton>
-    }
+
     if (error === PrimaryError.BALANCE) {
       return <PrimaryButton disabled>Insufficient {currencies[0]?.symbol} Balance</PrimaryButton>
     }

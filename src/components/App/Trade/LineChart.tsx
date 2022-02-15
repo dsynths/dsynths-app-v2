@@ -22,6 +22,10 @@ const Wrapper = styled(Card)<{
   height: ${({ show }) => (show ? '285px' : '0px')};
   border: ${({ theme, border, show }) => (show && border ? `1px solid ${theme.border2}` : 'none')};
 
+  ${({ theme, show }) => theme.mediaWidth.upToSmall`
+    height: ${show ? '200px' : '0px'};
+  `}
+
   -webkit-transition: height 0.4s linear;
   -moz-transition: height 0.4s linear;
   -ms-transition: height 0.4s linear;
@@ -45,6 +49,12 @@ const InfoWrapper = styled.div`
   align-items: flex-start;
   margin-bottom: 4px;
 
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+    gap: 3px;
+    padding: 10px;
+    margin-bottom: 2px;
+  `}
+
   & > * {
     display: flex;
     flex-flow: column nowrap;
@@ -59,11 +69,17 @@ const InfoWrapper = styled.div`
 const UpperText = styled.div`
   font-size: 1.3rem;
   color: ${({ theme }) => theme.text1};
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+    font-size: 1.1rem;
+  `}
 `
 
 const BottomText = styled.div`
   font-size: 0.8rem;
   color: ${({ theme }) => theme.text2};
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+    font-size: 0.7rem;
+  `}
 `
 
 const MarketSpan = styled.span<{
