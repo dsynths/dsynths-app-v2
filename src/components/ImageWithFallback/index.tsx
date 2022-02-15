@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import styled from 'styled-components'
 
@@ -29,9 +29,19 @@ export default function ImageWithFallback({
   round?: boolean
   [x: string]: any
 }) {
+  const [imgSrc, setImgSrc] = useState<string | StaticImageData>('/static/images/fallback/loader.gif')
+
+  useEffect(() => {
+    if (loading) {
+      setImgSrc('/static/images/fallback/loader.gif')
+    } else {
+      setImgSrc(src)
+    }
+  }, [src, loading])
+
   return (
     <Wrapper round={round}>
-      <Image src={src} alt={alt} width={width} height={height} {...rest} />
+      <Image src={imgSrc} alt={alt} width={width} height={height} {...rest} />
     </Wrapper>
   )
 }

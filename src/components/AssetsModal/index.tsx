@@ -1,23 +1,22 @@
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
-import { FixedSizeList as List } from 'react-window'
+import memoize from 'memoize-one'
+import { FixedSizeList as List, areEqual } from 'react-window'
 import Fuse from 'fuse.js'
 import { useSelect, SelectSearchOption } from 'react-select-search'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { isMobile } from 'react-device-detect'
+import isEmpty from 'lodash/isEmpty'
 
 import { SubAsset, useLongAssetsList } from 'hooks/useAssetList'
-import { useCurrency } from 'hooks/useCurrency'
-import useWeb3React from 'hooks/useWeb3'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
-import { useCurrencyBalance } from 'state/wallet/hooks'
 
 import { MobileModal, Modal, ModalHeader } from 'components/Modal'
 import ImageWithFallback from 'components/ImageWithFallback'
-import { Loader } from 'components/Icons'
 import { FALLBACK_CHAIN_ID } from 'constants/chains'
 import { useRouter } from 'next/router'
 import { useIsDedicatedTheme } from 'hooks/useTheme'
+import { useActiveBalances } from 'state/portfolio/hooks'
 
 const SearchWrapper = styled.div`
   display: flex;
@@ -33,9 +32,11 @@ const SearchWrapper = styled.div`
   margin: 10px;
 `
 
-const ListWrapper = styled.div`
+const ListWrapper = styled.div<{
+  isMobile: boolean
+}>`
   width: 100%;
-  height: 400px;
+  height: ${({ isMobile }) => (isMobile ? '80vh' : '400px')};
 `
 
 const InputField = styled.input<{
@@ -111,7 +112,56 @@ function fuzzySearch(options: SelectSearchOption[]): any {
   }
 }
 
+const AssetRow = ({ data, index, style }: { data: any; index: number; style: React.CSSProperties }) => {
+  const { items, onClick, optionProps } = data
+  const asset = items[index] as unknown as SubAsset
+  const logo = useCurrencyLogo(asset.id, undefined)
+  const balances = useActiveBalances()
+  const [loading, setLoading] = useState(true)
+
+  const balance = useMemo(() => {
+    if (!asset || isEmpty(balances) || !(asset.contract in balances)) return 0
+    return balances[asset.contract].balance
+  }, [asset, balances])
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(false)
+    }, 1000)
+  }, [])
+
+  return (
+    <Row
+      onClick={onClick}
+      onMouseDown={(evt) => {
+        onClick(asset.contract)
+        optionProps.onMouseDown(evt)
+      }}
+      style={style}
+    >
+      <ImageWithFallback src={logo} width={30} height={30} alt={`${asset.symbol}`} round loading={loading} />
+      <NameWrapper>
+        <div>{asset.id}</div>
+        <div>{asset.name}</div>
+      </NameWrapper>
+      <div>{balance}</div>
+    </Row>
+  )
+}
+
+const MemoAssetRow = React.memo(AssetRow, areEqual)
+
+const createItemData = memoize((items: SelectSearchOption[], onClick: (assetId?: string) => void, optionProps) => ({
+  items,
+  onClick,
+  optionProps,
+}))
+
 export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: () => void }) {
+  return isOpen ? <ActiveAssetsModal isOpen={isOpen} onDismiss={onDismiss} /> : null
+}
+
+function ActiveAssetsModal({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: () => void }) {
   const assetList = useLongAssetsList(FALLBACK_CHAIN_ID)
   const router = useRouter()
   const isDedicatedTheme = useIsDedicatedTheme()
@@ -135,16 +185,19 @@ export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; on
     [router, isDedicatedTheme]
   )
 
-  const onDismissProxy = (assetId?: string) => {
-    searchProps.onBlur()
-    onDismiss()
-    assetId && router.push(buildUrl(`trade?assetId=${assetId}`))
-  }
+  const onClick = useCallback(
+    (assetId?: string) => {
+      searchProps.onBlur()
+      onDismiss()
+      assetId && router.push(buildUrl(`trade?assetId=${assetId}`))
+    },
+    [router, onDismiss, searchProps, buildUrl]
+  )
 
   function getModalContent() {
     return (
       <>
-        <ModalHeader title="Select an asset" onClose={onDismissProxy} />
+        <ModalHeader title="Select an asset" onClose={onClick} />
         <SearchWrapper>
           <InputField
             {...searchProps}
@@ -156,31 +209,20 @@ export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; on
             onBlur={() => null}
           />
         </SearchWrapper>
-        <ListWrapper>
+        <ListWrapper isMobile={isMobile}>
           <AutoSizer>
             {({ height, width }) => {
+              const itemData = createItemData(snapshot.options, onClick, optionProps)
               return (
                 <List
                   width={width}
                   height={height}
                   itemCount={snapshot.options.length}
                   itemSize={50}
-                  itemData={snapshot.options}
+                  itemData={itemData}
+                  overscanCount={20}
                 >
-                  {({ data, index, style }) => {
-                    const asset = data[index] as unknown as SubAsset
-                    return (
-                      <AssetRow
-                        key={index}
-                        asset={asset}
-                        style={style}
-                        onClick={() => {
-                          onDismissProxy(asset.contract)
-                        }}
-                        {...optionProps}
-                      />
-                    )
-                  }}
+                  {MemoAssetRow}
                 </List>
               )
             }}
@@ -198,40 +240,5 @@ export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; on
     <Modal isOpen={isOpen} onBackgroundClick={onDismiss} onEscapeKeydown={onDismiss}>
       {getModalContent()}
     </Modal>
-  )
-}
-
-const AssetRow = ({
-  asset,
-  onClick,
-  style,
-  ...rest
-}: {
-  asset: SubAsset
-  onClick: () => void
-  style: React.CSSProperties
-  [x: string]: any
-}) => {
-  const { account } = useWeb3React()
-  const currency = useCurrency(asset.contract)
-  const balance = useCurrencyBalance(account ?? undefined, currency ?? undefined)
-  const logo = useCurrencyLogo(asset.id, undefined)
-
-  return (
-    <Row
-      onClick={onClick}
-      style={style}
-      onMouseDown={(evt) => {
-        onClick()
-        rest.onMouseDown(evt)
-      }}
-    >
-      <ImageWithFallback src={logo} width={30} height={30} alt={`${asset.symbol}`} round />
-      <NameWrapper>
-        <div>{asset.id}</div>
-        <div>{asset.name}</div>
-      </NameWrapper>
-      {balance ? <div>{balance?.toSignificant(6)}</div> : <Loader size="12px" duration={'3s'} />}
-    </Row>
   )
 }
