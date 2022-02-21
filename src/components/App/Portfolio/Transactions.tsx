@@ -97,7 +97,7 @@ export default function Transactions() {
   }, [transactions, offset])
 
   const showLoadMore = useMemo(() => {
-    return paginatedTransactions.length % ITEMS_PER_OFFSET == 0
+    return paginatedTransactions.length !== transactions.length
   }, [paginatedTransactions])
 
   useEffect(() => {
