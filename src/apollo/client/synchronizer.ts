@@ -1,10 +1,11 @@
+import { SupportedChainId } from 'constants/chains'
 import { createApolloClient } from './index'
 
 const fantomClient = createApolloClient(`https://api.thegraph.com/subgraphs/name/${getSubgraphName(250)}`)
 
-export function getApolloClient(chainId) {
-  switch (Number(chainId)) {
-    case 250:
+export function getApolloClient(chainId: SupportedChainId) {
+  switch (chainId) {
+    case SupportedChainId.FANTOM:
       return fantomClient
     default:
       console.error(`${chainId} is not a supported subgraph network`)
@@ -12,9 +13,9 @@ export function getApolloClient(chainId) {
   }
 }
 
-export function getSubgraphName(chainId) {
-  switch (Number(chainId)) {
-    case 250:
+export function getSubgraphName(chainId: SupportedChainId) {
+  switch (chainId) {
+    case SupportedChainId.FANTOM:
       return 'dsynths/synchronizer-fantom'
     default:
       console.error(`${chainId} is not a supported subgraph network`)
