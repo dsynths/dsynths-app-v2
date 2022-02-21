@@ -21,7 +21,6 @@ export default function Portfolio() {
     <Container>
       <EquityChart />
       <PortfolioList />
-      <div>Trade History</div>
       <Transactions />
     </Container>
   )

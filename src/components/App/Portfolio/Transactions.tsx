@@ -43,6 +43,18 @@ const Row = styled.div`
   }
 `
 
+const TextBlock = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  height: 50px;
+
+  &:hover {
+    cursor: pointer;
+  }
+`
+
 const ITEMS_PER_OFFSET = 5
 
 export default function Transactions() {
@@ -96,19 +108,20 @@ export default function Transactions() {
     setOffset((prev) => (prev += 1))
   }
 
+  if (!account || !chainId || !paginatedTransactions.length) {
+    return null
+  }
+
   return (
-    <Wrapper border={isJadeTheme}>
-      {paginatedTransactions.length > 0 ? (
-        <>
-          {paginatedTransactions.map((tx, index) => (
-            <TransactionRow tx={tx} key={index} />
-          ))}
-          {showLoadMore && <div onClick={() => onLoadMore()}>Load more transactions</div>}
-        </>
-      ) : (
-        <div>No transactions to show</div>
-      )}
-    </Wrapper>
+    <>
+      <div style={{ marginTop: '15px' }}>Trade History</div>
+      <Wrapper border={isJadeTheme}>
+        {paginatedTransactions.map((tx, index) => (
+          <TransactionRow tx={tx} key={index} />
+        ))}
+        {showLoadMore && <TextBlock onClick={() => onLoadMore()}>Load more transactions</TextBlock>}
+      </Wrapper>
+    </>
   )
 }
 
