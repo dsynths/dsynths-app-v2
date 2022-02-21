@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Portfolio as PortfolioList, EquityChart } from 'components/App/Portfolio'
+import { EquityChart, Portfolio as PortfolioList, Transactions } from 'components/App/Portfolio'
 
 const Container = styled.div`
   display: flex;
@@ -21,6 +21,8 @@ export default function Portfolio() {
     <Container>
       <EquityChart />
       <PortfolioList />
+      <div>Trade History</div>
+      <Transactions />
     </Container>
   )
 }

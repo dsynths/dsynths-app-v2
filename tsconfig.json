@@ -2,6 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./src",
     "paths": {
+      "apollo/*": ["./apollo/*"],
       "assets/*": ["./assets/*"],
       "components/*": ["./components/*"],
       "constants/*": ["./constants/*"],

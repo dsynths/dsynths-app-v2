@@ -17,6 +17,10 @@ function getEasternStandardTime() {
   }
 }
 
+export function timestampToObject(timestamp: number) {
+  return dayjs.unix(timestamp)
+}
+
 export function isWeekend(): boolean {
   const { day } = getEasternStandardTime()
   // monday through friday
