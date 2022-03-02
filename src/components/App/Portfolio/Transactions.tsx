@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { ArrowRight, Repeat, ExternalLink as ExtLink, Info } from 'react-feather'
+import useCollapse from 'react-collapsed'
+import ReactTooltip from 'react-tooltip'
 
 import { getApolloClient } from 'apollo/client/synchronizer'
 import { TRANSACTIONS, Tx } from 'apollo/queries'
@@ -14,8 +16,6 @@ import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import { Card } from 'components/Card'
 import { ExternalLink } from 'components/Link'
 import ImageWithFallback from 'components/ImageWithFallback'
-import useCollapse from 'react-collapsed'
-import ReactTooltip from 'react-tooltip'
 import { NavButton } from 'components/Button'
 
 const Wrapper = styled(Card)<{
@@ -31,7 +31,7 @@ const Box = styled.div`
   margin: 0.25rem 0rem 1rem 0rem;
 `
 
-const TrasanctionRecord = styled.div<{
+const TransactionRecord = styled.div<{
   isExpanded: boolean
 }>`
   display: flex;
@@ -281,7 +281,7 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
   }
 
   return (
-    <TrasanctionRecord className="collapsible" isExpanded={isExpanded}>
+    <TransactionRecord className="collapsible" isExpanded={isExpanded}>
       <TransactionHeader className="header" {...getToggleProps()}>
         <CellWrapper flex={'0 0 20%'}>
           <ActionIconWrapper>
@@ -357,6 +357,6 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
         </TransactionContent>
       </div>
       {!isExpanded && isNotLastRow ? <Divider isExpanded={isExpanded} /> : <div style={{ marginBottom: '0.8rem' }} />}
-    </TrasanctionRecord>
+    </TransactionRecord>
   )
 }
