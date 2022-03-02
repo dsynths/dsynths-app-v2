@@ -10,5 +10,5 @@ export function truncateAddress(address: string, chars = 4) {
 }
 
 export function truncateHash(hash: string, chars = 4) {
-  return `${hash.substring(0, chars + 2)}...${hash.substring(42 - chars)}`
+  return `${hash.substring(0, chars + 2)}...${hash.substring(64 - chars)}`
 }

@@ -40,8 +40,8 @@ const TransactionRecord = styled.div<{
   flex-flow: column nowrap;
   justify-content: flex-start;
   padding-top: 0.8rem;
-  margin: ${({ isExpanded }) => (isExpanded ? `0.2rem` : `0rem`)};
-  border: ${({ theme, isExpanded }) => (isExpanded ? `1px solid ${theme.border1}` : `none`)};
+  margin: 3px;
+  border: ${({ theme, isExpanded }) => (isExpanded ? `1px solid ${theme.border1}` : `1px solid transparent`)};
   border-radius: ${({ isExpanded }) => (isExpanded ? `10px` : `0px`)};
 
   &:hover {
@@ -60,7 +60,7 @@ const TransactionHeader = styled.div`
 const TransactionContentWrapper = styled.div`
   display: flex;
   flex-flow: row nowrap;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   margin-top: 0.8rem;
 `
@@ -202,7 +202,7 @@ export default function Transactions() {
 
   const showLoadMore = useMemo(() => {
     return paginatedTransactions.length !== groupedTransactions.length
-  }, [paginatedTransactions])
+  }, [paginatedTransactions, groupedTransactions])
 
   useEffect(() => {
     setOffset(0)
@@ -239,7 +239,6 @@ export default function Transactions() {
 
 function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean }) {
   const { chainId } = useWeb3React()
-  const theme = useTheme()
   const { getCollapseProps, getToggleProps, isExpanded } = useCollapse(collapseConfig)
 
   const tickerLogo = useCurrencyLogo(tx.registrar.ticker, undefined)
@@ -250,7 +249,7 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
       const base = {
         amountIn: tx.amountIn.slice(0, 8),
         amountOut: tx.amountOut.slice(0, 8),
-        txHash: truncateHash(tx.id),
+        txHash: tx.id,
         fee: Number(tx.daoFee) + Number(tx.partnerFee),
         feeToolTip: 'DEUS Dao Fee: ' + tx.daoFee + '<br/> Partner Fee: ' + tx.partnerFee,
       }
@@ -332,44 +331,62 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
         </CellWrapper>
       </TransactionHeader>
       <div {...getCollapseProps()}>
-        <TransactionContent className="content">
-          <Divider isExpanded={isExpanded} />
-          <TransactionContentWrapper>
-            <CellWrapper flex={'0 0 50%'}>
-              <ActionDetailsWrapper>
-                <FeeToolTip
-                  id="fee"
-                  place="right"
-                  type="info"
-                  effect="solid"
-                  multiline
-                  backgroundColor={theme.border1}
-                />
-                <div>Fee</div>
-                <SecondaryLabel data-for="fee" data-tip={feeToolTip}>
-                  ${fee.toPrecision(2)}
-                  <Info size={10} color={theme.text2} style={{ marginLeft: '0.25rem' }} />
-                </SecondaryLabel>
-              </ActionDetailsWrapper>
-            </CellWrapper>
-            <CellWrapper flex={'0 0 50%'}>
-              <ActionDetailsWrapper>
-                <div>Transaction Hash</div>
-                <SecondaryLabel>
-                  {txHash}
-                  <ExternalLink
-                    href={getExplorerLink(chainId, ExplorerDataType.TRANSACTION, tx.id)}
-                    style={{ marginLeft: '0.25rem' }}
-                  >
-                    <ExtLink size={12} color={theme.text2} />
-                  </ExternalLink>
-                </SecondaryLabel>
-              </ActionDetailsWrapper>
-            </CellWrapper>
-          </TransactionContentWrapper>
-        </TransactionContent>
+        <CollapsedInformation isExpanded={isExpanded} fee={fee} feeToolTip={feeToolTip} txHash={txHash} />
       </div>
       {!isExpanded && isNotLastRow ? <Divider isExpanded={isExpanded} /> : <div style={{ marginBottom: '0.8rem' }} />}
     </TransactionRecord>
+  )
+}
+
+function CollapsedInformation({
+  isExpanded,
+  fee,
+  feeToolTip,
+  txHash,
+}: {
+  isExpanded: boolean
+  fee: number
+  feeToolTip: string
+  txHash: string
+}) {
+  const theme = useTheme()
+  const { chainId } = useWeb3React()
+
+  if (!chainId) {
+    return null
+  }
+
+  return (
+    <>
+      <TransactionContent className="content">
+        <Divider isExpanded={isExpanded} />
+        <TransactionContentWrapper>
+          <CellWrapper>
+            <ActionDetailsWrapper>
+              <FeeToolTip id="fee" place="right" type="info" effect="solid" multiline backgroundColor={theme.border1} />
+              <div>Fee</div>
+              <SecondaryLabel data-for="fee" data-tip={feeToolTip}>
+                {formatDollarAmount(fee)}
+                <Info size={10} color={theme.text2} style={{ marginLeft: '0.25rem' }} />
+              </SecondaryLabel>
+            </ActionDetailsWrapper>
+          </CellWrapper>
+          <CellWrapper style={{ marginLeft: 'auto' }}>
+            <ActionDetailsWrapper>
+              <div>Transaction Hash</div>
+              <SecondaryLabel>
+                <ExternalLink
+                  href={getExplorerLink(chainId, ExplorerDataType.TRANSACTION, txHash)}
+                  style={{ marginLeft: '0.25rem' }}
+                >
+                  {truncateHash(txHash)}
+                  <ExtLink size={12} color={theme.text2} />
+                </ExternalLink>
+              </SecondaryLabel>
+            </ActionDetailsWrapper>
+          </CellWrapper>
+        </TransactionContentWrapper>
+      </TransactionContent>
+    </>
   )
 }
