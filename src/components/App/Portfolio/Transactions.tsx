@@ -135,6 +135,10 @@ interface TxGroup {
   [x: number]: Tx[]
 }
 
+function formatDate(date: string): string {
+  return timestampToObject(parseInt(date)).format('MMMM DD, YYYY')
+}
+
 const ITEMS_PER_OFFSET = 1
 
 export default function Transactions() {
@@ -201,10 +205,6 @@ export default function Transactions() {
 
   if (!account || !chainId || !paginatedTransactions.length) {
     return null
-  }
-
-  const formatDate = (date: string) => {
-    return timestampToObject(parseInt(date)).format('MMMM DD, YYYY')
   }
 
   return (
