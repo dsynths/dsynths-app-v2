@@ -139,6 +139,10 @@ function formatDate(date: string): string {
   return timestampToObject(parseInt(date)).format('MMMM DD, YYYY')
 }
 
+function formatTime(date: string): string {
+  return timestampToObject(parseInt(date)).format('hh:mm A')
+}
+
 const ITEMS_PER_OFFSET = 1
 
 export default function Transactions() {
@@ -228,8 +232,6 @@ export default function Transactions() {
   )
 }
 
-// Play around with this to get a sense of the results:
-// https://thegraph.com/hosted-service/subgraph/dsynths/synchronizer-fantom?query=Transactions
 function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean }) {
   const { chainId } = useWeb3React()
   const theme = useTheme()
@@ -237,14 +239,6 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
     duration: 300,
   }
   const { getCollapseProps, getToggleProps, isExpanded } = useCollapse(config)
-
-  const { date, time } = useMemo(() => {
-    const obj = timestampToObject(parseInt(tx.timestamp))
-    return {
-      date: obj.format('MMMM DD, YYYY'),
-      time: obj.format('hh:mm A'),
-    }
-  }, [tx])
 
   const tickerLogo = useCurrencyLogo(tx.registrar.ticker, undefined)
   const deiLogo = useCurrencyLogo(undefined, 'DEI')
@@ -294,7 +288,7 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
           </ActionIconWrapper>
           <ActionDetailsWrapper>
             <div>{method}</div>
-            <SecondaryLabel>{time}</SecondaryLabel>
+            <SecondaryLabel>{formatTime(parseInt(tx.timestamp))}</SecondaryLabel>
           </ActionDetailsWrapper>
         </CellWrapper>
         <CellWrapper flex={'0 0 35%'}>
