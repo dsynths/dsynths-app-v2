@@ -17,6 +17,8 @@ import { Card } from 'components/Card'
 import { ExternalLink } from 'components/Link'
 import ImageWithFallback from 'components/ImageWithFallback'
 import { NavButton } from 'components/Button'
+import { truncateHash } from 'utils/account'
+import { formatDollarAmount } from 'utils/numbers'
 
 const Wrapper = styled(Card)<{
   border?: boolean
@@ -84,11 +86,10 @@ export const ActionIconWrapper = styled.div`
   align-items: center;
   justify-content: center;
   background: ${({ theme }) => theme.bg2};
-  padding: 0.25rem;
-  width: 1.75rem;
-  height: 1.75rem;
   border-radius: 50%;
-  border: 1px solid ${({ theme }) => theme.text3};
+  min-width: 25px;
+  min-height: 25px;
+  border: 1px solid ${({ theme }) => theme.border2};
 `
 
 export const ActionDetailsWrapper = styled.div`
@@ -141,6 +142,10 @@ function formatDate(date: string): string {
 
 function formatTime(date: string): string {
   return timestampToObject(parseInt(date)).format('hh:mm A')
+}
+
+const collapseConfig = {
+  duration: 300,
 }
 
 const ITEMS_PER_OFFSET = 1
@@ -221,7 +226,7 @@ export default function Transactions() {
             <Date>{formatDate(txArr[0].timestamp)}</Date>
             <Box>
               {txArr.map((tx, index) => (
-                <TransactionRow tx={tx} key={index} isNotLastRow={index != txArr.length - 1} />
+                <TransactionRow tx={tx} key={index} isNotLastRow={index !== txArr.length - 1} />
               ))}
             </Box>
           </>
@@ -235,45 +240,54 @@ export default function Transactions() {
 function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean }) {
   const { chainId } = useWeb3React()
   const theme = useTheme()
-  const config = {
-    duration: 300,
-  }
-  const { getCollapseProps, getToggleProps, isExpanded } = useCollapse(config)
+  const { getCollapseProps, getToggleProps, isExpanded } = useCollapse(collapseConfig)
 
   const tickerLogo = useCurrencyLogo(tx.registrar.ticker, undefined)
   const deiLogo = useCurrencyLogo(undefined, 'DEI')
 
-  const {
-    method,
-    amountIn,
-    amountOut,
-    tickerIn,
-    tickerOut,
-    logoIn,
-    logoOut,
-    priceIn,
-    priceOut,
-    txHash,
-    fee,
-    feeToolTip,
-    color,
-  } = useMemo(() => {
-    return {
-      method: tx.method === 'open' ? 'Buy' : 'Sell',
-      amountIn: tx.amountIn.slice(0, 8),
-      amountOut: tx.amountOut.slice(0, 8),
-      tickerIn: tx.method === 'open' ? 'DEI' : tx.registrar.symbol,
-      tickerOut: tx.method === 'open' ? tx.registrar.symbol : 'DEI',
-      logoIn: tx.method === 'open' ? deiLogo : tickerLogo,
-      logoOut: tx.method === 'open' ? tickerLogo : deiLogo,
-      priceIn: tx.method === 'open' ? '1' : tx.price.slice(0, 8),
-      priceOut: tx.method === 'open' ? tx.price.slice(0, 8) : '1',
-      txHash: tx.id.slice(0, 6) + '...' + tx.id.slice(tx.id.length - 4),
-      fee: Number(tx.daoFee) + Number(tx.partnerFee),
-      feeToolTip: 'Deus Dao Fee: ' + tx.daoFee.slice(0, 6) + '<br/> Partner Fee: ' + tx.partnerFee.slice(0, 6),
-      color: tx.method === 'open' ? 'green' : 'red',
-    }
-  }, [tx])
+  const { amountIn, amountOut, txHash, fee, feeToolTip, method, tickerIn, tickerOut, logoIn, logoOut, price, color } =
+    useMemo(() => {
+      const base = {
+        amountIn: tx.amountIn.slice(0, 8),
+        amountOut: tx.amountOut.slice(0, 8),
+        txHash: truncateHash(tx.id),
+        fee: Number(tx.daoFee) + Number(tx.partnerFee),
+        feeToolTip: 'DEUS Dao Fee: ' + tx.daoFee + '<br/> Partner Fee: ' + tx.partnerFee,
+      }
+      if (tx.method === 'open') {
+        return {
+          ...base,
+          method: 'Buy',
+          tickerIn: 'DEI',
+          tickerOut: tx.registrar.symbol,
+          logoIn: deiLogo,
+          logoOut: tickerLogo,
+          color: 'green',
+          price: tx.price,
+        }
+      }
+      return {
+        ...base,
+        method: 'Sell',
+        tickerIn: tx.registrar.symbol,
+        tickerOut: 'DEI',
+        logoIn: tickerLogo,
+        logoOut: deiLogo,
+        price: tx.price,
+        color: 'red',
+      }
+    }, [tx, deiLogo, tickerLogo])
+
+  const getPriceOrValueLabel = useCallback(
+    (ticker: string) => {
+      if (ticker === 'DEI') {
+        return <SecondaryLabel>At {formatDollarAmount(Number(price))}</SecondaryLabel>
+      }
+      const amount = tx.method === 'open' ? amountOut : amountIn
+      return <SecondaryLabel>{formatDollarAmount(Number(price) * Number(amount))}</SecondaryLabel>
+    },
+    [price, amountIn, amountOut, tx]
+  )
 
   if (!chainId) {
     return null
@@ -284,36 +298,36 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
       <TransactionHeader className="header" {...getToggleProps()}>
         <CellWrapper flex={'0 0 20%'}>
           <ActionIconWrapper>
-            <Repeat size={24} color={color} />
+            <Repeat size={15} color={color} />
           </ActionIconWrapper>
           <ActionDetailsWrapper>
             <div>{method}</div>
-            <SecondaryLabel>{formatTime(parseInt(tx.timestamp))}</SecondaryLabel>
+            <SecondaryLabel>{formatTime(tx.timestamp)}</SecondaryLabel>
           </ActionDetailsWrapper>
         </CellWrapper>
         <CellWrapper flex={'0 0 35%'}>
           <ActionIconWrapper>
-            <ImageWithFallback src={logoIn} alt={`${tickerIn} Logo`} width={24} height={24} />
+            <ImageWithFallback src={logoIn} alt={`${tickerIn} Logo`} width={18} height={18} />
           </ActionIconWrapper>
           <ActionDetailsWrapper>
             <div>
               {amountIn} {tickerIn}
             </div>
-            <SecondaryLabel>${priceIn}</SecondaryLabel>
+            {getPriceOrValueLabel(tickerIn)}
           </ActionDetailsWrapper>
         </CellWrapper>
         <CellWrapper flex={'0 0 10%'}>
-          <ArrowRight size={24} />
+          <ArrowRight size={20} strokeWidth={1} />
         </CellWrapper>
         <CellWrapper flex={'0 0 35%'}>
           <ActionIconWrapper>
-            <ImageWithFallback src={logoOut} alt={`${tickerOut} Logo`} width={24} height={24} />
+            <ImageWithFallback src={logoOut} alt={`${tickerOut} Logo`} width={18} height={18} />
           </ActionIconWrapper>
           <ActionDetailsWrapper>
             <div>
               {amountOut} {tickerOut}
             </div>
-            <SecondaryLabel>${priceOut}</SecondaryLabel>
+            {getPriceOrValueLabel(tickerOut)}
           </ActionDetailsWrapper>
         </CellWrapper>
       </TransactionHeader>
