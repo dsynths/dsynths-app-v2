@@ -222,7 +222,7 @@ export default function Transactions() {
             </Box>
           </>
         ))}
-        {showLoadMore && <SecondaryButton onClick={() => onLoadMore()}>Show more trades</SecondaryButton>}
+        {showLoadMore && <SecondaryButton onClick={onLoadMore}>Show more trades</SecondaryButton>}
       </Wrapper>
     </>
   )
