@@ -209,7 +209,7 @@ export default function Transactions() {
 
   return (
     <>
-      <div style={{ marginTop: '15px' }}>Trade History</div>
+      <div style={{ margin: '15px 0' }}>Trade History</div>
       <Wrapper border={isJadeTheme}>
         {/* TODO : Have a search bar here to filter the trades of a particular synth */}
         {paginatedTransactions.map((txArr) => (
