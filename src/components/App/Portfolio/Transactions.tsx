@@ -211,7 +211,7 @@ export default function Transactions() {
     <>
       <div style={{ margin: '15px 0' }}>Trade History</div>
       <Wrapper border={isJadeTheme}>
-        {/* TODO : Have a search bar here to filter the trades of a particular synth */}
+        {/* TODO : Have a search bar here to filter the trades of a particular Registrar */}
         {paginatedTransactions.map((txArr) => (
           <>
             <Date>{formatDate(txArr[0].timestamp)}</Date>
