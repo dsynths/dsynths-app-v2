@@ -123,12 +123,17 @@ const FeeToolTip = styled(ReactTooltip)`
   padding: 3px 7px !important;
   font-size: 0.6rem !important;
 `
+
 const SecondaryButton = styled(NavButton)`
   width: fit-content;
   align-self: center;
   margin-top: -0.5rem;
   font-size: 0.8rem;
 `
+
+interface TxGroup {
+  [x: number]: Tx[]
+}
 
 const ITEMS_PER_OFFSET = 1
 
@@ -168,8 +173,8 @@ export default function Transactions() {
   }, [fetchTransactions])
 
   // group txs based on txs in a single day
-  const groupedTransactions = useMemo(() => {
-    const txs = transactions.reduce((arr, tx) => {
+  const groupedTransactions: Array<Tx[]> = useMemo(() => {
+    const txs = transactions.reduce((arr: TxGroup, tx) => {
       const id = Math.floor(parseInt(tx.timestamp) / 86400)
       if (!arr[id]) arr[id] = []
       arr[id].push(tx)
