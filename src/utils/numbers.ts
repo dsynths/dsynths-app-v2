@@ -9,7 +9,7 @@ export const formatDollarAmount = (num: number | undefined, digits = 2, round = 
   }
 
   return numbro(num).formatCurrency({
-    average: round,
+    thousandSeparated: true,
     mantissa: num > 1000 ? 2 : digits,
     abbreviations: {
       million: 'M',
