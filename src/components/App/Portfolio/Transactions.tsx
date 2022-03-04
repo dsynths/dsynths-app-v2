@@ -27,10 +27,12 @@ const Wrapper = styled(Card)<{
   padding: 0.8rem;
 `
 const Box = styled.div`
-  padding: 0.25rem;
+  display: flex;
+  flex-flow: column nowrap;
   border-radius: 10px;
   border: 1px solid ${({ theme }) => theme.border2};
   margin: 0.25rem 0rem 1rem 0rem;
+  padding: 0.25rem;
 `
 
 const TransactionRecord = styled.div<{
@@ -40,9 +42,9 @@ const TransactionRecord = styled.div<{
   flex-flow: column nowrap;
   justify-content: flex-start;
   padding-top: 0.8rem;
-  margin: 3px;
-  border: ${({ theme, isExpanded }) => (isExpanded ? `1px solid ${theme.border1}` : `1px solid transparent`)};
+  border: ${({ theme, isExpanded }) => (isExpanded ? `1px solid ${theme.border1}` : 'none')};
   border-radius: ${({ isExpanded }) => (isExpanded ? `10px` : `0px`)};
+  margin-bottom: ${({ isExpanded }) => (isExpanded ? `0.25rem` : `0px`)};
 
   &:hover {
     cursor: pointer;
@@ -244,49 +246,53 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
   const tickerLogo = useCurrencyLogo(tx.registrar.ticker, undefined)
   const deiLogo = useCurrencyLogo(undefined, 'DEI')
 
-  const { amountIn, amountOut, txHash, fee, feeToolTip, method, tickerIn, tickerOut, logoIn, logoOut, price, color } =
-    useMemo(() => {
-      const base = {
-        amountIn: tx.amountIn.slice(0, 8),
-        amountOut: tx.amountOut.slice(0, 8),
-        txHash: tx.id,
-        fee: Number(tx.daoFee) + Number(tx.partnerFee),
-        feeToolTip: 'DEUS Dao Fee: ' + tx.daoFee + '<br/> Partner Fee: ' + tx.partnerFee,
-      }
-      if (tx.method === 'open') {
-        return {
-          ...base,
-          method: 'Buy',
-          tickerIn: 'DEI',
-          tickerOut: tx.registrar.symbol,
-          logoIn: deiLogo,
-          logoOut: tickerLogo,
-          color: 'green',
-          price: tx.price,
-        }
-      }
+  const {
+    amountIn,
+    amountOut,
+    txHash,
+    fee,
+    feeToolTip,
+    method,
+    tickerIn,
+    tickerOut,
+    logoIn,
+    logoOut,
+    priceIn,
+    priceOut,
+    color,
+  } = useMemo(() => {
+    const base = {
+      amountIn: tx.amountIn.slice(0, 8),
+      amountOut: tx.amountOut.slice(0, 8),
+      txHash: tx.id,
+      fee: Number(tx.daoFee) + Number(tx.partnerFee),
+      feeToolTip: 'DEUS Dao Fee: ' + Number(tx.daoFee) + '<br/> Partner Fee: ' + Number(tx.partnerFee),
+    }
+    if (tx.method === 'open') {
       return {
         ...base,
-        method: 'Sell',
-        tickerIn: tx.registrar.symbol,
-        tickerOut: 'DEI',
-        logoIn: tickerLogo,
-        logoOut: deiLogo,
-        price: tx.price,
-        color: 'red',
+        method: 'Buy',
+        tickerIn: 'DEI',
+        tickerOut: tx.registrar.symbol,
+        logoIn: deiLogo,
+        logoOut: tickerLogo,
+        color: 'green',
+        priceIn: 1,
+        priceOut: parseFloat(tx.price).toFixed(2),
       }
-    }, [tx, deiLogo, tickerLogo])
-
-  const getPriceOrValueLabel = useCallback(
-    (ticker: string) => {
-      if (ticker === 'DEI') {
-        return <SecondaryLabel>At {formatDollarAmount(Number(price))}</SecondaryLabel>
-      }
-      const amount = tx.method === 'open' ? amountOut : amountIn
-      return <SecondaryLabel>{formatDollarAmount(Number(price) * Number(amount))}</SecondaryLabel>
-    },
-    [price, amountIn, amountOut, tx]
-  )
+    }
+    return {
+      ...base,
+      method: 'Sell',
+      tickerIn: tx.registrar.symbol,
+      tickerOut: 'DEI',
+      logoIn: tickerLogo,
+      logoOut: deiLogo,
+      priceIn: parseFloat(tx.price).toFixed(2),
+      priceOut: 1,
+      color: 'red',
+    }
+  }, [tx, deiLogo, tickerLogo])
 
   if (!chainId) {
     return null
@@ -312,7 +318,7 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
             <div>
               {amountIn} {tickerIn}
             </div>
-            {getPriceOrValueLabel(tickerIn)}
+            <SecondaryLabel>${priceIn}</SecondaryLabel>
           </ActionDetailsWrapper>
         </CellWrapper>
         <CellWrapper flex={'0 0 10%'}>
@@ -326,7 +332,7 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
             <div>
               {amountOut} {tickerOut}
             </div>
-            {getPriceOrValueLabel(tickerOut)}
+            <SecondaryLabel>${priceOut}</SecondaryLabel>
           </ActionDetailsWrapper>
         </CellWrapper>
       </TransactionHeader>
@@ -361,7 +367,7 @@ function CollapsedInformation({
       <TransactionContent className="content">
         <Divider isExpanded={isExpanded} />
         <TransactionContentWrapper>
-          <CellWrapper>
+          <CellWrapper flex={'0 0 50%'}>
             <ActionDetailsWrapper>
               <FeeToolTip id="fee" place="right" type="info" effect="solid" multiline backgroundColor={theme.border1} />
               <div>Fee</div>
@@ -371,18 +377,15 @@ function CollapsedInformation({
               </SecondaryLabel>
             </ActionDetailsWrapper>
           </CellWrapper>
-          <CellWrapper style={{ marginLeft: 'auto' }}>
+          <CellWrapper flex={'0 0 50%'}>
             <ActionDetailsWrapper>
               <div>Transaction Hash</div>
-              <SecondaryLabel>
-                <ExternalLink
-                  href={getExplorerLink(chainId, ExplorerDataType.TRANSACTION, txHash)}
-                  style={{ marginLeft: '0.25rem' }}
-                >
+              <ExternalLink href={getExplorerLink(chainId, ExplorerDataType.TRANSACTION, txHash)}>
+                <SecondaryLabel>
                   {truncateHash(txHash)}
-                  <ExtLink size={12} color={theme.text2} />
-                </ExternalLink>
-              </SecondaryLabel>
+                  <ExtLink size={12} color={theme.text2} style={{ marginLeft: '0.25rem' }} />
+                </SecondaryLabel>
+              </ExternalLink>
             </ActionDetailsWrapper>
           </CellWrapper>
         </TransactionContentWrapper>
