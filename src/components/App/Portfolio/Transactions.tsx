@@ -42,9 +42,10 @@ const TransactionRecord = styled.div<{
   flex-flow: column nowrap;
   justify-content: flex-start;
   padding-top: 0.8rem;
-  border: ${({ theme, isExpanded }) => (isExpanded ? `1px solid ${theme.border1}` : 'none')};
+  border: ${({ theme, isExpanded }) => (isExpanded ? `1px solid ${theme.border1}` : '1px solid transparent')};
   border-radius: ${({ isExpanded }) => (isExpanded ? `10px` : `0px`)};
-  margin-bottom: ${({ isExpanded }) => (isExpanded ? `0.25rem` : `0px`)};
+  margin: ${({ isExpanded }) => (isExpanded ? `0.25rem 0` : `0px`)};
+  transition: all 0.5s ease;
 
   &:hover {
     cursor: pointer;
@@ -377,7 +378,7 @@ function CollapsedInformation({
               </SecondaryLabel>
             </ActionDetailsWrapper>
           </CellWrapper>
-          <CellWrapper flex={'0 0 50%'}>
+          <CellWrapper style={{ marginLeft: 'auto' }}>
             <ActionDetailsWrapper>
               <div>Transaction Hash</div>
               <ExternalLink href={getExplorerLink(chainId, ExplorerDataType.TRANSACTION, txHash)}>
