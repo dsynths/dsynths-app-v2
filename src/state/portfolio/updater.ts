@@ -5,25 +5,25 @@ import { BigNumber } from 'bignumber.js'
 
 import { updateBalance, removeContract, updateTotalEquity } from './actions'
 import useWeb3React from 'hooks/useWeb3'
-import { useTokens } from 'hooks/useAssetList'
 import { useTokenBalances } from 'state/wallet/hooks'
 import { useActiveBalances } from './hooks'
+import { useRegistrarTokens } from 'lib/synchronizer/hooks'
 
 export default function Updater(): null {
   const dispatch = useAppDispatch()
   const { account } = useWeb3React()
-  const assetTokens = useTokens()
-  const assetBalances = useTokenBalances(account ?? undefined, assetTokens)
+  const registrarTokens = useRegistrarTokens()
+  const tokenBalances = useTokenBalances(account ?? undefined, registrarTokens)
   const activeBalances = useActiveBalances()
 
   useEffect(() => {
-    Object.entries(assetBalances).map(([contract, balance]) => {
+    Object.entries(tokenBalances).map(([contract, balance]) => {
       if (balance.equalTo(ZERO)) {
         return dispatch(removeContract({ contract }))
       }
       dispatch(updateBalance({ contract, balance: balance.toExact() }))
     }, {})
-  }, [dispatch, assetBalances])
+  }, [dispatch, tokenBalances])
 
   useEffect(() => {
     const totalEquity = Object.values(activeBalances).reduce((acc: BigNumber, activeBalance) => {

@@ -4,12 +4,13 @@ import Image from 'next/image'
 import { darken } from 'polished'
 
 import { useModalOpen, useNetworkModalToggle } from 'state/application/hooks'
-import { ApplicationModal } from 'state/application/reducer'
 import useWeb3React from 'hooks/useWeb3'
 import useRpcChangerCallback from 'hooks/useRpcChangerCallback'
 
+import { ApplicationModal } from 'state/application/reducer'
 import { SupportedChainId, SynchronizerChains } from 'constants/chains'
 import { ChainInfo } from 'constants/chainInfo'
+
 import { Modal, ModalHeader } from 'components/Modal'
 import { IconWrapper, GreenCircle } from 'components/Icons'
 

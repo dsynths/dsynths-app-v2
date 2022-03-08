@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import { AssetCard } from 'components/App/AssetCard'
+import { RegistrarCard } from 'components/App/RegistrarCard'
 
 const Container = styled.div`
   display: flex;
@@ -13,10 +13,10 @@ const Container = styled.div`
   overflow: visible;
 `
 
-export default function Asset() {
+export default function Registrar() {
   return (
     <Container>
-      <AssetCard />
+      <RegistrarCard />
     </Container>
   )
 }

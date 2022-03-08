@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/router'
 import styled from 'styled-components'
 import memoize from 'memoize-one'
 import { FixedSizeList as List, areEqual } from 'react-window'
@@ -7,16 +8,17 @@ import { useSelect, SelectSearchOption } from 'react-select-search'
 import AutoSizer from 'react-virtualized-auto-sizer'
 import { isMobile } from 'react-device-detect'
 import isEmpty from 'lodash/isEmpty'
+import { Registrar } from 'lib/synchronizer'
 
-import { SubAsset, useLongAssetsList } from 'hooks/useAssetList'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
+import { useIsDedicatedTheme } from 'hooks/useTheme'
+import { useActiveBalances } from 'state/portfolio/hooks'
+import { useLongRegistrars } from 'lib/synchronizer/hooks'
+
+import { FALLBACK_CHAIN_ID } from 'constants/chains'
 
 import { MobileModal, Modal, ModalHeader } from 'components/Modal'
 import ImageWithFallback from 'components/ImageWithFallback'
-import { FALLBACK_CHAIN_ID } from 'constants/chains'
-import { useRouter } from 'next/router'
-import { useIsDedicatedTheme } from 'hooks/useTheme'
-import { useActiveBalances } from 'state/portfolio/hooks'
 
 const SearchWrapper = styled.div`
   display: flex;
@@ -115,17 +117,17 @@ function fuzzySearch(options: SelectSearchOption[]): any {
   }
 }
 
-const AssetRow = ({ data, index, style }: { data: any; index: number; style: React.CSSProperties }) => {
+const RegistrarRow = ({ data, index, style }: { data: any; index: number; style: React.CSSProperties }) => {
   const { items, onClick, optionProps } = data
-  const asset = items[index] as unknown as SubAsset
-  const logo = useCurrencyLogo(asset.id, undefined)
+  const registrar = items[index] as unknown as Registrar
+  const logo = useCurrencyLogo(registrar.id, undefined)
   const balances = useActiveBalances()
   const [loading, setLoading] = useState(true)
 
   const balance = useMemo(() => {
-    if (!asset || isEmpty(balances) || !(asset.contract in balances)) return 0
-    return balances[asset.contract].balance
-  }, [asset, balances])
+    if (!registrar || isEmpty(balances) || !(registrar.contract in balances)) return 0
+    return balances[registrar.contract].balance
+  }, [registrar, balances])
 
   useEffect(() => {
     setTimeout(() => {
@@ -137,44 +139,44 @@ const AssetRow = ({ data, index, style }: { data: any; index: number; style: Rea
     <Row
       onClick={onClick}
       onMouseDown={(evt) => {
-        onClick(asset.contract)
+        onClick(registrar.contract)
         optionProps.onMouseDown(evt)
       }}
       style={style}
     >
-      <ImageWithFallback src={logo} width={30} height={30} alt={`${asset.symbol}`} round loading={loading} />
+      <ImageWithFallback src={logo} width={30} height={30} alt={`${registrar.symbol}`} round loading={loading} />
       <NameWrapper>
-        <div>{asset.id}</div>
-        <div>{asset.name}</div>
+        <div>{registrar.id}</div>
+        <div>{registrar.name}</div>
       </NameWrapper>
       <div>{balance}</div>
     </Row>
   )
 }
 
-const MemoAssetRow = React.memo(AssetRow, areEqual)
+const MemoRegistrarRow = React.memo(RegistrarRow, areEqual)
 
-const createItemData = memoize((items: SelectSearchOption[], onClick: (assetId?: string) => void, optionProps) => ({
+const createItemData = memoize((items: SelectSearchOption[], onClick: (registrarId?: string) => void, optionProps) => ({
   items,
   onClick,
   optionProps,
 }))
 
-export default function AssetsModal({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: () => void }) {
-  return isOpen ? <ActiveAssetsModal isOpen={isOpen} onDismiss={onDismiss} /> : null
+export default function RegistrarsModal({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: () => void }) {
+  return isOpen ? <ActiveRegistrarsModal isOpen={isOpen} onDismiss={onDismiss} /> : null
 }
 
-function ActiveAssetsModal({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: () => void }) {
-  const assetList = useLongAssetsList(FALLBACK_CHAIN_ID)
+function ActiveRegistrarsModal({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: () => void }) {
+  const registrarList = useLongRegistrars(FALLBACK_CHAIN_ID) // this prevents us from showing [] with an unknown chain
   const router = useRouter()
   const isDedicatedTheme = useIsDedicatedTheme()
 
-  const assets: SelectSearchOption[] = useMemo(() => {
-    return assetList.map((o) => ({ ...o, value: o.contract }))
-  }, [assetList])
+  const registrars: SelectSearchOption[] = useMemo(() => {
+    return registrarList.map((o) => ({ ...o, value: o.contract }))
+  }, [registrarList])
 
   const [snapshot, searchProps, optionProps] = useSelect({
-    options: assets,
+    options: registrars,
     value: '',
     search: true,
     filterOptions: fuzzySearch,
@@ -189,10 +191,10 @@ function ActiveAssetsModal({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: 
   )
 
   const onClick = useCallback(
-    (assetId?: string) => {
+    (registrarId?: string) => {
       searchProps.onBlur()
       onDismiss()
-      assetId && router.push(buildUrl(`trade?assetId=${assetId}`))
+      registrarId && router.push(buildUrl(`trade?registrarId=${registrarId}`))
     },
     [router, onDismiss, searchProps, buildUrl]
   )
@@ -225,7 +227,7 @@ function ActiveAssetsModal({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: 
                   itemData={itemData}
                   overscanCount={20}
                 >
-                  {MemoAssetRow}
+                  {MemoRegistrarRow}
                 </List>
               )
             }}

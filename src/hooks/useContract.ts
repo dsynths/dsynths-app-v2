@@ -6,13 +6,9 @@ import { Web3Provider } from '@ethersproject/providers'
 
 import useWeb3React from './useWeb3'
 
-import ERC20_ABI from 'constants/abi/ERC20.json'
-import ERC20_BYTES32_ABI from 'constants/abi/ERC20'
-import MULTICALL2_ABI from 'constants/abi/MULTICALL2.json'
-import SynchronizerABI from 'constants/abi/SYNCHRONIZER.json'
-import PartnerManagerABI from 'constants/abi/PARTNER_MANAGER.json'
-import { Providers } from 'constants/providers'
+import { ERC20_ABI, ERC20_BYTES32_ABI, Multicall2ABI, SynchronizerABI, PartnerManagerABI } from 'constants/abi'
 import { Multicall2, PartnerManager, Synchronizer } from 'constants/addresses'
+import { Providers } from 'constants/providers'
 
 export function useContract<T extends Contract = Contract>(
   addressOrAddressMap: string | null | undefined,
@@ -59,7 +55,7 @@ export function usePartnerManager() {
 export function useMulticall2Contract() {
   const { chainId } = useWeb3React()
   const address = useMemo(() => (chainId ? Multicall2[chainId] : undefined), [chainId])
-  return useContract(address, MULTICALL2_ABI)
+  return useContract(address, Multicall2ABI)
 }
 
 export function getProviderOrSigner(library: any, account?: string): any {

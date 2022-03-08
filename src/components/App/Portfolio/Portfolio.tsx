@@ -1,23 +1,21 @@
 import React, { useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import BigNumber from 'bignumber.js'
 import { Eye, EyeOff } from 'react-feather'
+import { useAppDispatch } from 'state'
 
 import useWeb3React from 'hooks/useWeb3'
-import { useAssetByContract } from 'hooks/useAssetList'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import { Direction } from 'hooks/useTradePage'
-
-import { useAppDispatch } from 'state'
 import { useIsJadeTheme } from 'hooks/useTheme'
 import useRpcChangerCallback from 'hooks/useRpcChangerCallback'
+import { useRegistrarByContract } from 'lib/synchronizer/hooks'
+
 import { Balance } from 'state/portfolio/reducer'
 import { updatePrice, updateEquity } from 'state/portfolio/actions'
 import { useActiveBalances, useShowEquity, useToggleEquity, useTotalEquity } from 'state/portfolio/hooks'
-import { ConductedStatus, useConductedState } from 'state/conducted/reducer'
-import { DetailsStatus, useDetailsState } from 'state/details/reducer'
 import { useWalletModalToggle } from 'state/application/hooks'
 
 import { formatDollarAmount } from 'utils/numbers'
@@ -26,7 +24,7 @@ import { FALLBACK_CHAIN_ID, SynchronizerChains } from 'constants/chains'
 import { API_BASE_URL } from 'constants/api'
 
 import ImageWithFallback from 'components/ImageWithFallback'
-import { Loader, Network } from 'components/Icons'
+import { Network } from 'components/Icons'
 import { Card } from 'components/Card'
 import { PrimaryButton } from 'components/Button'
 
@@ -202,9 +200,6 @@ function sortBalances(a: sortableBalance, b: sortableBalance) {
 
 export default function Portfolio() {
   const { chainId, account } = useWeb3React()
-  const theme = useTheme()
-  const { status: conductedStatus } = useConductedState()
-  const { status: detailsStatus } = useDetailsState()
   const toggleWalletModal = useWalletModalToggle()
   const isJadeTheme = useIsJadeTheme()
   const rpcChangerCallback = useRpcChangerCallback()
@@ -217,10 +212,6 @@ export default function Portfolio() {
 
   const toggleEquity = useToggleEquity()
   const showEquity = useShowEquity()
-
-  const isLoading: boolean = useMemo(() => {
-    return !(conductedStatus === ConductedStatus.OK && detailsStatus === DetailsStatus.OK)
-  }, [conductedStatus, detailsStatus])
 
   const isSupportedChainId: boolean = useMemo(() => {
     if (!chainId || !account) return false
@@ -246,15 +237,6 @@ export default function Portfolio() {
           </p>
           <PrimaryButton onClick={() => rpcChangerCallback(FALLBACK_CHAIN_ID)}>Switch to Fantom Mainnet</PrimaryButton>
         </SwitchBlock>
-      )
-    }
-
-    if (isLoading) {
-      return (
-        <Row>
-          <PrimaryLabel style={{ marginRight: '8px' }}>Loading assets</PrimaryLabel>
-          <Loader size="12.5px" duration={'3s'} stroke={theme.text2} />
-        </Row>
       )
     }
 
@@ -289,7 +271,7 @@ export default function Portfolio() {
       ) : (
         <>
           {contracts.map((contract, index) => (
-            <AssetRow key={index} contract={contract} />
+            <RegistrarRow key={index} contract={contract} />
           ))}
         </>
       )}
@@ -297,11 +279,11 @@ export default function Portfolio() {
   )
 }
 
-function AssetRow({ contract }: { contract: string }) {
+function RegistrarRow({ contract }: { contract: string }) {
   const dispatch = useAppDispatch()
   const router = useRouter()
-  const asset = useAssetByContract(contract)
-  const logo = useCurrencyLogo(asset?.id, asset?.symbol)
+  const registrar = useRegistrarByContract(contract)
+  const logo = useCurrencyLogo(registrar?.id, registrar?.symbol)
   const balances = useActiveBalances()
   const showEquity = useShowEquity()
   const totalEquity = useTotalEquity()
@@ -333,21 +315,21 @@ function AssetRow({ contract }: { contract: string }) {
 
   useEffect(() => {
     const getPrice = async () => {
-      if (!contract || !asset) return
+      if (!contract || !registrar) return
 
       // If within normal trading hours
-      if (parseFloat(asset.price)) {
-        dispatch(updatePrice({ contract, price: asset.price }))
+      if (parseFloat(registrar.price)) {
+        dispatch(updatePrice({ contract, price: registrar.price }))
         return
       }
 
       // Try to use API price (this will only be called once)
-      const quote = await fetchQuote(asset.ticker)
+      const quote = await fetchQuote(registrar.ticker)
       if (!quote) return
       dispatch(updatePrice({ contract, price: quote.current.toString() }))
     }
     getPrice()
-  }, [dispatch, contract, asset, fetchQuote])
+  }, [dispatch, contract, registrar, fetchQuote])
 
   useEffect(() => {
     dispatch(updateEquity({ contract, equity: equity.toString() }))
@@ -365,7 +347,7 @@ function AssetRow({ contract }: { contract: string }) {
       const queryString = Object.keys(router.query)
         .map((key) => key + '=' + router.query[key])
         .join('&')
-      return `/trade?assetId=${contract}&${queryString}`
+      return `/trade?registrarId=${contract}&${queryString}`
     },
     [router]
   )
@@ -373,12 +355,12 @@ function AssetRow({ contract }: { contract: string }) {
   return (
     <Link href={buildUrl(contract)} passHref>
       <RowWrapper>
-        <ImageWithFallback src={logo} width={30} height={30} alt={`${asset?.symbol}`} round />
+        <ImageWithFallback src={logo} width={30} height={30} alt={`${registrar?.symbol}`} round />
         <RowContent>
-          <NameWrapper long={asset?.direction === Direction.LONG}>
-            <div>{asset?.symbol}</div>
-            <div>{asset?.name}</div>
-            <div>{asset?.direction}</div>
+          <NameWrapper long={registrar?.direction === Direction.LONG}>
+            <div>{registrar?.symbol}</div>
+            <div>{registrar?.name}</div>
+            <div>{registrar?.direction}</div>
           </NameWrapper>
           {showEquity && <BalanceLabel>{formattedBalance}</BalanceLabel>}
         </RowContent>

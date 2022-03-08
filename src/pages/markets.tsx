@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { useRouter } from 'next/router'
+import { Registrar, Sector } from 'lib/synchronizer'
 
 import { useWalletModalToggle } from 'state/application/hooks'
-import { Sector, Sectors } from 'state/details/reducer'
-import { SubAsset } from 'hooks/useAssetList'
 import useWeb3React from 'hooks/useWeb3'
 import useRpcChangerCallback from 'hooks/useRpcChangerCallback'
 import { ChainInfo } from 'constants/chainInfo'
@@ -53,10 +52,10 @@ const Label = styled.span<{
 export default function Markets() {
   const { chainId, account } = useWeb3React()
   const router = useRouter()
-  const [selectedSector, setSelectedSector] = useState(Sectors[0])
+  const [selectedSector, setSelectedSector] = useState(Sector.STOCKS)
 
   const [showModal, setShowModal] = useState(false)
-  const [modalAsset, setModalAsset] = useState<SubAsset>()
+  const [modalRegistrar, setModalRegistrar] = useState<Registrar>()
   const [chainHasSwitched, setChainHasSwitched] = useState(false)
   const [navigateReady, setNavigateReady] = useState(false)
   const { snapshot, searchProps } = useSearch(selectedSector)
@@ -68,7 +67,7 @@ export default function Markets() {
       const queryString = Object.keys(router.query)
         .map((key) => key + '=' + router.query[key])
         .join('&')
-      return `/trade?assetId=${contract}&${queryString}`
+      return `/trade?registrarId=${contract}&${queryString}`
     },
     [router]
   )
@@ -81,22 +80,22 @@ export default function Markets() {
   }, [chainHasSwitched, chainId])
 
   const onSelect = useCallback(
-    (asset: SubAsset) => {
+    (registrar: Registrar) => {
       if (!chainId) {
-        setModalAsset(asset)
+        setModalRegistrar(registrar)
         setShowModal(true)
       } else {
-        router.push(buildUrl(asset.contract))
+        router.push(buildUrl(registrar.contract))
       }
     },
     [chainId, router, buildUrl]
   )
 
   useEffect(() => {
-    if (navigateReady && modalAsset) {
-      router.push(buildUrl(modalAsset.contract)).then(() => setNavigateReady(false))
+    if (navigateReady && modalRegistrar) {
+      router.push(buildUrl(modalRegistrar.contract)).then(() => setNavigateReady(false))
     }
-  }, [navigateReady, modalAsset, buildUrl, router])
+  }, [navigateReady, modalRegistrar, buildUrl, router])
 
   const placeholder = useMemo(() => {
     const sector =
@@ -113,14 +112,14 @@ export default function Markets() {
   }
 
   function getModalContent() {
-    if (!modalAsset) return null
+    if (!modalRegistrar) return null
 
     if (!chainId || !account) {
       return (
         <>
           <div>
-            You&apos;re not connected to a wallet. In order to trade {modalAsset.ticker} on the{' '}
-            <Label>{ChainInfo[modalAsset.chainId]['label']}</Label> network you have to connect your wallet first.
+            You&apos;re not connected to a wallet. In order to trade {modalRegistrar.ticker} on the{' '}
+            <Label>{ChainInfo[modalRegistrar.chainId]['label']}</Label> network you have to connect your wallet first.
           </div>
           <PrimaryButton onClick={walletToggle}>Connect Wallet</PrimaryButton>
         </>
@@ -129,27 +128,27 @@ export default function Markets() {
 
     return (
       <>
-        {chainId !== modalAsset.chainId && (
+        {chainId !== modalRegistrar.chainId && (
           <div>
             You&apos;re currently connected to the <Label warning>{getNetworkReference()}</Label> network. In order to
-            trade ${modalAsset.ticker} on the <Label>{ChainInfo[modalAsset.chainId]['label']}</Label> network you have
-            to switch chains first.
+            trade ${modalRegistrar.ticker} on the <Label>{ChainInfo[modalRegistrar.chainId]['label']}</Label> network
+            you have to switch chains first.
           </div>
         )}
         {window.web3 && window.ethereum && (
           <PrimaryButton
             onClick={async () => {
-              const success = await rpcChangerCallback(modalAsset.chainId)
+              const success = await rpcChangerCallback(modalRegistrar.chainId)
               if (success) {
                 setChainHasSwitched(true)
-                // give the rpc a small amount of time to catch up, else /trade will render an empty asset
+                // give the rpc a small amount of time to catch up, else /trade will render an empty registrar
                 await new Promise((resolve) => setTimeout(resolve, 1500))
                 setNavigateReady(true)
               }
             }}
           >
             {!chainHasSwitched ? (
-              <div>Switch to {ChainInfo[modalAsset.chainId]['label']}</div>
+              <div>Switch to {ChainInfo[modalRegistrar.chainId]['label']}</div>
             ) : (
               <>
                 Redirecting
@@ -167,18 +166,18 @@ export default function Markets() {
   return (
     <Container>
       <Modal isOpen={showModal} onBackgroundClick={onDismiss} onEscapeKeydown={onDismiss} width="500px">
-        <ModalHeader title={modalAsset?.name} onClose={onDismiss} />
+        <ModalHeader title={modalRegistrar?.name} onClose={onDismiss} />
         <ModalContent>{getModalContent()}</ModalContent>
       </Modal>
       <SectorRow>
-        {Sectors.map((sector, index) => (
-          <SectorButton key={index} active={sector == selectedSector} onClick={() => setSelectedSector(sector)}>
+        {(Object.keys(Sector) as (keyof typeof Sector)[]).map((sector, index) => (
+          <SectorButton key={index} active={sector == selectedSector} onClick={() => setSelectedSector(Sector[sector])}>
             {sector}
           </SectorButton>
         ))}
       </SectorRow>
       <InputField searchProps={searchProps} placeholder={placeholder} />
-      <Table options={snapshot.options as unknown as SubAsset[]} onSelect={onSelect} />
+      <Table options={snapshot.options as unknown as Registrar[]} onSelect={onSelect} />
     </Container>
   )
 }

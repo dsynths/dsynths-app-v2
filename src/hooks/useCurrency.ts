@@ -4,10 +4,10 @@ import { parseBytes32String } from '@ethersproject/strings'
 import { Currency, NATIVE, Token, WNATIVE } from '@sushiswap/core-sdk'
 
 import useWeb3React from './useWeb3'
-import { isAddress } from 'utils/validate'
 import { NEVER_RELOAD, useSingleCallResult } from 'state/multicall/hooks'
 import { useBytes32TokenContract, useERC20Contract } from './useContract'
-import { useTokensFromMap } from './useAssetList'
+import { isAddress } from 'utils/validate'
+import { useRegistrarTokenMap } from 'lib/synchronizer/hooks'
 
 // parse a name or symbol from a token response
 const BYTES32_REGEX = /^0x[a-fA-F0-9]{64}$/
@@ -23,7 +23,7 @@ function parseStringOrBytes32(str: string | undefined, bytes32: string | undefin
 
 export function useToken(tokenAddress?: string | null): Token | null | undefined {
   const { chainId } = useWeb3React()
-  const tokens = useTokensFromMap()
+  const tokens = useRegistrarTokenMap()
 
   const address = isAddress(tokenAddress)
 

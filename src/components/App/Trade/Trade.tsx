@@ -9,8 +9,8 @@ import useWeb3React from 'hooks/useWeb3'
 import useApproveCallback, { ApprovalState } from 'hooks/useApproveCallback'
 import useTradeCallback from 'hooks/useTradeCallback'
 import useTradePage, { Direction, PrimaryError } from 'hooks/useTradePage'
-import { useAssetByContract } from 'hooks/useAssetList'
 import useRpcChangerCallback from 'hooks/useRpcChangerCallback'
+
 import {
   setTradeState,
   setShowReview,
@@ -21,6 +21,7 @@ import {
 } from 'state/trade/reducer'
 import useDefaultsFromURL from 'state/trade/hooks'
 import { useNetworkModalToggle, useWalletModalToggle } from 'state/application/hooks'
+
 import { Synchronizer } from 'constants/addresses'
 import { FALLBACK_CHAIN_ID, SynchronizerChains } from 'constants/chains'
 import { formatDollarAmount } from 'utils/numbers'
@@ -32,6 +33,7 @@ import { BaseButton, PrimaryButton } from 'components/Button'
 import { DotFlashing } from 'components/Icons'
 import ConfirmTradeModal from 'components/TransactionConfirmationModal/ConfirmTrade'
 import { ExternalLink } from 'components/Link'
+import { useRegistrarByContract } from 'lib/synchronizer/hooks'
 
 const Wrapper = styled(Card)<{
   border?: boolean
@@ -202,13 +204,13 @@ export default function Trade() {
     return tradeType === TradeType.OPEN ? [quoteCurrency, baseCurrency] : [baseCurrency, quoteCurrency]
   }, [tradeType, baseCurrency, quoteCurrency])
 
-  const asset = useAssetByContract(baseCurrency?.wrapped.address ?? undefined)
+  const registrar = useRegistrarByContract(baseCurrency?.wrapped.address ?? '')
 
   const { formattedAmounts, parsedAmounts, error } = useTradePage(
     baseCurrency,
     quoteCurrency,
     currencies,
-    asset,
+    registrar,
     tradeType
   )
 
@@ -231,16 +233,16 @@ export default function Trade() {
     (newDirection) => {
       if (newDirection === direction) return
       setDirection(newDirection)
-      asset && setURLCurrency(asset.sibling)
+      registrar && setURLCurrency(registrar.sibling)
     },
-    [asset, setURLCurrency, direction]
+    [registrar, setURLCurrency, direction]
   )
 
   useEffect(() => {
-    if (asset && asset.direction !== direction) {
-      setDirection(asset.direction)
+    if (registrar && registrar.direction !== direction) {
+      setDirection(registrar.direction)
     }
-  }, [asset, direction])
+  }, [registrar, direction])
 
   const handleSwitchCurrencies = useCallback(() => {
     dispatch(setTradeState({ ...tradeState, typedValue: '', typedField: TypedField.A }))
@@ -253,8 +255,8 @@ export default function Trade() {
   }, [currencies, approvalState])
 
   const marketIsOpen = useMemo(() => {
-    return !!asset?.open
-  }, [asset])
+    return !!registrar?.open
+  }, [registrar])
 
   const { state: tradeCallbackState, callback: tradeCallback } = useTradeCallback(
     currencies[0],
@@ -303,11 +305,11 @@ export default function Trade() {
 
   const showSelectIn = useMemo(() => {
     // checking this else undefined === undefined returns true
-    if (!currencies[0] || !asset) {
+    if (!currencies[0] || !registrar) {
       return false
     }
-    return currencies[0].wrapped.address.toLowerCase() === asset.contract.toLowerCase()
-  }, [asset, currencies])
+    return currencies[0].wrapped.address.toLowerCase() === registrar.contract.toLowerCase()
+  }, [registrar, currencies])
 
   const showOverlay: boolean = useMemo(() => {
     if (!chainId) return false
@@ -316,25 +318,25 @@ export default function Trade() {
 
   const showSelectOut = useMemo(() => {
     // we don't need to check for undefined because we allow that to be true
-    return currencies[1]?.wrapped.address.toLowerCase() === asset?.contract.toLowerCase()
-  }, [asset, currencies])
+    return currencies[1]?.wrapped.address.toLowerCase() === registrar?.contract.toLowerCase()
+  }, [registrar, currencies])
 
   const feeLabel = useMemo(() => {
-    if (!asset) {
+    if (!registrar) {
       return null
     }
-    return `Fee: ${asset.fee.toFixed(2)}%`
-  }, [asset])
+    return `Fee: ${registrar.fee.toFixed(2)}%`
+  }, [registrar])
 
   const priceLabel = useMemo(() => {
-    return asset ? `Oracle Price: ${formatDollarAmount(Number(asset.price))}$ / ${asset.id}` : ''
-  }, [asset])
+    return registrar ? `Oracle Price: ${formatDollarAmount(Number(registrar.price))}$ / ${registrar.id}` : ''
+  }, [registrar])
 
   function getApproveButton(): JSX.Element | null {
     if (
       !isSupportedChainId ||
       !account ||
-      !asset ||
+      !registrar ||
       error !== PrimaryError.VALID ||
       !marketIsOpen ||
       !formattedAmounts[0]
@@ -375,7 +377,7 @@ export default function Trade() {
     if (!isSupportedChainId) {
       return <PrimaryButton onClick={toggleNetworkModal}>Switch to a supported chain</PrimaryButton>
     }
-    if (!asset) {
+    if (!registrar) {
       return <PrimaryButton>Select an asset</PrimaryButton>
     }
 
@@ -480,7 +482,7 @@ export default function Trade() {
         txHash={txHash}
         currencyIn={currencies[0]}
         currencyOut={currencies[1]}
-        asset={asset}
+        registrar={registrar}
         amountIn={parsedAmounts[0]}
         amountOut={parsedAmounts[1]}
         tradeType={tradeType}

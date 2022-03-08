@@ -1,11 +1,11 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import useWeb3React from 'hooks/useWeb3'
 import { useAllTransactions } from 'state/transactions/hooks'
+import useWeb3React from 'hooks/useWeb3'
+import { ExplorerDataType } from 'utils/explorers'
 import { ExplorerLink } from 'components/Link'
 import { CheckMark, Loader } from 'components/Icons'
-import { ExplorerDataType } from 'utils/explorers'
 
 const Row = styled.div`
   display: flex;
