@@ -6,8 +6,11 @@ import ReactTooltip from 'react-tooltip'
 
 import { getApolloClient } from 'apollo/client/synchronizer'
 import { TRANSACTIONS, Tx } from 'apollo/queries'
+
 import { timestampToObject } from 'utils/time'
 import { ExplorerDataType, getExplorerLink } from 'utils/explorers'
+import { truncateHash } from 'utils/account'
+import { formatDollarAmount } from 'utils/numbers'
 
 import useWeb3React from 'hooks/useWeb3'
 import { useIsJadeTheme } from 'hooks/useTheme'
@@ -17,8 +20,6 @@ import { Card } from 'components/Card'
 import { ExternalLink } from 'components/Link'
 import ImageWithFallback from 'components/ImageWithFallback'
 import { NavButton } from 'components/Button'
-import { truncateHash } from 'utils/account'
-import { formatDollarAmount } from 'utils/numbers'
 
 const Wrapper = styled(Card)<{
   border?: boolean
@@ -186,7 +187,12 @@ const collapseConfig = {
   duration: 300,
 }
 
-const ITEMS_PER_OFFSET = 1
+const ITEMS_PER_OFFSET = 10
+
+interface PaginatedReducer {
+  groups: Tx[][]
+  count: 0
+}
 
 export default function Transactions() {
   const { chainId, account } = useWeb3React()
@@ -231,11 +237,26 @@ export default function Transactions() {
       arr[id].push(tx)
       return arr
     }, {})
-    return Object.values(txs)
+    const flat: Tx[][] = Object.values(txs)
+    return flat.sort((arr1, arr2) => (Number(arr1[0].timestamp) > Number(arr2[0].timestamp) ? -1 : 1))
   }, [transactions])
 
+  // only show an N amount of transactions for every click on 'showLoadMore'
   const paginatedTransactions = useMemo(() => {
-    return groupedTransactions.slice(0, offset * ITEMS_PER_OFFSET + ITEMS_PER_OFFSET)
+    const currentMaximum = offset * ITEMS_PER_OFFSET + ITEMS_PER_OFFSET
+    const result = groupedTransactions.reduce(
+      (acc: PaginatedReducer, group) => {
+        if (acc.count >= currentMaximum) return acc
+        acc.groups.push(group)
+        acc.count += group.length
+        return acc
+      },
+      {
+        groups: [],
+        count: 0,
+      }
+    )
+    return result.groups
   }, [groupedTransactions, offset])
 
   const showLoadMore = useMemo(() => {
