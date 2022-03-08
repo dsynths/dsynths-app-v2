@@ -3,11 +3,13 @@ import styled from 'styled-components'
 
 import { useIsJadeTheme } from 'hooks/useTheme'
 import { useShowEquity, useTotalEquity } from 'state/portfolio/hooks'
-import { formatDollarAmount } from 'utils/numbers'
+import useWeb3React from 'hooks/useWeb3'
+
 import { LineChart as Chart } from 'components/Chart'
 import { Card } from 'components/Card'
-import useWeb3React from 'hooks/useWeb3'
+
 import { SynchronizerChains } from 'constants/chains'
+import { formatDollarAmount } from 'utils/numbers'
 
 const Wrapper = styled(Card)<{
   border?: boolean

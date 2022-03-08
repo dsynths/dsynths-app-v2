@@ -1,9 +1,9 @@
 import { useMemo } from 'react'
 import { JSBI, Currency, CurrencyAmount, ZERO, Price } from '@sushiswap/core-sdk'
 import { parseUnits } from '@ethersproject/units'
+import { Registrar } from 'lib/synchronizer'
 
 import useWeb3React from './useWeb3'
-import { SubAsset } from './useAssetList'
 import { useTradeState, TypedField, TradeType } from 'state/trade/reducer'
 import { useCurrencyBalance } from 'state/wallet/hooks'
 
@@ -27,7 +27,7 @@ export default function useTradePage(
   baseCurrency: Currency | undefined,
   quoteCurrency: Currency | undefined,
   currencies: (Currency | undefined)[],
-  asset: SubAsset | undefined,
+  registrar: Registrar | undefined,
   tradeType: TradeType
 ) {
   const { chainId, account } = useWeb3React()
@@ -40,8 +40,8 @@ export default function useTradePage(
   }, [currencies, typedValue, typedField])
 
   const price = useMemo(() => {
-    if (!asset || !parseFloat(asset.price) || !baseCurrency || !quoteCurrency) return undefined
-    const fixedPrice = parseFloat(asset.price).toFixed(quoteCurrency.decimals)
+    if (!registrar || !parseFloat(registrar.price) || !baseCurrency || !quoteCurrency) return undefined
+    const fixedPrice = parseFloat(registrar.price).toFixed(quoteCurrency.decimals)
 
     const base = CurrencyAmount.fromRawAmount(
       baseCurrency,
@@ -52,12 +52,12 @@ export default function useTradePage(
       JSBI.BigInt(parseUnits(fixedPrice, quoteCurrency.decimals).toString())
     )
     return new Price({ baseAmount: base, quoteAmount: quote })
-  }, [asset, baseCurrency, quoteCurrency])
+  }, [registrar, baseCurrency, quoteCurrency])
 
   // Computed counter amount by typedAmount and its corresponding price
   const computedAmount = useMemo(() => {
-    if (!typedAmount || !price || !asset) return undefined
-    const fee = asset.fee
+    if (!typedAmount || !price || !registrar) return undefined
+    const fee = registrar.fee
 
     // inputfield
     if (typedField === TypedField.A && tradeType === TradeType.OPEN) {
@@ -79,7 +79,7 @@ export default function useTradePage(
     if (tradeType === TradeType.CLOSE) {
       return price.invert().quote(typedAmount).divide(ONE_HUNDRED_PERCENT.subtract(fee))
     }
-  }, [typedAmount, typedField, tradeType, price, asset])
+  }, [typedAmount, typedField, tradeType, price, registrar])
 
   const parsedAmounts = useMemo(() => {
     return [

@@ -7,7 +7,7 @@ import useWeb3React from 'hooks/useWeb3'
 import { useMulticall2Contract } from 'hooks/useContract'
 import { useMultipleContractSingleData, useSingleContractMultipleData } from 'state/multicall/hooks'
 
-import ERC20_ABI from 'constants/abi/ERC20.json'
+import { ERC20_ABI } from 'constants/abi/ERC20'
 import { isAddress } from 'utils/validate'
 import { TokenBalancesMap } from './types'
 

@@ -3,9 +3,9 @@ import { useRouter } from 'next/router'
 import styled from 'styled-components'
 import Link from 'next/link'
 import { isMobile } from 'react-device-detect'
+import { Z_INDEX } from 'theme'
 
 import useOnOutsideClick from 'hooks/useOnOutsideClick'
-import { Z_INDEX } from 'theme'
 import { useIsDedicatedTheme } from 'hooks/useTheme'
 import { useDarkModeManager } from 'state/user/hooks'
 

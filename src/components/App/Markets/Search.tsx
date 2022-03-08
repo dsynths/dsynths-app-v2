@@ -2,12 +2,11 @@ import React, { useMemo } from 'react'
 import styled from 'styled-components'
 import Fuse from 'fuse.js'
 import { useSelect, SelectSearchOption } from 'react-select-search'
+import { Sector } from 'lib/synchronizer'
 
-import { useLongAssetsList } from 'hooks/useAssetList'
 import useDefaultsFromURL from 'state/trade/hooks'
+import { useLongRegistrars } from 'lib/synchronizer/hooks'
 import { Search as SearchIcon } from 'components/Icons'
-import { Sector } from 'state/details/reducer'
-import { FALLBACK_CHAIN_ID } from 'constants/chains'
 
 const SearchWrapper = styled.div`
   display: flex;
@@ -62,15 +61,15 @@ function fuzzySearch(options: SelectSearchOption[]): any {
 }
 
 export function useSearch(selectedSector: Sector) {
-  const assetList = useLongAssetsList(FALLBACK_CHAIN_ID)
+  const registrarList = useLongRegistrars()
   const { setURLCurrency } = useDefaultsFromURL()
 
-  const assets: SelectSearchOption[] = useMemo(() => {
-    return assetList.filter((o) => o.sector === selectedSector).map((o) => ({ ...o, value: o.contract }))
-  }, [assetList, selectedSector])
+  const registrars: SelectSearchOption[] = useMemo(() => {
+    return registrarList.filter((o) => o.sector === selectedSector).map((o) => ({ ...o, value: o.contract }))
+  }, [registrarList, selectedSector])
 
   const [snapshot, searchProps, optionProps] = useSelect({
-    options: assets,
+    options: registrars,
     value: '',
     search: true,
     filterOptions: fuzzySearch,

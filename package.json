@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "@apollo/client": "^3.5.7",
+    "@deusfinance/synchronizer-sdk": "^2.2.0",
     "@ethersproject/abi": "^5.5.0",
     "@ethersproject/address": "^5.4.0",
     "@ethersproject/bignumber": "^5.4.1",

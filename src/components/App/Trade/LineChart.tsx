@@ -1,18 +1,18 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
 import styled from 'styled-components'
+import { Direction, Sector } from 'lib/synchronizer'
 
 import useDefaultsFromURL from 'state/trade/hooks'
-import { Sector } from 'state/details/reducer'
-import { useAssetByContract } from 'hooks/useAssetList'
+import { useIsJadeTheme } from 'hooks/useTheme'
+import useWeb3React from 'hooks/useWeb3'
+import { useRegistrarByContract } from 'lib/synchronizer/hooks'
+
 import { API_BASE_URL } from 'constants/api'
 import { makeHttpRequest } from 'utils/http'
 import { isPreMarket, isAfterHours, isRegularMarket } from 'utils/time'
-import { useIsJadeTheme } from 'hooks/useTheme'
 
 import { LineChart as Chart } from 'components/Chart'
 import { Card } from 'components/Card'
-import useWeb3React from 'hooks/useWeb3'
-import { Direction } from 'hooks/useTradePage'
 
 const Wrapper = styled(Card)<{
   show: boolean
@@ -146,7 +146,7 @@ export default function LineChart() {
   const [afterHours, setAfterHours] = useState(false)
 
   const { currencies } = useDefaultsFromURL()
-  const asset = useAssetByContract(currencies.baseCurrency?.wrapped.address ?? undefined)
+  const registrar = useRegistrarByContract(currencies.baseCurrency?.wrapped.address ?? '')
 
   const fetchCandlesticks = useCallback(
     async (ticker: string, sector: Sector) => {
@@ -184,7 +184,7 @@ export default function LineChart() {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [asset]
+    [registrar]
   )
 
   const fetchQuote = useCallback(
@@ -216,11 +216,11 @@ export default function LineChart() {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [asset]
+    [registrar]
   )
 
   useEffect(() => {
-    const { name, ticker, sector } = asset ?? { name: 'Tesla Inc.', ticker: 'TSLA', sector: Sector.STOCKS }
+    const { name, ticker, sector } = registrar ?? { name: 'Tesla Inc.', ticker: 'TSLA', sector: Sector.STOCKS }
 
     setCachedTicker(ticker)
     setCachedName(name)
@@ -236,7 +236,7 @@ export default function LineChart() {
     } else {
       fetchQuote(ticker, sector)
     }
-  }, [asset, chainId, candlesticksCache, quoteCache, fetchCandlesticks, fetchQuote])
+  }, [registrar, chainId, candlesticksCache, quoteCache, fetchCandlesticks, fetchQuote])
 
   const majorPrice: number | null = useMemo(() => {
     // general note: if the API is down or faulty, the linechart will hide itself by default
@@ -244,34 +244,34 @@ export default function LineChart() {
 
     // quotes are only available for stocks, nor do special hours exist for non-stocks
     // only show LONG price, else default to current candlestick price (only then fallback to SHORT price)
-    if (asset?.sector !== Sector.STOCKS) {
+    if (registrar?.sector !== Sector.STOCKS) {
       const candleClose = candlesticks.length ? candlesticks[candlesticks.length - 1].close : null
-      if (!asset || !parseFloat(asset.price)) {
+      if (!registrar || !parseFloat(registrar.price)) {
         return candleClose
       }
-      return asset.direction === Direction.LONG ? Number(asset.price) : candleClose ?? Number(asset.price)
+      return registrar.direction === Direction.LONG ? Number(registrar.price) : candleClose ?? Number(registrar.price)
     }
 
-    if (!asset) return null
+    if (!registrar) return null
 
-    // if no quote: default to asset price (we don't have to resort to candlesticks price
+    // if no quote: default to registrar price (we don't have to resort to candlesticks price
     // because if there's no quote then the API won't return candlesticks either)
     if (!quote) {
-      return parseFloat(asset.price) ? Number(asset.price) : null
+      return parseFloat(registrar.price) ? Number(registrar.price) : null
     }
     const { close, current } = quote
 
     // If regular hours, use oracle price
     if (regularHours) {
-      if (!parseFloat(asset.price) || asset.direction === Direction.SHORT) {
+      if (!parseFloat(registrar.price) || registrar.direction === Direction.SHORT) {
         return current
       }
-      return Number(asset.price)
+      return Number(registrar.price)
     }
 
     // Market is closed or is special hours
     return close
-  }, [asset, candlesticks, quote, regularHours])
+  }, [registrar, candlesticks, quote, regularHours])
 
   const ytdChange: string = useMemo(() => {
     if (!candlesticks.length) return ''
@@ -288,7 +288,7 @@ export default function LineChart() {
   }, [majorPrice, hoverPrice])
 
   const preMarketLabel = useMemo(() => {
-    if (asset?.sector !== Sector.STOCKS || !quote || !preMarket) return null
+    if (registrar?.sector !== Sector.STOCKS || !quote || !preMarket) return null
     const change = `${quote.change > 0 ? '+' : ''}${quote.change.toFixed(2)}%`
 
     return (
@@ -296,17 +296,17 @@ export default function LineChart() {
         Pre-market {quote.current.toFixed(2)} <MarketSpan positive={quote.change > 0}>{change}</MarketSpan>
       </div>
     )
-  }, [asset, quote, preMarket])
+  }, [registrar, quote, preMarket])
 
   const afterHoursLabel = useMemo(() => {
-    if (asset?.sector !== Sector.STOCKS || !quote || !afterHours) return null
+    if (registrar?.sector !== Sector.STOCKS || !quote || !afterHours) return null
     const change = `${quote.change > 0 ? '+' : ''}${quote.change.toFixed(2)}%`
     return (
       <div>
         After-hours {quote.current.toFixed(2)} <MarketSpan positive={quote.change > 0}>{change}</MarketSpan>
       </div>
     )
-  }, [asset, quote, afterHours])
+  }, [registrar, quote, afterHours])
 
   useEffect(() => {
     const fetchTime = () => {

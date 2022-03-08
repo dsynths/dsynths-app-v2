@@ -1,25 +1,17 @@
+import { SynchronizerUpdater } from 'lib/synchronizer/instance'
 import ApplicationUpdater from './application/updater'
-import ConductedUpdater from './conducted/updater'
-import DetailsUpdater from './details/updater'
 import MulticallUpdater from './multicall/updater'
 import PortfolioUpdater from './portfolio/updater'
-import QuotesUpdater from './quotes/updater'
-import SignaturesUpdater from './signatures/updater'
-import SynchronizerUpdater from './synchronizer/updater'
 import TransactionUpdater from './transactions/updater'
 import UserUpdater from './user/updater'
 
 export default function Updaters() {
   return (
     <>
+      <SynchronizerUpdater />
       <ApplicationUpdater />
-      <ConductedUpdater />
-      <DetailsUpdater />
       <MulticallUpdater />
       <PortfolioUpdater />
-      <QuotesUpdater />
-      <SignaturesUpdater />
-      <SynchronizerUpdater />
       <TransactionUpdater />
       <UserUpdater />
     </>

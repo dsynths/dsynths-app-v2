@@ -2,9 +2,9 @@ import React from 'react'
 import styled from 'styled-components'
 import Image from 'next/image'
 
-import { Trade as TradeComponent, LineChart } from 'components/App/Trade'
 import DeusLogo from '/public/static/images/tokens/deus.svg'
 import { ExternalLink } from 'components/Link'
+import { Trade as TradeComponent, LineChart } from 'components/App/Trade'
 
 const Container = styled.div`
   display: flex;

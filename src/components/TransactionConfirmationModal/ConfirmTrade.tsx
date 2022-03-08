@@ -2,14 +2,15 @@ import React, { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { Currency, CurrencyAmount, NativeCurrency, Token } from '@sushiswap/core-sdk'
 import ReactTooltip from 'react-tooltip'
+import { Registrar } from 'lib/synchronizer'
+import { usePartnerFeeCallback, usePlatformFeeCallback } from 'lib/synchronizer/hooks'
 
 import { TradeType } from 'state/trade/reducer'
-import { usePlatformFeeCallback, usePartnerFeeCallback } from 'state/synchronizer/hooks'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
-import { SubAsset } from 'hooks/useAssetList'
 import { Direction } from 'hooks/useTradePage'
-import { formatDollarAmount } from 'utils/numbers'
 import { useIsPartner } from 'hooks/usePartnerId'
+
+import { formatDollarAmount } from 'utils/numbers'
 
 import { PrimaryButton } from 'components/Button'
 import { IconWrapper, ChevronDown, Info } from 'components/Icons'
@@ -105,7 +106,7 @@ export default function ConfirmTrade({
   tradeErrorMessage,
   currencyIn,
   currencyOut,
-  asset,
+  registrar,
   amountIn,
   amountOut,
   tradeType,
@@ -119,45 +120,45 @@ export default function ConfirmTrade({
   tradeErrorMessage?: string
   currencyIn: Currency | undefined
   currencyOut: Currency | undefined
-  asset: SubAsset | undefined
+  registrar: Registrar | undefined
   amountIn: CurrencyAmount<NativeCurrency | Token> | null | undefined
   amountOut: CurrencyAmount<NativeCurrency | Token> | null | undefined
   tradeType: TradeType
   direction: Direction
 }) {
   const theme = useTheme()
-  const logoIn = useCurrencyLogo(tradeType === TradeType.OPEN ? undefined : asset?.id, currencyIn?.symbol)
-  const logoOut = useCurrencyLogo(tradeType === TradeType.CLOSE ? undefined : asset?.id, currencyOut?.symbol)
+  const logoIn = useCurrencyLogo(tradeType === TradeType.OPEN ? undefined : registrar?.id, currencyIn?.symbol)
+  const logoOut = useCurrencyLogo(tradeType === TradeType.CLOSE ? undefined : registrar?.id, currencyOut?.symbol)
   const getPlatformFee = usePlatformFeeCallback()
   const getPartnerFee = usePartnerFeeCallback()
   const isPartner = useIsPartner()
 
   const feeAmount: string | null = useMemo(() => {
-    if (!amountIn || !amountOut || !asset) return null
+    if (!amountIn || !amountOut || !registrar) return null
     return tradeType === TradeType.OPEN
-      ? amountIn.multiply(asset.fee).toSignificant()
-      : amountOut.multiply(asset.fee).toSignificant()
-  }, [amountIn, amountOut, asset, tradeType])
+      ? amountIn.multiply(registrar.fee).toSignificant()
+      : amountOut.multiply(registrar.fee).toSignificant()
+  }, [amountIn, amountOut, registrar, tradeType])
 
   const feeLabel = useMemo(() => {
-    if (!asset || !feeAmount) return ''
-    return `${asset.fee.toSignificant()}% / ${feeAmount} DEI`
-  }, [asset, feeAmount])
+    if (!registrar || !feeAmount) return ''
+    return `${registrar.fee.toSignificant()}% / ${feeAmount} DEI`
+  }, [registrar, feeAmount])
 
   const partnerName = useMemo(() => {
     return isPartner ? 'Partner' : 'dSynths'
   }, [isPartner])
 
   const feeToolTip = useMemo(() => {
-    if (!asset) return null
-    const platformFee = getPlatformFee(asset.sector).times(100)
-    const partnerFee = getPartnerFee(asset.sector).times(100)
+    if (!registrar) return null
+    const platformFee = getPlatformFee(registrar.sector).times(100)
+    const partnerFee = getPartnerFee(registrar.sector).times(100)
     return `${platformFee.toString()}% DEUS DAO <br/> ${partnerFee.toString()}% ${partnerName}`
-  }, [asset, getPlatformFee, getPartnerFee, partnerName])
+  }, [registrar, getPlatformFee, getPartnerFee, partnerName])
 
   const priceLabel = useMemo(() => {
-    return asset ? `${formatDollarAmount(Number(asset.price))}$ / ${asset.id}` : ''
-  }, [asset])
+    return registrar ? `${formatDollarAmount(Number(registrar.price))}$ / ${registrar.id}` : ''
+  }, [registrar])
 
   const summary = useMemo(() => {
     if (!amountIn || !amountOut || !currencyIn || !currencyOut) return ''

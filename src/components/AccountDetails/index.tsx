@@ -1,14 +1,15 @@
 import { useCallback } from 'react'
 import { ExternalLink as LinkIcon } from 'react-feather'
 import styled from 'styled-components'
+import { useAppDispatch } from 'state'
 
 import useWeb3React from 'hooks/useWeb3'
-import { useAppDispatch } from 'state'
+import { clearAllTransactions } from 'state/transactions/actions'
+
 import { injected, walletlink } from '../../connectors'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 import { ExplorerDataType } from 'utils/explorers'
 import { truncateAddress } from 'utils/account'
-import { clearAllTransactions } from 'state/transactions/actions'
 
 import { Connected as ConnectedIcon } from 'components/Icons'
 import { ExplorerLink } from 'components/Link'

@@ -1,28 +1,22 @@
 import { useCallback, useMemo } from 'react'
 import { TransactionResponse } from '@ethersproject/abstract-provider'
-import { BigintIsh, JSBI, Currency, CurrencyAmount, NativeCurrency, Token, ZERO } from '@sushiswap/core-sdk'
+import { Currency, CurrencyAmount, NativeCurrency, Token, ZERO } from '@sushiswap/core-sdk'
 import { getAddress } from '@ethersproject/address'
+import { SupportedChainId as MuonChainId } from 'lib/synchronizer'
+
+import { useTransactionAdder } from 'state/transactions/hooks'
+import { TradeType } from 'state/trade/reducer'
 
 import useWeb3React from './useWeb3'
 import { useSynchronizerContract } from './useContract'
-import { useTransactionAdder } from 'state/transactions/hooks'
-import { TradeType } from 'state/trade/reducer'
-import { MuonClient, MUON_NETWORK_NAMES, MuonResponse } from 'constants/oracle'
-import { calculateGasMargin } from 'utils/web3'
 import { usePartnerId } from './usePartnerId'
+import { calculateGasMargin } from 'utils/web3'
+import { Muon } from 'lib/synchronizer/muon'
+import { toHex } from 'utils/hex'
 
 export enum TradeCallbackState {
   INVALID = 'INVALID',
   VALID = 'VALID',
-}
-
-export function toHex(bigintIsh: BigintIsh) {
-  const bigInt = JSBI.BigInt(bigintIsh)
-  let hex = bigInt.toString(16)
-  if (hex.length % 2 !== 0) {
-    hex = `0${hex}`
-  }
-  return `0x${hex}`
 }
 
 export default function useTradeCallback(
@@ -50,39 +44,16 @@ export default function useTradeCallback(
 
   const constructCall = useCallback(async () => {
     try {
-      if (
-        !account ||
-        !chainId ||
-        !(chainId in MUON_NETWORK_NAMES) ||
-        !registrar ||
-        !partnerId ||
-        !amountA ||
-        !Synchronizer
-      ) {
+      if (!account || !chainId || !(chainId in MuonChainId) || !registrar || !partnerId || !amountA || !Synchronizer) {
         throw new Error('Missing dependencies.')
       }
 
-      const action = tradeType === TradeType.OPEN ? 'buy' : 'sell'
+      const action = tradeType === TradeType.OPEN ? 'buy' : 'sell' // muon
+      const methodName = tradeType === TradeType.OPEN ? 'buyFor' : 'sellFor' // synchronizer
+      const signatures = await Muon.getSignatures(registrar, action, chainId)
 
-      const response: MuonResponse = await MuonClient.app('synchronizer')
-        .method('signature', {
-          tokenId: registrar,
-          action,
-          chain: MUON_NETWORK_NAMES[chainId],
-          useMultiplier: false,
-        })
-        .call()
-
-      console.log('Muon request: ', {
-        tokenId: registrar,
-        action,
-        chain: MUON_NETWORK_NAMES[chainId],
-        useMultiplier: false,
-      })
-      console.log('Muon response: ', response)
-
-      if (response.success === false) {
-        throw new Error('Unable to fetch Muon signatures. Please try again later.')
+      if (signatures.success === false) {
+        throw new Error(`Unable to fetch Muon signatures: ${signatures.error}`)
       }
 
       const args = {
@@ -90,13 +61,11 @@ export default function useTradeCallback(
         receipient: account,
         registrar,
         amountIn: toHex(amountA.quotient),
-        price: response.data.result.price,
-        expireBlock: response.data.result.expireBlock,
-        _reqId: response.reqId,
-        sigs: response.sigs,
+        price: signatures.data.calldata.price,
+        expireBlock: signatures.data.calldata.expireBlock,
+        _reqId: signatures.data.calldata.reqId,
+        sigs: signatures.data.calldata.sigs,
       }
-
-      const methodName = tradeType === TradeType.OPEN ? 'buyFor' : 'sellFor'
 
       console.log('Contract arguments: ', args)
 
