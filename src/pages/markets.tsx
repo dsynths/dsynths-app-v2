@@ -99,7 +99,15 @@ export default function Markets() {
 
   const placeholder = useMemo(() => {
     const sector =
-      selectedSector === Sector.STOCKS ? 'stock' : selectedSector === Sector.CRYPTO ? 'crypto' : 'forex currency'
+      selectedSector === Sector.STOCKS
+        ? 'stock'
+        : selectedSector === Sector.CRYPTO
+        ? 'crypto'
+        : selectedSector === Sector.FOREX
+        ? 'forex currency'
+        : selectedSector === Sector.COMMODITIES
+        ? 'commodity'
+        : 'miscellaneous asset'
     return `Search for a ${sector}...`
   }, [selectedSector])
 
