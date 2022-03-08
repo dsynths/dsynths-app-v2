@@ -1,4 +1,5 @@
 import { SupportedChainId } from './chains'
+import { addresses } from 'lib/synchronizer'
 
 interface AddressMap {
   [chainId: number]: string
@@ -11,7 +12,7 @@ export const Multicall2: AddressMap = {
 
 export const Collateral: AddressMap = {
   [SupportedChainId.RINKEBY]: '0xDE12c7959E1a72bbe8a5f7A1dc8f8EeF9Ab011B3',
-  [SupportedChainId.FANTOM]: '0xDE12c7959E1a72bbe8a5f7A1dc8f8EeF9Ab011B3',
+  [SupportedChainId.FANTOM]: addresses.Collateral[SupportedChainId.FANTOM],
 }
 
 export const DefaultSynth: AddressMap = {
@@ -21,12 +22,12 @@ export const DefaultSynth: AddressMap = {
 
 export const Synchronizer: AddressMap = {
   [SupportedChainId.RINKEBY]: '0xa4E7ed8548e4fB5d7E5a4fee907FD8C1430eEd0C', // DEPRECATED
-  [SupportedChainId.FANTOM]: '0x71EB0bCFeB9610a79af007531aEeeE7848e76E71',
+  [SupportedChainId.FANTOM]: addresses.Synchronizer[SupportedChainId.FANTOM],
 }
 
 export const PartnerManager: AddressMap = {
   [SupportedChainId.RINKEBY]: '0x1164fe7a76D22EAA66f6A0aDcE3E3a30d9957A5f', // DEPRECATED
-  [SupportedChainId.FANTOM]: '0x6796a6b39f2c8FF2bEfa223aC6eeD13a4d693ba4',
+  [SupportedChainId.FANTOM]: addresses.PartnerManager[SupportedChainId.FANTOM],
 }
 
 export const PartnerId: { [partner: string]: string } = {

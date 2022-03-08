@@ -12,7 +12,7 @@ import Web3Network from 'components/Web3Network'
 import Web3Status from 'components/Web3Status'
 import { ThemeToggle, Search as SearchIcon } from 'components/Icons'
 import { NavButton } from 'components/Button'
-import AssetsModal from 'components/AssetsModal'
+import RegistrarsModal from 'components/RegistrarsModal'
 import Menu from './Menu'
 import NavLogo from './NavLogo'
 
@@ -113,7 +113,7 @@ const SearchText = styled.div`
 export default function NavBar() {
   const router = useRouter()
   const [, toggleDarkMode] = useDarkModeManager()
-  const [assetModalOpen, setAssetModalOpen] = useState<boolean>(false)
+  const [registrarModalOpen, setRegistrarModalOpen] = useState<boolean>(false)
   const isDedicatedTheme = useIsDedicatedTheme()
 
   const buildUrl = useCallback(
@@ -149,7 +149,7 @@ export default function NavBar() {
           </Link>
         </Routes>
         <Items>
-          <NavButton onClick={() => setAssetModalOpen(true)}>
+          <NavButton onClick={() => setRegistrarModalOpen(true)}>
             <SearchText>Search for a ticker</SearchText>
             <SearchIcon size={20} />
           </NavButton>
@@ -169,7 +169,7 @@ export default function NavBar() {
   return (
     <>
       {isMobile ? getMobileContent() : getDefaultContent()}
-      <AssetsModal isOpen={assetModalOpen} onDismiss={() => setAssetModalOpen(false)} />
+      <RegistrarsModal isOpen={registrarModalOpen} onDismiss={() => setRegistrarModalOpen(false)} />
     </>
   )
 }

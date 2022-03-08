@@ -7,11 +7,11 @@ import useWeb3React from 'hooks/useWeb3'
 import { useCurrencyBalance } from 'state/wallet/hooks'
 import { maxAmountSpend } from 'utils/currency'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
-import { useAssetByContract } from 'hooks/useAssetList'
+import { useRegistrarByContract } from 'lib/synchronizer/hooks'
 
 import DEI from '/public/static/images/tokens/dei.svg'
 import ImageWithFallback from 'components/ImageWithFallback'
-import AssetsModal from 'components/AssetsModal'
+import RegistrarsModal from 'components/RegistrarsModal'
 import { ChevronDown } from 'components/Icons'
 
 const Wrapper = styled.div`
@@ -30,7 +30,7 @@ const Wrapper = styled.div`
   height: 82px;
 `
 
-const AssetPanel = styled.div`
+const RegistrarPanel = styled.div`
   display: column nowrap;
   justify-content: flex-start;
 `
@@ -42,7 +42,7 @@ const Row = styled.div`
   gap: 10px;
 `
 
-const AssetSelect = styled(Row)<{
+const RegistrarSelect = styled(Row)<{
   select?: boolean
 }>`
   padding: 5px 7px;
@@ -169,9 +169,9 @@ export default function InputBox({
   onChange(x?: string): void
 }) {
   const { account } = useWeb3React()
-  const asset = useAssetByContract(currency?.wrapped.address)
+  const registrar = useRegistrarByContract(currency?.wrapped.address ?? '')
   const balance = useCurrencyBalance(account ?? undefined, currency ?? undefined)
-  const logo = useCurrencyLogo(asset?.id, currency?.symbol)
+  const logo = useCurrencyLogo(registrar?.id, currency?.symbol)
   const [modalOpen, setModalOpen] = useState<boolean>(false)
 
   const handleClick = useCallback(() => {
@@ -182,23 +182,23 @@ export default function InputBox({
   return (
     <>
       <Wrapper>
-        <AssetPanel>
+        <RegistrarPanel>
           {!currency && showSelect ? (
-            <AssetSelect onClick={() => setModalOpen(true)} select>
+            <RegistrarSelect onClick={() => setModalOpen(true)} select>
               Select an asset
               <ChevronDown size={15} />
-            </AssetSelect>
+            </RegistrarSelect>
           ) : !currency ? (
             <Row style={{ marginLeft: '5px' }}>
               <ImageWithFallback src={DEI} width={30} height={30} alt="Loading" round />
               DEI
             </Row>
           ) : showSelect ? (
-            <AssetSelect onClick={() => setModalOpen(true)}>
+            <RegistrarSelect onClick={() => setModalOpen(true)}>
               <ImageWithFallback src={logo} width={30} height={30} alt={`${currency?.symbol} Logo`} round />
               {currency?.symbol}
               <ChevronDown size={15} />
-            </AssetSelect>
+            </RegistrarSelect>
           ) : (
             <Row style={{ marginLeft: '5px' }}>
               <ImageWithFallback src={logo} width={30} height={30} alt={`${currency?.symbol} Logo`} round />
@@ -217,14 +217,14 @@ export default function InputBox({
               <span>MAX</span>
             </Balance>
           )}
-        </AssetPanel>
+        </RegistrarPanel>
         {currency ? (
           <NumericalInput value={value || ''} onUserInput={onChange} placeholder={'Enter an amount'} autoFocus />
         ) : (
           <div />
         )}
       </Wrapper>
-      <AssetsModal isOpen={modalOpen} onDismiss={() => setModalOpen(false)} />
+      <RegistrarsModal isOpen={modalOpen} onDismiss={() => setModalOpen(false)} />
     </>
   )
 }

@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import styled from 'styled-components'
+import { Registrar } from 'lib/synchronizer'
 
-import { SubAsset } from 'hooks/useAssetList'
 import Pagination from './Pagination'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import ImageWithFallback from 'components/ImageWithFallback'
@@ -79,7 +79,13 @@ const ImageWrapper = styled.div`
 `
 
 const itemsPerPage = 10
-export default function Table({ options, onSelect }: { options: SubAsset[]; onSelect: (asset: SubAsset) => void }) {
+export default function Table({
+  options,
+  onSelect,
+}: {
+  options: Registrar[]
+  onSelect: (registrar: Registrar) => void
+}) {
   const [offset, setOffset] = useState(0)
 
   const paginatedOptions = useMemo(() => {
@@ -107,7 +113,9 @@ export default function Table({ options, onSelect }: { options: SubAsset[]; onSe
         </Head>
         <tbody>
           {paginatedOptions.length ? (
-            paginatedOptions.map((asset: SubAsset, index) => <TableRow key={index} asset={asset} onSelect={onSelect} />)
+            paginatedOptions.map((registrar: Registrar, index) => (
+              <TableRow key={index} registrar={registrar} onSelect={onSelect} />
+            ))
           ) : (
             <tr>
               <td colSpan={4} style={{ textAlign: 'center', padding: '20px' }}>
@@ -122,22 +130,22 @@ export default function Table({ options, onSelect }: { options: SubAsset[]; onSe
   )
 }
 
-function TableRow({ asset, onSelect }: { asset: SubAsset; onSelect: (asset: SubAsset) => void }) {
-  const logo = useCurrencyLogo(asset.id, undefined)
+function TableRow({ registrar, onSelect }: { registrar: Registrar; onSelect: (registrar: Registrar) => void }) {
+  const logo = useCurrencyLogo(registrar.id, undefined)
 
   const price = useMemo(() => {
-    return parseFloat(asset.price) ? formatDollarAmount(Number(asset.price), 2, false) : 'Market Closed'
-  }, [asset])
+    return parseFloat(registrar.price) ? formatDollarAmount(Number(registrar.price), 2, false) : 'Market Closed'
+  }, [registrar])
 
   return (
-    <Row onClick={() => onSelect(asset)}>
+    <Row onClick={() => onSelect(registrar)}>
       <Cel>
         <ImageWrapper>
-          <ImageWithFallback src={logo} width={30} height={30} alt={`${asset.symbol}`} round />
+          <ImageWithFallback src={logo} width={30} height={30} alt={`${registrar.symbol}`} round />
         </ImageWrapper>
       </Cel>
-      <Cel>{asset.ticker}</Cel>
-      <Cel>{asset.name}</Cel>
+      <Cel>{registrar.ticker}</Cel>
+      <Cel>{registrar.name}</Cel>
       <Cel style={{ textAlign: 'right' }}>{price}</Cel>
     </Row>
   )
