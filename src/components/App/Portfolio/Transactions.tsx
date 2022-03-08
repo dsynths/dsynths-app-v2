@@ -25,7 +25,20 @@ const Wrapper = styled(Card)<{
 }>`
   border: ${({ theme, border }) => (border ? `1px solid ${theme.border2}` : 'none')};
   padding: 0.8rem;
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    padding: 0.5rem;
+  `}
 `
+
+const Header = styled.div`
+  margin: 1rem 0;
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    margin: 0.5rem 0;
+  `}
+`
+
 const Box = styled.div`
   display: flex;
   flex-flow: column nowrap;
@@ -42,9 +55,9 @@ const TransactionRecord = styled.div<{
   flex-flow: column nowrap;
   justify-content: flex-start;
   padding-top: 0.8rem;
-  border: ${({ theme, isExpanded }) => (isExpanded ? `1px solid ${theme.border1}` : '1px solid transparent')};
+  border: ${({ theme, isExpanded }) => (isExpanded ? `1px solid ${theme.border1}` : 'none')};
   border-radius: ${({ isExpanded }) => (isExpanded ? `10px` : `0px`)};
-  margin: ${({ isExpanded }) => (isExpanded ? `0.25rem 0` : `0px`)};
+  margin-bottom: ${({ isExpanded }) => (isExpanded ? `0.25rem` : `0px`)};
   transition: all 0.5s ease;
 
   &:hover {
@@ -81,7 +94,13 @@ export const CellWrapper = styled.div<{ flex?: string }>`
   align-items: center;
   padding: 0rem 0.25rem;
   gap: 0.5rem;
-  flex: ${({ flex }) => flex ?? '0 0 25%'};
+  flex: ${({ flex }) => flex ?? 'none'};
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+  #details {
+    display: none !important;
+  }
+  `}
 `
 
 export const ActionIconWrapper = styled.div`
@@ -110,9 +129,21 @@ const Divider = styled.div<{ isExpanded: boolean }>`
   border: ${({ theme, isExpanded }) => (isExpanded ? `1px solid ${theme.border2}` : `1px solid ${theme.bg1}`)};
 `
 
+const PrimaryLabel = styled.div`
+  font-size: 1rem;
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    font-size: 0.7rem;
+  `}
+`
+
 const SecondaryLabel = styled.div`
   color: ${({ theme }) => theme.text3};
   font-size: 0.7rem;
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    font-size: 0.6rem;
+  `}
 `
 
 const Date = styled.div`
@@ -133,6 +164,10 @@ const SecondaryButton = styled(NavButton)`
   align-self: center;
   margin-top: -0.5rem;
   font-size: 0.8rem;
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    font-size: 0.7rem;
+  `}
 `
 
 interface TxGroup {
@@ -221,7 +256,7 @@ export default function Transactions() {
 
   return (
     <>
-      <div style={{ margin: '15px 0' }}>Trade History</div>
+      <Header>Trade History</Header>
       <Wrapper border={isJadeTheme}>
         {/* TODO : Have a search bar here to filter the trades of a particular Registrar */}
         {paginatedTransactions.map((txArr) => (
@@ -267,7 +302,8 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
       amountOut: tx.amountOut.slice(0, 8),
       txHash: tx.id,
       fee: Number(tx.daoFee) + Number(tx.partnerFee),
-      feeToolTip: 'DEUS Dao Fee: ' + Number(tx.daoFee) + '<br/> Partner Fee: ' + Number(tx.partnerFee),
+      feeToolTip:
+        'DEUS Dao Fee: ' + Number(tx.daoFee).toFixed(4) + '<br/> Partner Fee: ' + Number(tx.partnerFee).toFixed(4),
     }
     if (tx.method === 'open') {
       return {
@@ -307,8 +343,8 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
             <Repeat size={15} color={color} />
           </ActionIconWrapper>
           <ActionDetailsWrapper>
-            <div>{method}</div>
-            <SecondaryLabel>{formatTime(tx.timestamp)}</SecondaryLabel>
+            <PrimaryLabel>{method}</PrimaryLabel>
+            <SecondaryLabel id="details">{formatTime(tx.timestamp)}</SecondaryLabel>
           </ActionDetailsWrapper>
         </CellWrapper>
         <CellWrapper flex={'0 0 35%'}>
@@ -316,10 +352,10 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
             <ImageWithFallback src={logoIn} alt={`${tickerIn} Logo`} width={18} height={18} />
           </ActionIconWrapper>
           <ActionDetailsWrapper>
-            <div>
+            <PrimaryLabel>
               {amountIn} {tickerIn}
-            </div>
-            <SecondaryLabel>${priceIn}</SecondaryLabel>
+            </PrimaryLabel>
+            <SecondaryLabel id="details">${priceIn}</SecondaryLabel>
           </ActionDetailsWrapper>
         </CellWrapper>
         <CellWrapper flex={'0 0 10%'}>
@@ -330,10 +366,10 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
             <ImageWithFallback src={logoOut} alt={`${tickerOut} Logo`} width={18} height={18} />
           </ActionIconWrapper>
           <ActionDetailsWrapper>
-            <div>
+            <PrimaryLabel>
               {amountOut} {tickerOut}
-            </div>
-            <SecondaryLabel>${priceOut}</SecondaryLabel>
+            </PrimaryLabel>
+            <SecondaryLabel id="details">${priceOut}</SecondaryLabel>
           </ActionDetailsWrapper>
         </CellWrapper>
       </TransactionHeader>
@@ -371,16 +407,16 @@ function CollapsedInformation({
           <CellWrapper flex={'0 0 50%'}>
             <ActionDetailsWrapper>
               <FeeToolTip id="fee" place="right" type="info" effect="solid" multiline backgroundColor={theme.border1} />
-              <div>Fee</div>
+              <PrimaryLabel>Fee</PrimaryLabel>
               <SecondaryLabel data-for="fee" data-tip={feeToolTip}>
-                {formatDollarAmount(fee)}
+                {formatDollarAmount(fee, 3)}
                 <Info size={10} color={theme.text2} style={{ marginLeft: '0.25rem' }} />
               </SecondaryLabel>
             </ActionDetailsWrapper>
           </CellWrapper>
           <CellWrapper style={{ marginLeft: 'auto' }}>
             <ActionDetailsWrapper>
-              <div>Transaction Hash</div>
+              <PrimaryLabel>Transaction Hash</PrimaryLabel>
               <ExternalLink href={getExplorerLink(chainId, ExplorerDataType.TRANSACTION, txHash)}>
                 <SecondaryLabel>
                   {truncateHash(txHash)}
