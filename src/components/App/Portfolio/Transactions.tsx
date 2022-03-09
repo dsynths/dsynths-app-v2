@@ -335,8 +335,8 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
         logoIn: deiLogo,
         logoOut: tickerLogo,
         color: 'green',
-        priceIn: 1,
-        priceOut: parseFloat(tx.price).toFixed(2),
+        priceIn: '1',
+        priceOut: tx.price,
       }
     }
     return {
@@ -346,11 +346,25 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
       tickerOut: 'DEI',
       logoIn: tickerLogo,
       logoOut: deiLogo,
-      priceIn: parseFloat(tx.price).toFixed(2),
-      priceOut: 1,
+      priceIn: tx.price,
+      priceOut: '1',
       color: 'red',
     }
   }, [tx, deiLogo, tickerLogo])
+
+  const getPriceLabel = (amount: string, ticker: string, price: string) => {
+    if (ticker === 'DEI') {
+      return <PrimaryLabel>{amount} USD</PrimaryLabel>
+    }
+    return (
+      <>
+        <PrimaryLabel>
+          {amount} {ticker}
+        </PrimaryLabel>
+        <SecondaryLabel id="details">{formatDollarAmount(Number(price))}</SecondaryLabel>
+      </>
+    )
+  }
 
   if (!chainId) {
     return null
@@ -372,12 +386,7 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
           <ActionIconWrapper>
             <ImageWithFallback src={logoIn} alt={`${tickerIn} Logo`} width={18} height={18} />
           </ActionIconWrapper>
-          <ActionDetailsWrapper>
-            <PrimaryLabel>
-              {amountIn} {tickerIn}
-            </PrimaryLabel>
-            <SecondaryLabel id="details">${priceIn}</SecondaryLabel>
-          </ActionDetailsWrapper>
+          <ActionDetailsWrapper>{getPriceLabel(amountIn, tickerIn, priceIn)}</ActionDetailsWrapper>
         </CellWrapper>
         <CellWrapper flex={'0 0 10%'}>
           <ArrowRight size={20} strokeWidth={1} />
@@ -386,12 +395,7 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
           <ActionIconWrapper>
             <ImageWithFallback src={logoOut} alt={`${tickerOut} Logo`} width={18} height={18} />
           </ActionIconWrapper>
-          <ActionDetailsWrapper>
-            <PrimaryLabel>
-              {amountOut} {tickerOut}
-            </PrimaryLabel>
-            <SecondaryLabel id="details">${priceOut}</SecondaryLabel>
-          </ActionDetailsWrapper>
+          <ActionDetailsWrapper>{getPriceLabel(amountOut, tickerOut, priceOut)}</ActionDetailsWrapper>
         </CellWrapper>
       </TransactionHeader>
       <div {...getCollapseProps()}>
