@@ -98,9 +98,16 @@ export const CellWrapper = styled.div<{ flex?: string }>`
   flex: ${({ flex }) => flex ?? 'none'};
 
   ${({ theme }) => theme.mediaWidth.upToMedium`
-  #details {
-    display: none !important;
-  }
+    #details {
+      display: none !important;
+    }
+  `}
+`
+
+export const ResponsiveCellWrapper = styled(CellWrapper)`
+  display: none;
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    display: flex;
   `}
 `
 
@@ -139,8 +146,11 @@ const PrimaryLabel = styled.div`
 `
 
 const SecondaryLabel = styled.div`
+  display: flex;
   color: ${({ theme }) => theme.text3};
   font-size: 0.7rem;
+  align-items: center;
+  text-align: center;
 
   ${({ theme }) => theme.mediaWidth.upToMedium`
     font-size: 0.6rem;
@@ -324,7 +334,10 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
       txHash: tx.id,
       fee: Number(tx.daoFee) + Number(tx.partnerFee),
       feeToolTip:
-        'DEUS Dao Fee: ' + Number(tx.daoFee).toFixed(4) + '<br/> Partner Fee: ' + Number(tx.partnerFee).toFixed(4),
+        'DEUS Dao Fee: ' +
+        formatDollarAmount(Number(tx.daoFee), 3) +
+        '<br/> Partner Fee: ' +
+        formatDollarAmount(Number(tx.partnerFee), 3),
     }
     if (tx.method === 'open') {
       return {
@@ -335,8 +348,8 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
         logoIn: deiLogo,
         logoOut: tickerLogo,
         color: 'green',
-        priceIn: 1,
-        priceOut: parseFloat(tx.price).toFixed(2),
+        priceIn: '1',
+        priceOut: tx.price,
       }
     }
     return {
@@ -346,11 +359,32 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
       tickerOut: 'DEI',
       logoIn: tickerLogo,
       logoOut: deiLogo,
-      priceIn: parseFloat(tx.price).toFixed(2),
-      priceOut: 1,
+      priceIn: tx.price,
+      priceOut: '1',
       color: 'red',
     }
   }, [tx, deiLogo, tickerLogo])
+
+  const { basePrice, baseTicker } = useMemo(() => {
+    return {
+      basePrice: priceIn === '1' ? priceOut : priceIn,
+      baseTicker: tickerIn === 'DEI' ? tickerOut : tickerIn,
+    }
+  }, [priceIn, priceOut, tickerIn, tickerOut])
+
+  function getPriceLabel(amount: string, ticker: string, price: string) {
+    if (ticker === 'DEI') {
+      return <PrimaryLabel>{amount} USD</PrimaryLabel>
+    }
+    return (
+      <>
+        <PrimaryLabel>
+          {amount} {ticker}
+        </PrimaryLabel>
+        <SecondaryLabel id="details">{formatDollarAmount(Number(price))}</SecondaryLabel>
+      </>
+    )
+  }
 
   if (!chainId) {
     return null
@@ -373,12 +407,7 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
             <ActionIconWrapper>
               <ImageWithFallback src={logoIn} alt={`${tickerIn} Logo`} width={18} height={18} />
             </ActionIconWrapper>
-            <ActionDetailsWrapper>
-              <PrimaryLabel>
-                {amountIn} {tickerIn}
-              </PrimaryLabel>
-              <SecondaryLabel id="details">${priceIn}</SecondaryLabel>
-            </ActionDetailsWrapper>
+            <ActionDetailsWrapper>{getPriceLabel(amountIn, tickerIn, priceIn)}</ActionDetailsWrapper>
           </CellWrapper>
           <CellWrapper flex={'0 0 10%'}>
             <ArrowRight size={20} strokeWidth={1} />
@@ -387,16 +416,18 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
             <ActionIconWrapper>
               <ImageWithFallback src={logoOut} alt={`${tickerOut} Logo`} width={18} height={18} />
             </ActionIconWrapper>
-            <ActionDetailsWrapper>
-              <PrimaryLabel>
-                {amountOut} {tickerOut}
-              </PrimaryLabel>
-              <SecondaryLabel id="details">${priceOut}</SecondaryLabel>
-            </ActionDetailsWrapper>
+            <ActionDetailsWrapper>{getPriceLabel(amountOut, tickerOut, priceOut)}</ActionDetailsWrapper>
           </CellWrapper>
         </TransactionHeader>
         <div {...getCollapseProps()}>
-          <CollapsedInformation isExpanded={isExpanded} fee={fee} feeToolTip={feeToolTip} txHash={txHash} />
+          <CollapsedInformation
+            isExpanded={isExpanded}
+            fee={fee}
+            price={basePrice}
+            ticker={baseTicker}
+            feeToolTip={feeToolTip}
+            txHash={txHash}
+          />
         </div>
         {!isExpanded && isNotLastRow ? <Divider isExpanded={isExpanded} /> : <div style={{ marginBottom: '0.8rem' }} />}
       </TransactionRecord>
@@ -407,11 +438,15 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
 function CollapsedInformation({
   isExpanded,
   fee,
+  price,
+  ticker,
   feeToolTip,
   txHash,
 }: {
   isExpanded: boolean
   fee: number
+  price: string
+  ticker: string
   feeToolTip: string
   txHash: string
 }) {
@@ -427,7 +462,7 @@ function CollapsedInformation({
       <TransactionContent className="content">
         <Divider isExpanded={isExpanded} />
         <TransactionContentWrapper>
-          <CellWrapper flex={'0 0 50%'}>
+          <CellWrapper flex={'0 0 25%'}>
             <ActionDetailsWrapper>
               <FeeToolTip id="fee" place="right" type="info" effect="solid" multiline backgroundColor={theme.border1} />
               <PrimaryLabel>Fee</PrimaryLabel>
@@ -437,6 +472,14 @@ function CollapsedInformation({
               </SecondaryLabel>
             </ActionDetailsWrapper>
           </CellWrapper>
+          <ResponsiveCellWrapper flex={'0 0 25%'}>
+            <ActionDetailsWrapper>
+              <PrimaryLabel>Price</PrimaryLabel>
+              <SecondaryLabel>
+                {formatDollarAmount(Number(price))} / {ticker}
+              </SecondaryLabel>
+            </ActionDetailsWrapper>
+          </ResponsiveCellWrapper>
           <CellWrapper style={{ marginLeft: 'auto' }}>
             <ActionDetailsWrapper>
               <PrimaryLabel>Transaction Hash</PrimaryLabel>
