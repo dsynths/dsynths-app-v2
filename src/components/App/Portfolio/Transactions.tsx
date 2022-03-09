@@ -365,9 +365,12 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
     }
   }, [tx, deiLogo, tickerLogo])
 
-  const quotePrice = useMemo(() => {
-    return priceIn === '1' ? priceOut : priceIn
-  }, [priceIn, priceOut])
+  const { basePrice, baseTicker } = useMemo(() => {
+    return {
+      basePrice: priceIn === '1' ? priceOut : priceIn,
+      baseTicker: tickerIn === 'DEI' ? tickerOut : tickerIn,
+    }
+  }, [priceIn, priceOut, tickerIn, tickerOut])
 
   function getPriceLabel(amount: string, ticker: string, price: string) {
     if (ticker === 'DEI') {
@@ -419,7 +422,8 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
         <CollapsedInformation
           isExpanded={isExpanded}
           fee={fee}
-          price={quotePrice}
+          price={basePrice}
+          ticker={baseTicker}
           feeToolTip={feeToolTip}
           txHash={txHash}
         />
@@ -433,12 +437,14 @@ function CollapsedInformation({
   isExpanded,
   fee,
   price,
+  ticker,
   feeToolTip,
   txHash,
 }: {
   isExpanded: boolean
   fee: number
   price: string
+  ticker: string
   feeToolTip: string
   txHash: string
 }) {
@@ -467,7 +473,9 @@ function CollapsedInformation({
           <ResponsiveCellWrapper flex={'0 0 25%'}>
             <ActionDetailsWrapper>
               <PrimaryLabel>Price</PrimaryLabel>
-              <SecondaryLabel>{formatDollarAmount(Number(price))}</SecondaryLabel>
+              <SecondaryLabel>
+                {formatDollarAmount(Number(price))} / {ticker}
+              </SecondaryLabel>
             </ActionDetailsWrapper>
           </ResponsiveCellWrapper>
           <CellWrapper style={{ marginLeft: 'auto' }}>
