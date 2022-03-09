@@ -103,11 +103,7 @@ export default function Markets() {
         ? 'stock'
         : selectedSector === Sector.CRYPTO
         ? 'crypto'
-        : selectedSector === Sector.FOREX
-        ? 'forex currency'
-        : selectedSector === Sector.COMMODITIES
-        ? 'commodity'
-        : 'miscellaneous asset'
+        : 'commodity or forex currency'
     return `Search for a ${sector}...`
   }, [selectedSector])
 
@@ -178,11 +174,19 @@ export default function Markets() {
         <ModalContent>{getModalContent()}</ModalContent>
       </Modal>
       <SectorRow>
-        {(Object.keys(Sector) as (keyof typeof Sector)[]).map((sector, index) => (
-          <SectorButton key={index} active={sector == selectedSector} onClick={() => setSelectedSector(Sector[sector])}>
-            {sector}
-          </SectorButton>
-        ))}
+        {(Object.keys(Sector) as (keyof typeof Sector)[]).map((sector, index) => {
+          if (sector === Sector.COMMODITIES || sector === Sector.MISC) return null
+          const sectorName = sector !== Sector.FOREX ? sector : 'FOREX / COMMODITIES'
+          return (
+            <SectorButton
+              key={index}
+              active={sector == selectedSector}
+              onClick={() => setSelectedSector(Sector[sector])}
+            >
+              {sectorName}
+            </SectorButton>
+          )
+        })}
       </SectorRow>
       <InputField searchProps={searchProps} placeholder={placeholder} />
       <Table options={snapshot.options as unknown as Registrar[]} onSelect={onSelect} />
