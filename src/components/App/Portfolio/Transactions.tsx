@@ -391,45 +391,49 @@ function TransactionRow({ tx, isNotLastRow }: { tx: Tx; isNotLastRow: boolean })
   }
 
   return (
-    <TransactionRecord className="collapsible" isExpanded={isExpanded}>
-      <TransactionHeader className="header" {...getToggleProps()}>
-        <CellWrapper flex={'0 0 20%'}>
-          <ActionIconWrapper>
-            <Repeat size={15} color={color} />
-          </ActionIconWrapper>
-          <ActionDetailsWrapper>
-            <PrimaryLabel>{method}</PrimaryLabel>
-            <SecondaryLabel id="details">{formatTime(tx.timestamp)}</SecondaryLabel>
-          </ActionDetailsWrapper>
-        </CellWrapper>
-        <CellWrapper flex={'0 0 35%'}>
-          <ActionIconWrapper>
-            <ImageWithFallback src={logoIn} alt={`${tickerIn} Logo`} width={18} height={18} />
-          </ActionIconWrapper>
-          <ActionDetailsWrapper>{getPriceLabel(amountIn, tickerIn, priceIn)}</ActionDetailsWrapper>
-        </CellWrapper>
-        <CellWrapper flex={'0 0 10%'}>
-          <ArrowRight size={20} strokeWidth={1} />
-        </CellWrapper>
-        <CellWrapper flex={'0 0 35%'}>
-          <ActionIconWrapper>
-            <ImageWithFallback src={logoOut} alt={`${tickerOut} Logo`} width={18} height={18} />
-          </ActionIconWrapper>
-          <ActionDetailsWrapper>{getPriceLabel(amountOut, tickerOut, priceOut)}</ActionDetailsWrapper>
-        </CellWrapper>
-      </TransactionHeader>
-      <div {...getCollapseProps()}>
-        <CollapsedInformation
-          isExpanded={isExpanded}
-          fee={fee}
-          price={basePrice}
-          ticker={baseTicker}
-          feeToolTip={feeToolTip}
-          txHash={txHash}
-        />
-      </div>
-      {!isExpanded && isNotLastRow ? <Divider isExpanded={isExpanded} /> : <div style={{ marginBottom: '0.8rem' }} />}
-    </TransactionRecord>
+    <div className="collapsible">
+      <TransactionRecord isExpanded={isExpanded} {...getToggleProps()}>
+        <TransactionHeader className="header">
+          <CellWrapper flex={'0 0 20%'}>
+            <ActionIconWrapper>
+              <Repeat size={15} color={color} />
+            </ActionIconWrapper>
+            <ActionDetailsWrapper>{getPriceLabel(amountIn, tickerIn, priceIn)}</ActionDetailsWrapper>
+          </CellWrapper>
+          <CellWrapper flex={'0 0 35%'}>
+            <ActionIconWrapper>
+              <ImageWithFallback src={logoIn} alt={`${tickerIn} Logo`} width={18} height={18} />
+            </ActionIconWrapper>
+            <ActionDetailsWrapper>
+              <PrimaryLabel>
+                {amountIn} {tickerIn}
+              </PrimaryLabel>
+              <SecondaryLabel id="details">${priceIn}</SecondaryLabel>
+            </ActionDetailsWrapper>
+          </CellWrapper>
+          <CellWrapper flex={'0 0 10%'}>
+            <ArrowRight size={20} strokeWidth={1} />
+          </CellWrapper>
+          <CellWrapper flex={'0 0 35%'}>
+            <ActionIconWrapper>
+              <ImageWithFallback src={logoOut} alt={`${tickerOut} Logo`} width={18} height={18} />
+            </ActionIconWrapper>
+            <ActionDetailsWrapper>{getPriceLabel(amountOut, tickerOut, priceOut)}</ActionDetailsWrapper>
+          </CellWrapper>
+        </TransactionHeader>
+        <div {...getCollapseProps()}>
+          <CollapsedInformation
+            isExpanded={isExpanded}
+            fee={fee}
+            price={basePrice}
+            ticker={baseTicker}
+            feeToolTip={feeToolTip}
+            txHash={txHash}
+          />
+        </div>
+        {!isExpanded && isNotLastRow ? <Divider isExpanded={isExpanded} /> : <div style={{ marginBottom: '0.8rem' }} />}
+      </TransactionRecord>
+    </div>
   )
 }
 
