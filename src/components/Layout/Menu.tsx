@@ -2,7 +2,6 @@ import React, { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import styled from 'styled-components'
 import Link from 'next/link'
-import { isMobile } from 'react-device-detect'
 import { Z_INDEX } from 'theme'
 
 import useOnOutsideClick from 'hooks/useOnOutsideClick'
@@ -107,16 +106,14 @@ export default function Menu() {
               </IconWrapper>
             </Row>
           </Link>
-          {!isMobile && (
-            <Link href={buildUrl('markets')} passHref>
-              <Row onClick={() => toggle()} active={router.route === '/markets'}>
-                <div>Explore Markets</div>
-                <IconWrapper>
-                  <MarketsIcon size={15} />
-                </IconWrapper>
-              </Row>
-            </Link>
-          )}
+          <Link href={buildUrl('markets')} passHref>
+            <Row onClick={() => toggle()} active={router.route === '/markets'}>
+              <div>Explore Markets</div>
+              <IconWrapper>
+                <MarketsIcon size={15} />
+              </IconWrapper>
+            </Row>
+          </Link>
           {!isDedicatedTheme && (
             <Row onClick={() => toggleDarkMode()}>
               <div>{darkMode ? 'Light Theme' : 'Dark Theme'}</div>
