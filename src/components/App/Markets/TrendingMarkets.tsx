@@ -10,6 +10,8 @@ import { formatDollarAmount } from 'utils/numbers'
 import { useRegistrarByContract } from 'lib/synchronizer/hooks'
 import { Card } from 'components/Card'
 import { ExternalLink } from 'components/Link'
+import ImageWithFallback from 'components/ImageWithFallback'
+import useCurrencyLogo from 'hooks/useCurrencyLogo'
 
 const Wrapper = styled(Card)`
   display: flex;
@@ -75,6 +77,18 @@ const BodyContainer = styled(ExternalLink)`
     cursor: pointer;
     background: ${({ theme }) => theme.bg1};
   }
+`
+
+const DetailsWrapper = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
+`
+
+const LogoWrapper = styled.div`
+  margin-right: 0.5rem;
+  border-radius: 50%;
 `
 
 const AssetDetailsContainer = styled.div`
@@ -154,6 +168,7 @@ export default function TrendingMarkets() {
     const router = useRouter()
 
     const registrar = useRegistrarByContract(asset.id ?? '')
+    const logo = useCurrencyLogo(registrar?.ticker, undefined)
     const contract = registrar?.contract || ''
     const price = Number(registrar?.price || '')
     const volume = Number(asset.quoteVolume)
@@ -177,10 +192,15 @@ export default function TrendingMarkets() {
         </TitleContainer>
         <Divider />
         <BodyContainer href={buildUrl(contract)} passHref>
-          <AssetDetailsContainer>
-            <BodyPrimaryLabel>{asset.symbol}</BodyPrimaryLabel>
-            <BodySecondaryLabel>{asset.name}</BodySecondaryLabel>
-          </AssetDetailsContainer>
+          <DetailsWrapper>
+            <LogoWrapper>
+              <ImageWithFallback src={logo} alt={`${asset.name} Logo`} width={32} height={32} />{' '}
+            </LogoWrapper>
+            <AssetDetailsContainer>
+              <BodyPrimaryLabel>{asset.symbol}</BodyPrimaryLabel>
+              <BodySecondaryLabel>{asset.name}</BodySecondaryLabel>
+            </AssetDetailsContainer>
+          </DetailsWrapper>
           <AssetPriceText>{isMarketOpen ? formatDollarAmount(price) : 'Market closed'}</AssetPriceText>
         </BodyContainer>
       </Wrapper>
