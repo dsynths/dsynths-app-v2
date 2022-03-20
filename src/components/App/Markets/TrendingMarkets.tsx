@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { Swiper, SwiperSlide } from 'swiper/react'
@@ -17,10 +17,10 @@ import useCurrencyLogo from 'hooks/useCurrencyLogo'
 import { TOPMARKETS, TopMarket } from 'apollo/queries'
 import { getApolloClient } from 'apollo/client/synchronizer'
 import { formatDollarAmount } from 'utils/numbers'
+import { FALLBACK_CHAIN_ID } from 'constants/chains'
 
 import { Card } from 'components/Card'
 import ImageWithFallback from 'components/ImageWithFallback'
-import React from 'react'
 
 const Wrapper = styled(Card)`
   display: flex;
@@ -161,14 +161,13 @@ const AssetPriceText = styled.div`
 const TOP_MARKETS_COUNT = 10
 
 export default function TrendingMarkets() {
-  const { chainId, account } = useWeb3React()
+  const { chainId } = useWeb3React()
   const [trendingMarkets, setTrendingMarkets] = useState<TopMarket[]>([])
 
   const fetchTrendingMarkets = useCallback(async () => {
     const DEFAULT_RETURN: TopMarket[] = []
     try {
-      if (!account || !chainId) return DEFAULT_RETURN
-      const client = getApolloClient(chainId)
+      const client = getApolloClient(chainId ?? FALLBACK_CHAIN_ID)
       if (!client) return DEFAULT_RETURN
 
       const { data } = await client.query({
@@ -183,7 +182,7 @@ export default function TrendingMarkets() {
       console.error(error)
       return []
     }
-  }, [chainId, account])
+  }, [chainId])
 
   useEffect(() => {
     const getTransactions = async () => {
