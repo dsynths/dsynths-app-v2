@@ -9,13 +9,7 @@ import useRpcChangerCallback from 'hooks/useRpcChangerCallback'
 import { ChainInfo } from 'constants/chainInfo'
 
 import { Modal, ModalHeader } from 'components/Modal'
-import {
-  SectorButton,
-  useSearch,
-  InputField,
-  Table,
-  TrendingMarkets as TrendingMarketsList,
-} from 'components/App/Markets'
+import { SectorButton, useSearch, InputField, Table, TrendingMarkets } from 'components/App/Markets'
 import { IconWrapper, Loader } from 'components/Icons'
 import { PrimaryButton } from 'components/Button'
 
@@ -179,7 +173,7 @@ export default function Markets() {
         <ModalHeader title={modalRegistrar?.name} onClose={onDismiss} />
         <ModalContent>{getModalContent()}</ModalContent>
       </Modal>
-      <TrendingMarketsList />
+      <TrendingMarkets />
       <SectorRow>
         {(Object.keys(Sector) as (keyof typeof Sector)[]).map((sector, index) => {
           if (sector === Sector.COMMODITIES || sector === Sector.MISC) return null

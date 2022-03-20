@@ -1,23 +1,26 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/router'
+import Link from 'next/link'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay, Pagination, Mousewheel, Keyboard } from 'swiper'
+import { Autoplay, Pagination, Virtual } from 'swiper'
 import styled from 'styled-components'
+import { areEqual } from 'react-window'
 
 import 'swiper/css'
-import 'swiper/css/navigation'
 import 'swiper/css/pagination'
+import 'swiper/css/virtual'
 
 import useWeb3React from 'hooks/useWeb3'
-import { useRouter } from 'next/router'
-import { TOPMARKETS, TopMarkets } from 'apollo/queries'
-import { getApolloClient } from 'apollo/client/synchronizer'
-
-import { formatDollarAmount } from 'utils/numbers'
 import { useRegistrarByContract } from 'lib/synchronizer/hooks'
-import { Card } from 'components/Card'
-import { ExternalLink } from 'components/Link'
-import ImageWithFallback from 'components/ImageWithFallback'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
+
+import { TOPMARKETS, TopMarket } from 'apollo/queries'
+import { getApolloClient } from 'apollo/client/synchronizer'
+import { formatDollarAmount } from 'utils/numbers'
+
+import { Card } from 'components/Card'
+import ImageWithFallback from 'components/ImageWithFallback'
+import React from 'react'
 
 const Wrapper = styled(Card)`
   display: flex;
@@ -28,20 +31,33 @@ const Wrapper = styled(Card)`
   ${({ theme }) => theme.mediaWidth.upToMedium`
     padding: 0.75rem;
   `}
+
+  &:hover {
+    cursor: pointer;
+    background: ${({ theme }) => theme.bg1};
+  }
 `
 
 const SwiperContainer = styled(Swiper)`
   padding: 1rem 0rem 2rem 0rem;
+
+  .swiper-pagination-bullet {
+    background: white;
+  }
+  .swiper-pagination-bullet-active {
+    background: ${({ theme }) => theme.yellow1};
+  }
 `
 
 const TitleText = styled.div`
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   line-height: 1.75rem;
   color: ${({ theme }) => theme.yellow1};
 
   ${({ theme }) => theme.mediaWidth.upToMedium`
-    font-size: 1rem;
+    font-size: 1.2rem;
     line-height: 1.25rem;
+    text-align: center;
   `}
 `
 
@@ -79,17 +95,12 @@ const Divider = styled.div`
   border: 1px solid ${({ theme }) => theme.yellow1};
 `
 
-const BodyContainer = styled(ExternalLink)`
+const BodyContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
   align-items: center;
   margin-top: 0.25rem;
-
-  &:hover {
-    cursor: pointer;
-    background: ${({ theme }) => theme.bg1};
-  }
 `
 
 const DetailsWrapper = styled.div`
@@ -121,6 +132,7 @@ const BodyPrimaryLabel = styled.div`
     line-height: 1rem;
   `}
 `
+
 const BodySecondaryLabel = styled.div`
   font-size: 0.7rem;
   line-height: 1rem;
@@ -150,10 +162,10 @@ const TOP_MARKETS_COUNT = 10
 
 export default function TrendingMarkets() {
   const { chainId, account } = useWeb3React()
-  const [trendingMarkets, setTrendingMarkets] = useState<TopMarkets[]>([])
+  const [trendingMarkets, setTrendingMarkets] = useState<TopMarket[]>([])
 
   const fetchTrendingMarkets = useCallback(async () => {
-    const DEFAULT_RETURN: TopMarkets[] = []
+    const DEFAULT_RETURN: TopMarket[] = []
     try {
       if (!account || !chainId) return DEFAULT_RETURN
       const client = getApolloClient(chainId)
@@ -165,9 +177,9 @@ export default function TrendingMarkets() {
         fetchPolicy: 'no-cache',
       })
 
-      return data.registrars as TopMarkets[]
+      return data.registrars as TopMarket[]
     } catch (error) {
-      console.log('Unable to fetch registrars from The Graph Network')
+      console.log('Unable to fetch TopMarkets from The Graph Network')
       console.error(error)
       return []
     }
@@ -179,30 +191,29 @@ export default function TrendingMarkets() {
       setTrendingMarkets(result)
     }
     getTransactions()
-    return () => {
-      setTrendingMarkets([])
-    }
   }, [fetchTrendingMarkets])
+
+  if (!trendingMarkets.length) {
+    return null
+  }
 
   return (
     <div>
-      <TitleText>TOP {TOP_MARKETS_COUNT} ASSETS BY TRADING VOLUME</TitleText>
+      <TitleText>TOP {TOP_MARKETS_COUNT} ASSETS BY GLOBAL TRADING VOLUME</TitleText>
       <SwiperContainer
+        modules={[Autoplay, Pagination, Virtual]}
         cssMode={true}
-        mousewheel={true}
-        keyboard={true}
         spaceBetween={0}
         slidesPerView={1}
         slidesPerGroup={1}
-        loop={true}
         autoplay={{
           delay: 4000,
           disableOnInteraction: false,
+          pauseOnMouseEnter: true,
         }}
         pagination={{
           clickable: true,
         }}
-        modules={[Autoplay, Pagination, Mousewheel, Keyboard]}
         breakpoints={{
           // display 2 cards per row above this screen width
           640: {
@@ -211,45 +222,54 @@ export default function TrendingMarkets() {
             spaceBetween: 16,
           },
         }}
-        className="mySwiper"
       >
-        {trendingMarkets.map((asset, index) => (
+        {trendingMarkets.map((asset: TopMarket, index) => (
           <SwiperSlide key={index}>
-            <AssetCard asset={asset} index={index + 1} />
+            <MemoizedAssetCard asset={asset} index={index + 1} />
           </SwiperSlide>
         ))}
       </SwiperContainer>
     </div>
   )
+}
 
-  function AssetCard({ asset, index }: { asset: TopMarkets; index: number }) {
-    const router = useRouter()
+const MemoizedAssetCard = React.memo(AssetCard, areEqual)
 
-    const registrar = useRegistrarByContract(asset.id ?? '')
-    const logo = useCurrencyLogo(registrar?.ticker, undefined)
-    const contract = registrar?.contract || ''
-    const price = Number(registrar?.price || '')
-    const volume = Number(asset.quoteVolume)
-    const isMarketOpen = registrar?.open
+function AssetCard({ asset, index }: { asset: TopMarket; index: number }) {
+  const router = useRouter()
+  const registrar = useRegistrarByContract(asset.id)
 
-    const buildUrl = useCallback(
-      (contract: string) => {
-        const queryString = Object.keys(router.query)
-          .map((key) => key + '=' + router.query[key])
-          .join('&')
-        return `/trade?registrarId=${contract}&${queryString}`
-      },
-      [router]
-    )
+  const { ticker, contract, price, volume, isMarketOpen } = useMemo(
+    () => ({
+      ticker: registrar?.ticker ?? '',
+      contract: registrar?.contract ?? '',
+      price: registrar ? parseFloat(registrar.price) : 0,
+      volume: registrar ? parseFloat(asset.quoteVolume) : 0,
+      isMarketOpen: !!registrar?.open,
+    }),
+    [registrar, asset]
+  )
+  const logo = useCurrencyLogo(ticker, undefined)
 
-    return (
+  const buildUrl = useCallback(
+    (contract: string) => {
+      const queryString = Object.keys(router.query)
+        .map((key) => key + '=' + router.query[key])
+        .join('&')
+      return queryString ? `/trade?registrarId=${contract}&${queryString}` : `/trade?registrarId=${contract}`
+    },
+    [router]
+  )
+
+  return (
+    <Link href={buildUrl(contract)} passHref>
       <Wrapper>
         <TitleContainer>
           <TitlePrimaryLabel>#{index}</TitlePrimaryLabel>
           <TitleSecondaryLabel>Volume: {formatDollarAmount(volume)}</TitleSecondaryLabel>
         </TitleContainer>
         <Divider />
-        <BodyContainer href={buildUrl(contract)} passHref>
+        <BodyContainer>
           <DetailsWrapper>
             <LogoWrapper>
               <ImageWithFallback src={logo} alt={`${asset.name} Logo`} width={32} height={32} />{' '}
@@ -262,6 +282,6 @@ export default function TrendingMarkets() {
           <AssetPriceText>{isMarketOpen ? formatDollarAmount(price) : 'Market closed'}</AssetPriceText>
         </BodyContainer>
       </Wrapper>
-    )
-  }
+    </Link>
+  )
 }

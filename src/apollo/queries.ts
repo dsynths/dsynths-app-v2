@@ -21,7 +21,7 @@ export interface Tx {
   }
 }
 
-export interface TopMarkets {
+export interface TopMarket {
   id: string
   name: string
   ticker: string

@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js'
 import numbro from 'numbro'
 
-export const formatDollarAmount = (num: number | undefined, digits = 2, round = true) => {
+export const formatDollarAmount = (num: number | undefined, digits = 2) => {
   if (num === 0) return '$0.00'
   if (!num) return '-'
   if (num < 0.001 && digits <= 3) {

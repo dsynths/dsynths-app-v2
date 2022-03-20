@@ -134,7 +134,7 @@ function TableRow({ registrar, onSelect }: { registrar: Registrar; onSelect: (re
   const logo = useCurrencyLogo(registrar.id, undefined)
 
   const price = useMemo(() => {
-    return parseFloat(registrar.price) ? formatDollarAmount(Number(registrar.price), 2, false) : 'Market Closed'
+    return parseFloat(registrar.price) ? formatDollarAmount(Number(registrar.price), 2) : 'Market Closed'
   }, [registrar])
 
   return (
