@@ -258,7 +258,7 @@ export default function Trade() {
     return !!registrar?.open
   }, [registrar])
 
-  const { state: tradeCallbackState, callback: tradeCallback } = useTradeCallback(
+  const { callback: tradeCallback } = useTradeCallback(
     currencies[0],
     currencies[1],
     parsedAmounts[0],
