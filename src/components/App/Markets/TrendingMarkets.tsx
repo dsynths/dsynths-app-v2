@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay, Pagination, Mousewheel, Keyboard } from 'swiper'
+import styled from 'styled-components'
+
+import 'swiper/css'
+import 'swiper/css/navigation'
+import 'swiper/css/pagination'
 
 import useWeb3React from 'hooks/useWeb3'
 import { useRouter } from 'next/router'
@@ -12,17 +18,6 @@ import { Card } from 'components/Card'
 import { ExternalLink } from 'components/Link'
 import ImageWithFallback from 'components/ImageWithFallback'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
-
-// Import Swiper React components
-import { Swiper, SwiperOptions, SwiperSlide } from 'swiper/react'
-
-// Import Swiper styles
-import 'swiper/css'
-import 'swiper/css/navigation'
-import 'swiper/css/pagination'
-
-// import required modules
-import { Autoplay, Pagination, Mousewheel, Keyboard } from 'swiper'
 
 const Wrapper = styled(Card)`
   display: flex;
@@ -126,10 +121,6 @@ const TOP_MARKETS_COUNT = 10
 export default function TrendingMarkets() {
   const { chainId, account } = useWeb3React()
   const [trendingMarkets, setTrendingMarkets] = useState<TopMarkets[]>([])
-  const swiperParams: SwiperOptions = {
-    slidesPerView: 3,
-    spaceBetween: 50,
-  }
 
   const fetchTrendingMarkets = useCallback(async () => {
     const DEFAULT_RETURN: TopMarkets[] = []
