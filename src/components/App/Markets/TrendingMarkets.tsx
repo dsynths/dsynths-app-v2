@@ -24,6 +24,10 @@ const Wrapper = styled(Card)`
   flex-basis: calc(50% - 0.5rem);
   justify-content: center;
   padding: 1rem;
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    padding: 0.75rem;
+  `}
 `
 
 const SwiperContainer = styled(Swiper)`
@@ -36,7 +40,8 @@ const TitleText = styled.div`
   color: ${({ theme }) => theme.yellow1};
 
   ${({ theme }) => theme.mediaWidth.upToMedium`
-    display: none;
+    font-size: 1rem;
+    line-height: 1.25rem;
   `}
 `
 
@@ -51,12 +56,22 @@ const TitlePrimaryLabel = styled.div`
   font-size: 1rem;
   line-height: 1.25rem;
   color: ${({ theme }) => theme.text1};
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    font-size: 0.8rem;
+    line-height: 1rem;
+  `}
 `
 
 const TitleSecondaryLabel = styled.div`
   font-size: 0.7rem;
   line-height: 1.25rem;
   color: ${({ theme }) => theme.text2};
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    font-size: 0.6rem;
+    line-height: 0.8rem;
+  `}
 `
 
 const Divider = styled.div`
@@ -100,11 +115,21 @@ const BodyPrimaryLabel = styled.div`
   font-size: 1rem;
   line-height: 1.25rem;
   color: ${({ theme }) => theme.text1};
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    font-size: 0.8rem;
+    line-height: 1rem;
+  `}
 `
 const BodySecondaryLabel = styled.div`
   font-size: 0.7rem;
   line-height: 1rem;
   color: ${({ theme }) => theme.text2};
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    font-size: 0.6rem;
+    line-height: 0.8rem;
+  `}
 `
 
 const AssetPriceText = styled.div`
@@ -114,6 +139,11 @@ const AssetPriceText = styled.div`
   font-size: 1rem;
   line-height: 1.25rem;
   color: ${({ theme }) => theme.text1};
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+    font-size: 0.8rem;
+    line-height: 1rem;
+  `}
 `
 
 const TOP_MARKETS_COUNT = 10
