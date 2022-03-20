@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import useWeb3React from 'hooks/useWeb3'
 import { useRouter } from 'next/router'
@@ -13,6 +13,17 @@ import { ExternalLink } from 'components/Link'
 import ImageWithFallback from 'components/ImageWithFallback'
 import useCurrencyLogo from 'hooks/useCurrencyLogo'
 
+// Import Swiper React components
+import { Swiper, SwiperOptions, SwiperSlide } from 'swiper/react'
+
+// Import Swiper styles
+import 'swiper/css'
+import 'swiper/css/navigation'
+import 'swiper/css/pagination'
+
+// import required modules
+import { Autoplay, Pagination, Mousewheel, Keyboard } from 'swiper'
+
 const Wrapper = styled(Card)`
   display: flex;
   flex-basis: calc(50% - 0.5rem);
@@ -20,16 +31,8 @@ const Wrapper = styled(Card)`
   padding: 1rem;
 `
 
-const AssetContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  gap: 1rem;
-  margin: 1rem 0rem;
-
-  ${({ theme }) => theme.mediaWidth.upToMedium`
-    display: none;
-  `}
+const SwiperContainer = styled(Swiper)`
+  padding: 1rem 0rem 2rem 0rem;
 `
 
 const TitleText = styled.div`
@@ -118,11 +121,15 @@ const AssetPriceText = styled.div`
   color: ${({ theme }) => theme.text1};
 `
 
-const TOP_MARKETS_COUNT = 4
+const TOP_MARKETS_COUNT = 10
 
 export default function TrendingMarkets() {
   const { chainId, account } = useWeb3React()
   const [trendingMarkets, setTrendingMarkets] = useState<TopMarkets[]>([])
+  const swiperParams: SwiperOptions = {
+    slidesPerView: 3,
+    spaceBetween: 50,
+  }
 
   const fetchTrendingMarkets = useCallback(async () => {
     const DEFAULT_RETURN: TopMarkets[] = []
@@ -151,16 +158,46 @@ export default function TrendingMarkets() {
       setTrendingMarkets(result)
     }
     getTransactions()
+    return () => {
+      setTrendingMarkets([])
+    }
   }, [fetchTrendingMarkets])
 
   return (
     <div>
       <TitleText>TOP {TOP_MARKETS_COUNT} ASSETS BY TRADING VOLUME</TitleText>
-      <AssetContainer>
+      <SwiperContainer
+        cssMode={true}
+        mousewheel={true}
+        keyboard={true}
+        spaceBetween={0}
+        slidesPerView={1}
+        slidesPerGroup={1}
+        loop={true}
+        autoplay={{
+          delay: 4000,
+          disableOnInteraction: false,
+        }}
+        pagination={{
+          clickable: true,
+        }}
+        modules={[Autoplay, Pagination, Mousewheel, Keyboard]}
+        breakpoints={{
+          // display 2 cards per row above this screen width
+          640: {
+            slidesPerView: 2,
+            slidesPerGroup: 2,
+            spaceBetween: 16,
+          },
+        }}
+        className="mySwiper"
+      >
         {trendingMarkets.map((asset, index) => (
-          <AssetCard key="index" asset={asset} index={index + 1} />
+          <SwiperSlide key={index}>
+            <AssetCard asset={asset} index={index + 1} />
+          </SwiperSlide>
         ))}
-      </AssetContainer>
+      </SwiperContainer>
     </div>
   )
 
