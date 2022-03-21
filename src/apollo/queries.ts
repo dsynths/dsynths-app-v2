@@ -31,6 +31,14 @@ export interface TopMarket {
   quoteVolume: string
 }
 
+export interface SynchroniserStat {
+  totalVolumeDEI: string
+  registrarCount: string
+  txCount: string
+  daoFees: string
+  partnerFees: string
+}
+
 export const TRANSACTIONS = gql`
   query getTransactions($account: Bytes!) {
     transactions(where: { from: $account }, orderBy: timestamp, orderDirection: desc) {
@@ -66,6 +74,18 @@ export const TOPMARKETS = gql`
       type
       version
       quoteVolume
+    }
+  }
+`
+
+export const STATS = gql`
+  query getSynchroniserStats {
+    synchronizers {
+      totalVolumeDEI
+      registrarCount
+      txCount
+      daoFees
+      partnerFees
     }
   }
 `
