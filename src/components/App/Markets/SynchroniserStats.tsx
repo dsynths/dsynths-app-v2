@@ -10,10 +10,11 @@ import { FALLBACK_CHAIN_ID } from 'constants/chains'
 
 const Container = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 40px;
 
-  ${({ theme }) => theme.mediaWidth.upToMedium`
-   
+  ${({ theme }) => theme.mediaWidth.upToSmall`
+      display: none;
   `}
 `
 
@@ -91,11 +92,11 @@ export default function SynchroniserStats() {
       </div>
       <div>
         <PrimaryLabel>{registrarCount}</PrimaryLabel>
-        <SecondaryLabel>Assets to trade</SecondaryLabel>
+        <SecondaryLabel>Assets to Trade</SecondaryLabel>
       </div>
       <div>
         <PrimaryLabel>{tradeCount}+</PrimaryLabel>
-        <SecondaryLabel>Trades on dSynths</SecondaryLabel>
+        <SecondaryLabel>Unique Trades</SecondaryLabel>
       </div>
     </Container>
   )
