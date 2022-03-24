@@ -49,18 +49,6 @@ const SwiperContainer = styled(Swiper)`
   }
 `
 
-const TitleText = styled.div`
-  font-size: 1.7rem;
-  line-height: 1.75rem;
-  color: ${({ theme }) => theme.yellow1};
-
-  ${({ theme }) => theme.mediaWidth.upToMedium`
-    font-size: 1.2rem;
-    line-height: 1.25rem;
-    text-align: center;
-  `}
-`
-
 const TitleContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
@@ -92,7 +80,7 @@ const TitleSecondaryLabel = styled.div`
 
 const Divider = styled.div`
   margin: 0.5rem 0rem;
-  border: 1px solid ${({ theme }) => theme.yellow1};
+  border: 1px solid ${({ theme }) => theme.border2};
 `
 
 const BodyContainer = styled.div`
@@ -198,7 +186,6 @@ export default function TrendingMarkets() {
 
   return (
     <div>
-      <TitleText>TOP {TOP_MARKETS_COUNT} ASSETS BY GLOBAL TRADING VOLUME</TitleText>
       <SwiperContainer
         modules={[Autoplay, Pagination, Virtual]}
         cssMode={true}
