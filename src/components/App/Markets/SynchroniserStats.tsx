@@ -108,7 +108,7 @@ export default function SynchroniserStats() {
         {!stats ? (
           <DotFlashing colour={theme.yellow1} size={'12px'} gap={'2px'} style={{ padding: '8px' }} />
         ) : (
-          <PrimaryLabel>{tradeCount}</PrimaryLabel>
+          <PrimaryLabel>{tradeCount}+</PrimaryLabel>
         )}
         <SecondaryLabel>Unique Trades</SecondaryLabel>
       </div>
