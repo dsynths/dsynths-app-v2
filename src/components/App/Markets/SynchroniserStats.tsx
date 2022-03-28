@@ -71,7 +71,11 @@ export default function SynchroniserStats() {
     getSynchroniserStats()
   }, [fetchSynchroniserStats])
 
-  const { totalVolume, registrarCount, tradeCount } = useMemo(
+  const {
+    totalVolume = 0,
+    registrarCount = 0,
+    tradeCount = 0,
+  } = useMemo(
     () => ({
       totalVolume: formatDollarAmount(Number(stats?.totalVolumeDEI ?? '0')),
       registrarCount: parseInt(stats?.registrarCount ?? '0') / 2 ?? 0,
@@ -79,10 +83,6 @@ export default function SynchroniserStats() {
     }),
     [stats]
   )
-
-  if (!stats) {
-    return null
-  }
 
   return (
     <Container>
