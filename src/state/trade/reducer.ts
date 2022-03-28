@@ -16,6 +16,7 @@ export interface TradeState {
   typedField: TypedField
   receipient?: string
   attemptingTxn: boolean
+  expiryBlock: number | undefined
   showReview: boolean
   error?: string
 }
@@ -25,6 +26,7 @@ const initialState: TradeState = {
   typedField: TypedField.A,
   receipient: undefined,
   attemptingTxn: false,
+  expiryBlock: undefined,
   showReview: false,
   error: undefined,
 }
@@ -37,6 +39,7 @@ export const tradeSlice = createSlice({
       state.typedValue = action.payload.typedValue
       state.typedField = action.payload.typedField
       state.attemptingTxn = action.payload.attemptingTxn
+      state.expiryBlock = action.payload.expiryBlock
       state.showReview = action.payload.showReview
       state.error = action.payload.error
     },
@@ -45,6 +48,9 @@ export const tradeSlice = createSlice({
     },
     setAttemptingTxn: (state, action: PayloadAction<boolean>) => {
       state.attemptingTxn = action.payload
+    },
+    setExpiryBlock: (state, action: PayloadAction<number | undefined>) => {
+      state.expiryBlock = action.payload
     },
     setShowReview: (state, action: PayloadAction<boolean>) => {
       state.showReview = action.payload
@@ -55,7 +61,8 @@ export const tradeSlice = createSlice({
   },
 })
 
-export const { setTradeState, setReceipient, setAttemptingTxn, setShowReview, setError } = tradeSlice.actions
+export const { setTradeState, setReceipient, setAttemptingTxn, setExpiryBlock, setShowReview, setError } =
+  tradeSlice.actions
 
 export function useTradeState(): TradeState {
   return useAppSelector((state: AppState) => state.trade)

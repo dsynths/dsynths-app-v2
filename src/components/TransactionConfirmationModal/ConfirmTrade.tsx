@@ -103,6 +103,7 @@ export default function ConfirmTrade({
   onConfirm,
   attemptingTxn,
   txHash,
+  expiryBlock,
   tradeErrorMessage,
   currencyIn,
   currencyOut,
@@ -117,6 +118,7 @@ export default function ConfirmTrade({
   onConfirm: () => void
   attemptingTxn: boolean
   txHash: string
+  expiryBlock: number | undefined
   tradeErrorMessage?: string
   currencyIn: Currency | undefined
   currencyOut: Currency | undefined
@@ -247,6 +249,7 @@ export default function ConfirmTrade({
       onDismiss={onDismiss}
       attemptingTxn={attemptingTxn}
       hash={txHash}
+      expiryBlock={expiryBlock}
       summary={summary}
       currencyToAdd={currencyOut}
       content={

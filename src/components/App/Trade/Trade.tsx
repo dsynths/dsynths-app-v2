@@ -196,7 +196,7 @@ export default function Trade() {
 
   const [tradeType, setTradeType] = useState<TradeType>(TradeType.OPEN)
   const [direction, setDirection] = useState(Direction.LONG)
-  const { attemptingTxn, showReview, error: tradeStateError } = tradeState
+  const { attemptingTxn, expiryBlock, showReview, error: tradeStateError } = tradeState
   const [txHash, setTxHash] = useState<string>('')
   const [awaitingApproveConfirmation, setAwaitingApproveConfirmation] = useState<boolean>(false)
 
@@ -295,12 +295,20 @@ export default function Trade() {
       }
     }
 
-    dispatch(setTradeState({ ...tradeState, error, attemptingTxn: false }))
+    dispatch(setTradeState({ ...tradeState, error, attemptingTxn: false, expiryBlock: undefined }))
   }, [tradeCallback, dispatch, tradeState])
 
   const handleOnDismiss = useCallback(() => {
     setTxHash('')
-    dispatch(setTradeState({ ...tradeState, showReview: false, attemptingTxn: false, error: undefined }))
+    dispatch(
+      setTradeState({
+        ...tradeState,
+        showReview: false,
+        attemptingTxn: false,
+        error: undefined,
+        expiryBlock: undefined,
+      })
+    )
   }, [dispatch, tradeState])
 
   const showSelectIn = useMemo(() => {
@@ -480,6 +488,7 @@ export default function Trade() {
         attemptingTxn={attemptingTxn}
         tradeErrorMessage={tradeStateError}
         txHash={txHash}
+        expiryBlock={expiryBlock}
         currencyIn={currencies[0]}
         currencyOut={currencies[1]}
         registrar={registrar}

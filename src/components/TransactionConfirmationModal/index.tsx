@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { AlertTriangle } from 'react-feather'
 import { Currency } from '@sushiswap/core-sdk'
+import Countdown from 'react-countdown'
 
 import useWeb3React from 'hooks/useWeb3'
 import useAddTokenToMetaMask from 'hooks/useAddTokenToMetaMask'
@@ -12,6 +13,7 @@ import { Modal, ModalHeader } from 'components/Modal'
 import { ConfirmationAnimation, CheckMark } from 'components/Icons'
 import { PrimaryButton } from 'components/Button'
 import { ExplorerLink } from 'components/Link'
+import { useBlockNumber } from 'state/application/hooks'
 
 const Wrapper = styled.div`
   display: flex;
@@ -70,6 +72,7 @@ export default function TransactionConfirmationModal({
   onDismiss,
   attemptingTxn,
   hash,
+  expiryBlock,
   summary,
   currencyToAdd,
   content,
@@ -78,6 +81,7 @@ export default function TransactionConfirmationModal({
   onDismiss: () => void
   attemptingTxn: boolean
   hash?: string
+  expiryBlock: number | undefined
   summary: string
   currencyToAdd?: Currency
   content: React.ReactNode
@@ -88,7 +92,7 @@ export default function TransactionConfirmationModal({
   return (
     <Modal isOpen={isOpen} onBackgroundClick={onDismiss} onEscapeKeydown={onDismiss}>
       {attemptingTxn ? (
-        <ConfirmationPendingContent onDismiss={onDismiss} summary={summary} />
+        <ConfirmationPendingContent onDismiss={onDismiss} summary={summary} expiryBlock={expiryBlock} />
       ) : hash ? (
         <TransactionSubmittedContent
           chainId={chainId}
@@ -143,8 +147,36 @@ export function TransactionErrorContent({ message, onDismiss }: { message: strin
   )
 }
 
+const FTM_BLOCK_TIME = 0.9
+
 // User needs to confirm the transaction in their wallet
-function ConfirmationPendingContent({ onDismiss, summary }: { onDismiss: () => void; summary: string }) {
+function ConfirmationPendingContent({
+  onDismiss,
+  summary,
+  expiryBlock,
+}: {
+  onDismiss: () => void
+  summary: string
+  expiryBlock: number | undefined
+}) {
+  const currentBlockNumber = useBlockNumber()
+  const expiryTime = useMemo(() => {
+    return Math.floor(Number(expiryBlock) - Number(currentBlockNumber) * FTM_BLOCK_TIME)
+  }, [expiryBlock, currentBlockNumber])
+
+  // Renderer callback with condition
+  const renderer = ({ seconds, completed }: { seconds: number; completed: any }) => {
+    if (!completed) {
+      return <div>Oracle signatures have expired. Please reject the transaction.</div>
+    } else {
+      return (
+        <div>
+          Please confirm the transaction within <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>{seconds}</span>s
+        </div>
+      )
+    }
+  }
+
   return (
     <div>
       <ModalHeader title=" " onClose={onDismiss} border={false} />
@@ -152,7 +184,7 @@ function ConfirmationPendingContent({ onDismiss, summary }: { onDismiss: () => v
         <ConfirmationAnimation size="80px" />
         <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Waiting for Confirmation</div>
         <div>{summary}</div>
-        <div>Confirm this transaction in your wallet</div>
+        <Countdown date={Date.now() + expiryTime} renderer={renderer} precision={3} />
       </PendingWrapper>
     </div>
   )

@@ -5,7 +5,7 @@ import { getAddress } from '@ethersproject/address'
 import { SupportedChainId as MuonChainId } from 'lib/synchronizer'
 
 import { useTransactionAdder } from 'state/transactions/hooks'
-import { TradeType } from 'state/trade/reducer'
+import { TradeType, setExpiryBlock } from 'state/trade/reducer'
 
 import useWeb3React from './useWeb3'
 import { useSynchronizerContract } from './useContract'
@@ -13,6 +13,7 @@ import { usePartnerId } from './usePartnerId'
 import { calculateGasMargin } from 'utils/web3'
 import { Muon } from 'lib/synchronizer/muon'
 import { toHex } from 'utils/hex'
+import { useAppDispatch } from 'state'
 
 export enum TradeCallbackState {
   INVALID = 'INVALID',
@@ -34,6 +35,7 @@ export default function useTradeCallback(
   const addTransaction = useTransactionAdder()
   const Synchronizer = useSynchronizerContract()
   const partnerId = usePartnerId()
+  const dispatch = useAppDispatch()
 
   const registrar = useMemo(() => {
     if (!currencyA || !currencyB) {
@@ -68,6 +70,8 @@ export default function useTradeCallback(
       }
 
       console.log('Contract arguments: ', args)
+
+      dispatch(setExpiryBlock(signatures.data.calldata.expireBlock))
 
       return {
         address: Synchronizer.address,
