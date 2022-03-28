@@ -20,6 +20,8 @@ import { Card } from 'components/Card'
 import { ExternalLink } from 'components/Link'
 import ImageWithFallback from 'components/ImageWithFallback'
 import { NavButton } from 'components/Button'
+import { DotFlashing } from 'components/Icons'
+import ThemeProvider from 'theme'
 
 const Wrapper = styled(Card)<{
   border?: boolean
@@ -209,6 +211,7 @@ export default function Transactions() {
   const [transactions, setTransactions] = useState<Tx[]>([])
   const [offset, setOffset] = useState(0)
   const isJadeTheme = useIsJadeTheme()
+  const theme = useTheme()
 
   const fetchTransactions = useCallback(async () => {
     const DEFAULT_RETURN: Tx[] = []
@@ -281,7 +284,7 @@ export default function Transactions() {
     setOffset((prev) => (prev += 1))
   }
 
-  if (!account || !chainId || !paginatedTransactions.length) {
+  if (!account || !chainId) {
     return null
   }
 
@@ -290,16 +293,20 @@ export default function Transactions() {
       <Header>Trade History</Header>
       <Wrapper border={isJadeTheme}>
         {/* TODO : Have a search bar here to filter the trades of a particular Registrar */}
-        {paginatedTransactions.map((txArr) => (
-          <>
-            <Date>{formatDate(txArr[0].timestamp)}</Date>
-            <Box>
-              {txArr.map((tx, index) => (
-                <TransactionRow tx={tx} key={index} isNotLastRow={index !== txArr.length - 1} />
-              ))}
-            </Box>
-          </>
-        ))}
+        {paginatedTransactions.length > 0 ? (
+          paginatedTransactions.map((txArr) => (
+            <>
+              <Date>{formatDate(txArr[0].timestamp)}</Date>
+              <Box>
+                {txArr.map((tx, index) => (
+                  <TransactionRow tx={tx} key={index} isNotLastRow={index !== txArr.length - 1} />
+                ))}
+              </Box>
+            </>
+          ))
+        ) : (
+          <DotFlashing size={'10px'} gap={'2px'} colour={theme.text1} />
+        )}
         {showLoadMore && <SecondaryButton onClick={onLoadMore}>Show more trades</SecondaryButton>}
       </Wrapper>
     </>
