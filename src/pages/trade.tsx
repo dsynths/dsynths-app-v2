@@ -11,8 +11,7 @@ const Container = styled.div`
   flex-flow: column nowrap;
   gap: 5px;
   overflow: visible;
-  margin: 0 auto;
-  margin-top: 75px;
+  margin: 75px auto;
   width: clamp(250px, 90%, 512px);
 
   ${({ theme }) => theme.mediaWidth.upToMedium`

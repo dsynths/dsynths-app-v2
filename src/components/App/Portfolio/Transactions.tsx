@@ -20,8 +20,6 @@ import { Card } from 'components/Card'
 import { ExternalLink } from 'components/Link'
 import ImageWithFallback from 'components/ImageWithFallback'
 import { NavButton } from 'components/Button'
-import { DotFlashing } from 'components/Icons'
-import ThemeProvider from 'theme'
 
 const Wrapper = styled(Card)<{
   border?: boolean
@@ -225,7 +223,6 @@ export default function Transactions() {
   const [transactions, setTransactions] = useState<Tx[]>([])
   const [offset, setOffset] = useState(0)
   const isJadeTheme = useIsJadeTheme()
-  const theme = useTheme()
 
   const fetchTransactions = useCallback(async () => {
     const DEFAULT_RETURN: Tx[] = []

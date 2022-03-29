@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import NavBar from './NavBar'
-import Header from './Header'
+import Warning, { DISPLAY_WARNING } from './Warning'
 
 const Wrapper = styled.div`
   display: flex;
@@ -10,24 +10,21 @@ const Wrapper = styled.div`
   flex-flow: column nowrap;
 `
 
-// Scroll content so we can use a semi transparent navbar.
-const Content = styled.div`
+const Content = styled.div<{
+  warning: boolean
+}>`
   display: block;
   position: relative;
-  height: calc(100vh - 55px);
+  height: calc(100vh - 55px - ${({ warning }) => (warning ? '80px' : '0px')});
   overflow: scroll;
-  padding-bottom: 20px;
-  @media only screen and (min-width: 767px) {
-    padding-bottom: 40px;
-  }
 `
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <Wrapper>
       <NavBar />
-      <Header />
-      <Content>{children}</Content>
+      <Warning />
+      <Content warning={DISPLAY_WARNING}>{children}</Content>
     </Wrapper>
   )
 }
