@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 import NavBar from './NavBar'
+import Header from './Header'
 
 const Wrapper = styled.div`
   display: flex;
@@ -25,6 +26,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <Wrapper>
       <NavBar />
+      <Header />
       <Content>{children}</Content>
     </Wrapper>
   )
