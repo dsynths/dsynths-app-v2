@@ -110,6 +110,21 @@ const AssetDetailsContainer = styled.div`
   align-items: start;
 `
 
+const LoadingContainer = styled(Card)`
+  display: flex;
+  text-align: center;
+  padding: 3rem;
+
+  ${({ theme }) => theme.mediaWidth.upToMedium`
+  padding: 2.25rem;
+`}
+
+  &:hover {
+    cursor: pointer;
+    background: ${({ theme }) => theme.bg1};
+  }
+`
+
 const BodyPrimaryLabel = styled.div`
   font-size: 1rem;
   line-height: 1.25rem;
@@ -180,10 +195,6 @@ export default function TrendingMarkets() {
     getTransactions()
   }, [fetchTrendingMarkets])
 
-  if (!trendingMarkets.length) {
-    return null
-  }
-
   return (
     <div>
       <SwiperContainer
@@ -209,11 +220,15 @@ export default function TrendingMarkets() {
           },
         }}
       >
-        {trendingMarkets.map((asset: TopMarket, index) => (
-          <SwiperSlide key={index}>
-            <MemoizedAssetCard asset={asset} index={index + 1} />
-          </SwiperSlide>
-        ))}
+        {trendingMarkets.length > 0 ? (
+          trendingMarkets.map((asset: TopMarket, index) => (
+            <SwiperSlide key={index}>
+              <MemoizedAssetCard asset={asset} index={index + 1} />
+            </SwiperSlide>
+          ))
+        ) : (
+          <LoadingContainer>Loading Trending Markets...</LoadingContainer>
+        )}
       </SwiperContainer>
     </div>
   )

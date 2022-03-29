@@ -181,6 +181,20 @@ const SecondaryButton = styled(NavButton)`
   `}
 `
 
+const HelperText = styled.div`
+  display: flex;
+  align-self: center;
+  font-size: 12.5px;
+  color: ${({ theme }) => theme.text1};
+
+  & > span {
+    color: ${({ theme }) => theme.primary3};
+    &:hover {
+      cursor: pointer;
+    }
+  }
+`
+
 interface TxGroup {
   [x: number]: Tx[]
 }
@@ -281,7 +295,7 @@ export default function Transactions() {
     setOffset((prev) => (prev += 1))
   }
 
-  if (!account || !chainId || !paginatedTransactions.length) {
+  if (!account || !chainId) {
     return null
   }
 
@@ -290,16 +304,20 @@ export default function Transactions() {
       <Header>Trade History</Header>
       <Wrapper border={isJadeTheme}>
         {/* TODO : Have a search bar here to filter the trades of a particular Registrar */}
-        {paginatedTransactions.map((txArr) => (
-          <>
-            <Date>{formatDate(txArr[0].timestamp)}</Date>
-            <Box>
-              {txArr.map((tx, index) => (
-                <TransactionRow tx={tx} key={index} isNotLastRow={index !== txArr.length - 1} />
-              ))}
-            </Box>
-          </>
-        ))}
+        {paginatedTransactions.length > 0 ? (
+          paginatedTransactions.map((txArr) => (
+            <>
+              <Date>{formatDate(txArr[0].timestamp)}</Date>
+              <Box>
+                {txArr.map((tx, index) => (
+                  <TransactionRow tx={tx} key={index} isNotLastRow={index !== txArr.length - 1} />
+                ))}
+              </Box>
+            </>
+          ))
+        ) : (
+          <HelperText>You don&apos;t have any trade history.</HelperText>
+        )}
         {showLoadMore && <SecondaryButton onClick={onLoadMore}>Show more trades</SecondaryButton>}
       </Wrapper>
     </>

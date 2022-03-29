@@ -16,8 +16,7 @@ import { PrimaryButton } from 'components/Button'
 const Container = styled.div`
   display: flex;
   flex-flow: column nowrap;
-  margin: 0 auto;
-  margin-top: 75px;
+  margin: 75px auto;
   width: clamp(250px, 80%, 800px);
   gap: 20px;
 

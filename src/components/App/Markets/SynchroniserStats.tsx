@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import useWeb3React from 'hooks/useWeb3'
 
@@ -7,6 +7,7 @@ import { SynchroniserStat, STATS } from 'apollo/queries'
 import { getApolloClient } from 'apollo/client/synchronizer'
 import { formatDollarAmount } from 'utils/numbers'
 import { FALLBACK_CHAIN_ID } from 'constants/chains'
+import { DotFlashing } from 'components/Icons'
 
 const Container = styled.div`
   display: flex;
@@ -43,6 +44,7 @@ const SecondaryLabel = styled.div`
 export default function SynchroniserStats() {
   const { chainId = FALLBACK_CHAIN_ID } = useWeb3React()
   const [stats, setStats] = useState<SynchroniserStat | null>()
+  const theme = useTheme()
 
   const fetchSynchroniserStats = useCallback(async () => {
     const DEFAULT_RETURN: SynchroniserStat | null = null
@@ -71,7 +73,11 @@ export default function SynchroniserStats() {
     getSynchroniserStats()
   }, [fetchSynchroniserStats])
 
-  const { totalVolume, registrarCount, tradeCount } = useMemo(
+  const {
+    totalVolume = 0,
+    registrarCount = 0,
+    tradeCount = 0,
+  } = useMemo(
     () => ({
       totalVolume: formatDollarAmount(Number(stats?.totalVolumeDEI ?? '0')),
       registrarCount: parseInt(stats?.registrarCount ?? '0') / 2 ?? 0,
@@ -80,22 +86,30 @@ export default function SynchroniserStats() {
     [stats]
   )
 
-  if (!stats) {
-    return null
-  }
-
   return (
     <Container>
       <div>
-        <PrimaryLabel>{totalVolume}</PrimaryLabel>
+        {!stats ? (
+          <DotFlashing colour={theme.yellow1} size={'12px'} gap={'2px'} style={{ padding: '8px' }} />
+        ) : (
+          <PrimaryLabel>{totalVolume}</PrimaryLabel>
+        )}
         <SecondaryLabel>Global Trading Volume</SecondaryLabel>
       </div>
       <div>
-        <PrimaryLabel>{registrarCount}</PrimaryLabel>
+        {!stats ? (
+          <DotFlashing colour={theme.yellow1} size={'12px'} gap={'2px'} style={{ padding: '8px' }} />
+        ) : (
+          <PrimaryLabel>{registrarCount}</PrimaryLabel>
+        )}
         <SecondaryLabel>Assets to Trade</SecondaryLabel>
       </div>
       <div>
-        <PrimaryLabel>{tradeCount}+</PrimaryLabel>
+        {!stats ? (
+          <DotFlashing colour={theme.yellow1} size={'12px'} gap={'2px'} style={{ padding: '8px' }} />
+        ) : (
+          <PrimaryLabel>{tradeCount}+</PrimaryLabel>
+        )}
         <SecondaryLabel>Unique Trades</SecondaryLabel>
       </div>
     </Container>
