@@ -183,6 +183,20 @@ const SecondaryButton = styled(NavButton)`
   `}
 `
 
+const HelperText = styled.div`
+  display: flex;
+  align-self: center;
+  font-size: 12.5px;
+  color: ${({ theme }) => theme.text1};
+
+  & > span {
+    color: ${({ theme }) => theme.primary3};
+    &:hover {
+      cursor: pointer;
+    }
+  }
+`
+
 interface TxGroup {
   [x: number]: Tx[]
 }
@@ -305,7 +319,7 @@ export default function Transactions() {
             </>
           ))
         ) : (
-          <DotFlashing size={'10px'} gap={'2px'} colour={theme.text1} />
+          <HelperText>You don&apos;t have any trade history.</HelperText>
         )}
         {showLoadMore && <SecondaryButton onClick={onLoadMore}>Show more trades</SecondaryButton>}
       </Wrapper>
