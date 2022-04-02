@@ -64,6 +64,32 @@ export const TRANSACTIONS = gql`
   }
 `
 
+export const ALL_INTERACTED_ACCOUNTS = gql`
+  query getTransactions {
+    transactions(first: 1000, orderBy: timestamp, orderDirection: asc) {
+      from
+      to
+    }
+  }
+`
+
+export const ALL_SNAPSHOTS = gql`
+  query getSnapshots($users: [Bytes!]!) {
+    userBalanceSnapshots(first: 1000, where: { user_in: $users }, orderBy: timestamp, orderDirection: asc) {
+      user
+      timestamp
+      registrar {
+        id
+        name
+        ticker
+        symbol
+        type
+      }
+      amount
+    }
+  }
+`
+
 export const TOPMARKETS = gql`
   query getTopMarkets($count: Int!) {
     registrars(orderBy: quoteVolume, orderDirection: desc, first: $count) {
