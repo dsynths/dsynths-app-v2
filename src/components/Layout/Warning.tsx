@@ -33,9 +33,13 @@ export default function Warning() {
     <Wrapper>
       <AlertTriangle color={theme.red1} size="80px" />
       <div>
-        Trading on dSynths is temorarily suspended until further notice. Visit our{' '}
-        <ExternalLink href="https://t.me/dsynths">Telegram</ExternalLink> for more information. Apologies for the
-        inconvenience!
+        Trading on dSynths is temporarily suspended. Pricing at the time of maintenance will be honored and affected
+        users will be reimbursed if necessary. Please join{' '}
+        <ExternalLink href="https://t.me/dsynths" style={{ textDecoration: 'underline' }}>
+          {' '}
+          our Telegram
+        </ExternalLink>{' '}
+        for more info. Thank you for your understanding.
       </div>
     </Wrapper>
   ) : null
