@@ -10,6 +10,9 @@ module.exports = {
       '/portfolio': {
         page: '/portfolio',
       },
+      '/reimburse': {
+        page: '/reimburse',
+      },
     }
   },
   async redirects() {
