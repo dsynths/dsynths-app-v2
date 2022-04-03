@@ -22,7 +22,7 @@ function makeStore(preloadedState = undefined) {
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         thunk: true,
-        immutableCheck: true,
+        // immutableCheck: true,
         serializableCheck: false,
       }),
     devTools: process.env.NODE_ENV === 'development',
