@@ -16,7 +16,7 @@ export function getApolloClient(chainId: SupportedChainId) {
 export function getSubgraphName(chainId: SupportedChainId) {
   switch (chainId) {
     case SupportedChainId.FANTOM:
-      return 'dsynths/synchronizer-fantom'
+      return 'deusfinance/synchronizer-fantom'
     default:
       console.error(`${chainId} is not a supported subgraph network`)
       return null
