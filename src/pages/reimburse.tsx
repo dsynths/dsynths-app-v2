@@ -86,11 +86,11 @@ const Row = styled.tr<{
 `
 
 const Cell = styled.td<{
-  short?: boolean
+  red?: boolean
 }>`
   text-align: left;
   padding: 5px;
-  color: ${({ theme, short }) => short && theme.red1};
+  color: ${({ theme, red }) => red && theme.red1};
 `
 
 const ShutdownPricesMap: { [symbol: string]: string } = {
@@ -262,11 +262,11 @@ function SnapshotRow({
       <Cell>{user}</Cell>
       <Cell>{registrar?.ticker}</Cell>
       <Cell>{registrar?.sector}</Cell>
-      <Cell short={registrar?.direction === Direction.SHORT}>{registrar?.direction}</Cell>
+      <Cell red={registrar?.direction === Direction.SHORT}>{registrar?.direction}</Cell>
       <Cell>{amount}</Cell>
       <Cell>{oldPriceFormatted}</Cell>
       <Cell>{currentPriceFormatted}</Cell>
-      <Cell>{formatDollarAmount(parseFloat(deltaUSD))}</Cell>
+      <Cell red={parseFloat(deltaUSD) < 0}>${deltaUSD}</Cell>
       <Cell>{isNegative ? 'yes' : ''}</Cell>
     </Row>
   )
