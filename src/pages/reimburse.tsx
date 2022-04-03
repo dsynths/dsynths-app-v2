@@ -253,8 +253,8 @@ function SnapshotRow({
     if (!parseFloat(amount) || !parseFloat(currentPrice) || !parseFloat(oldPrice)) return ['0', false]
     const notionalThen = new BigNumber(oldPrice).times(amount)
     const notionalNow = new BigNumber(currentPrice).times(amount)
-    const deltaUSD = notionalThen.minus(notionalNow)
-    return [deltaUSD.toFixed(), deltaUSD.isNegative()]
+    const deltaUSD = notionalNow.minus(notionalThen)
+    return [deltaUSD.toFixed(2), deltaUSD.isNegative()]
   }, [currentPrice, oldPrice, amount])
 
   return (
