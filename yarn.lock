@@ -212,10 +212,10 @@
     "@babel/helper-validator-identifier" "^7.16.7"
     to-fast-properties "^2.0.0"
 
-"@deusfinance/synchronizer-sdk@^2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@deusfinance/synchronizer-sdk/-/synchronizer-sdk-2.2.0.tgz#9fedb8346d085b816861a9aca3b5bc29a220ff5a"
-  integrity sha512-kBja0fycNfm50dCs84Fe7pjnW/Nt3Gx2bFoEdUjvMsn8hV3jtRJ++S1tygxjotCVVDGKPWt4U9Qu64LvybzN2w==
+"@deusfinance/synchronizer-sdk@2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@deusfinance/synchronizer-sdk/-/synchronizer-sdk-2.3.0.tgz#32ce1b1dd3af9dd334637c164389d9ccaac8604d"
+  integrity sha512-+7TNCxFF4OU1YYAwq77hn7eXPkNk7XJ+i0AjqmzfTGJRppOfxPw35zvY4/6rKQRvaR8CuvoV/BmG6BVMR6cbEw==
   dependencies:
     "@ethersproject/address" "^5.5.0"
     "@ethersproject/bignumber" "^5.5.0"

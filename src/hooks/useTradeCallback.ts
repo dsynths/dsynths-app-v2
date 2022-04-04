@@ -56,13 +56,15 @@ export default function useTradeCallback(
         throw new Error(`Unable to fetch Muon signatures: ${signatures.error}`)
       }
 
+      console.log(signatures)
+
       const args = {
         partnerId,
         receipient: account,
         registrar,
         amountIn: toHex(amountA.quotient),
         price: signatures.data.calldata.price,
-        expireBlock: signatures.data.calldata.expireBlock,
+        timestamp: signatures.data.calldata.timestamp,
         _reqId: signatures.data.calldata.reqId,
         sigs: signatures.data.calldata.sigs,
       }
