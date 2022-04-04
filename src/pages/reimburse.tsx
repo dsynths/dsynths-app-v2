@@ -117,7 +117,7 @@ const ShutdownPricesMap: { [symbol: string]: string } = {
   MRO: '26.04',
   OXY: '58.8',
   PFE: '52.77',
-  NIC: '',
+  NIC: '1.93',
   SLB: '41.7',
   SPGI: '413',
   TSLA: '1010',
