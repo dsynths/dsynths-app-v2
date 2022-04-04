@@ -46,12 +46,6 @@ export function useSynchronizerContract() {
   return useContract(address, SynchronizerABI)
 }
 
-export function usePartnerManager() {
-  const { chainId } = useWeb3React()
-  const address = useMemo(() => (chainId ? PartnerManager[chainId] : undefined), [chainId])
-  return useContract(address, PartnerManagerABI)
-}
-
 export function useMulticall2Contract() {
   const { chainId } = useWeb3React()
   const address = useMemo(() => (chainId ? Multicall2[chainId] : undefined), [chainId])

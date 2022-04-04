@@ -14,7 +14,7 @@ const Container = styled.div`
   gap: 40px;
 
   ${({ theme }) => theme.mediaWidth.upToSmall`
-      display: none;
+    display: none;
   `}
 `
 
