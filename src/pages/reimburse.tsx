@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import BigNumber from 'bignumber.js'
+import { areEqual } from 'react-window'
 
 import { useRegistrarByContract } from 'lib/synchronizer/hooks'
+import { Direction, Registrar } from 'lib/synchronizer'
 import { getApolloClient } from 'apollo/client/synchronizer'
 import { ALL_INTERACTED_ACCOUNTS, ALL_SNAPSHOTS } from 'apollo/queries'
 import { SupportedChainId } from 'constants/chains'
 import { formatDollarAmount } from 'utils/numbers'
-import { Direction, Registrar } from '@deusfinance/synchronizer-sdk'
 import { makeHttpRequest } from 'utils/http'
-import { areEqual } from 'react-window'
 
 interface Interaction {
   from: string
@@ -97,12 +97,12 @@ const ShutdownPricesMap: { [symbol: string]: string } = {
   AAL: '17',
   AAPL: '174',
   ADA: '1.098',
-  ALU: '3613',
+  ALU: '0.1123',
   AMD: '119',
   AMZN: '3295',
   BA: '188',
   BTC: '44250',
-  BRENTOIL: '116',
+  BRENTOIL: '120.6',
   CHF: '1.0744',
   COP: '107',
   DE: '436',
@@ -117,19 +117,45 @@ const ShutdownPricesMap: { [symbol: string]: string } = {
   MRO: '26.04',
   OXY: '58.8',
   PFE: '52.77',
-  NIC: '1.93',
+  NIC: '1.927',
   SLB: '41.7',
   SPGI: '413',
   TSLA: '1010',
-  WHEAT: '1093',
+  WHEAT: '380.6',
   XAU: '1955',
-  XCU: '470',
-  XPT: '1006',
+  XCU: '0.293',
+  XPT: '999',
 }
 
 export default function Reimburse() {
   const snapshots = useSnapShots()
   const conductPrices = useConductPrices()
+  const [amounts, setAmounts] = useState<{ [id: string]: BigNumber }>({})
+
+  const addAmount = (id: string, amount: BigNumber) => {
+    setAmounts((prev) => ({
+      ...prev,
+      [id]: amount,
+    }))
+  }
+
+  const amountPerUser = useMemo(() => {
+    return Object.entries(amounts).reduce((acc: { [user: string]: BigNumber }, [id, amount]) => {
+      const user = id.split('__')[0]
+      if (!acc[user]) {
+        acc[user] = new BigNumber('0')
+      }
+      acc[user] = acc[user].plus(amount)
+      return acc
+    }, {})
+  }, [amounts])
+
+  console.table(
+    Object.entries(amountPerUser).map(([user, amount]) => ({
+      user,
+      amount: amount.toFixed(),
+    }))
+  )
 
   return (
     <Container>
@@ -153,7 +179,12 @@ export default function Reimburse() {
         </Head>
         <tbody>
           {Object.values(snapshots).map((userSnapshots, index) => (
-            <MemoSnapshotGroup key={index} userSnapshots={userSnapshots} conductPrices={conductPrices} />
+            <MemoSnapshotGroup
+              key={index}
+              userSnapshots={userSnapshots}
+              conductPrices={conductPrices}
+              addAmount={addAmount}
+            />
           ))}
         </tbody>
       </TableWrapper>
@@ -163,7 +194,15 @@ export default function Reimburse() {
 
 const MemoSnapshotGroup = React.memo(SnapshotGroup, areEqual)
 
-function SnapshotGroup({ userSnapshots, conductPrices }: { userSnapshots: Snapshot[]; conductPrices: ConductPrices }) {
+function SnapshotGroup({
+  userSnapshots,
+  conductPrices,
+  addAmount,
+}: {
+  userSnapshots: Snapshot[]
+  conductPrices: ConductPrices
+  addAmount: (id: string, amount: BigNumber) => void
+}) {
   const grouped = useMemo(
     () =>
       userSnapshots.reduce((acc: RegistrarUserSnapshots, obj) => {
@@ -187,6 +226,7 @@ function SnapshotGroup({ userSnapshots, conductPrices }: { userSnapshots: Snapsh
           if (last) return <Row key={index} showBorder={last} />
           return null
         }
+
         return (
           <SnapshotRow
             key={index}
@@ -195,6 +235,7 @@ function SnapshotGroup({ userSnapshots, conductPrices }: { userSnapshots: Snapsh
             amount={amount}
             last={last}
             conductPrices={conductPrices}
+            addAmount={addAmount}
           />
         )
       })}
@@ -208,13 +249,16 @@ function SnapshotRow({
   amount,
   last,
   conductPrices,
+  addAmount,
 }: {
   user: string
   contract: string
   amount: string
   last: boolean
   conductPrices: ConductPrices
+  addAmount: (id: string, amount: BigNumber) => void
 }) {
+  const id = user.concat('__').concat(contract).concat(amount)
   const registrar = useRegistrarByContract(contract)
 
   const calculatePrice = useCallback(
@@ -250,12 +294,16 @@ function SnapshotRow({
   }, [registrar])
 
   const [deltaUSD, isNegative] = useMemo(() => {
-    if (!parseFloat(amount) || !parseFloat(currentPrice) || !parseFloat(oldPrice)) return ['0', false]
+    if (!parseFloat(amount) || !parseFloat(currentPrice) || !parseFloat(oldPrice)) return [new BigNumber('0'), false]
     const notionalThen = new BigNumber(oldPrice).times(amount)
     const notionalNow = new BigNumber(currentPrice).times(amount)
     const deltaUSD = notionalNow.minus(notionalThen)
-    return [deltaUSD.toFixed(2), deltaUSD.isNegative()]
+    return [deltaUSD, deltaUSD.isNegative()]
   }, [currentPrice, oldPrice, amount])
+
+  useEffect(() => {
+    addAmount(id, deltaUSD)
+  }, [deltaUSD])
 
   return (
     <Row showBorder={last}>
@@ -266,7 +314,7 @@ function SnapshotRow({
       <Cell>{amount}</Cell>
       <Cell>{oldPriceFormatted}</Cell>
       <Cell>{currentPriceFormatted}</Cell>
-      <Cell red={parseFloat(deltaUSD) < 0}>${deltaUSD}</Cell>
+      <Cell red={parseFloat(deltaUSD.toFixed(2)) < 0}>${deltaUSD.toFixed(2)}</Cell>
       <Cell>{isNegative ? 'yes' : ''}</Cell>
     </Row>
   )

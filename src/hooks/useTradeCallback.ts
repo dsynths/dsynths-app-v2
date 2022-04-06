@@ -58,22 +58,21 @@ export default function useTradeCallback(
 
       console.log(signatures)
 
-      const args = {
+      const args = [
         partnerId,
-        receipient: account,
+        account,
         registrar,
-        amountIn: toHex(amountA.quotient),
-        price: signatures.data.calldata.price,
-        timestamp: signatures.data.calldata.timestamp,
-        _reqId: signatures.data.calldata.reqId,
-        sigs: signatures.data.calldata.sigs,
-      }
-
+        toHex(amountA.quotient),
+        signatures.data.calldata.price,
+        signatures.data.calldata.timestamp,
+        signatures.data.calldata.reqId,
+        signatures.data.calldata.sigs,
+      ]
       console.log('Contract arguments: ', args)
 
       return {
         address: Synchronizer.address,
-        calldata: Synchronizer.interface.encodeFunctionData(methodName, Object.values(args)) ?? '',
+        calldata: Synchronizer.interface.encodeFunctionData(methodName, args) ?? '',
         value: 0,
       }
     } catch (error) {
