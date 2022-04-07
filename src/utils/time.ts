@@ -8,7 +8,7 @@ dayjs.extend(dayOfYear)
 dayjs.extend(utc)
 
 function getEasternStandardTime() {
-  const now = dayjs().tz('EST')
+  const now = dayjs.utc().tz('EST')
   return {
     now,
     minute: now.minute(),
