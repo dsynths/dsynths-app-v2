@@ -4,7 +4,7 @@ import Image from 'next/image'
 
 import DeusLogo from '/public/static/images/tokens/deus.svg'
 import { ExternalLink } from 'components/Link'
-import { Trade as TradeComponent, LineChart } from 'components/App/Trade'
+import { Trade as TradeComponent, LineChart, Claim } from 'components/App/Trade'
 
 const Container = styled.div`
   display: flex;
@@ -36,6 +36,7 @@ export default function Trade() {
     <Container>
       <LineChart />
       <TradeComponent />
+      <Claim />
       <DeusBanner>
         <Image src={DeusLogo} alt="DEUS Logo" width="15px" height="15px" />
         <ExternalLink href="https://deus.finance">Powered by DEUS Finance</ExternalLink>

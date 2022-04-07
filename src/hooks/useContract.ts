@@ -6,8 +6,8 @@ import { Web3Provider } from '@ethersproject/providers'
 
 import useWeb3React from './useWeb3'
 
-import { ERC20_ABI, ERC20_BYTES32_ABI, Multicall2ABI, SynchronizerABI, PartnerManagerABI } from 'constants/abi'
-import { Multicall2, PartnerManager, Synchronizer } from 'constants/addresses'
+import { ERC20_ABI, ERC20_BYTES32_ABI, Multicall2ABI, SynchronizerABI } from 'constants/abi'
+import { Multicall2, Synchronizer } from 'constants/addresses'
 import { Providers } from 'constants/providers'
 
 export function useContract<T extends Contract = Contract>(
