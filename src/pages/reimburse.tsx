@@ -371,7 +371,9 @@ function useSnapShots() {
         if (!acc[obj.user]) {
           acc[obj.user] = []
         }
-        acc[obj.user].push(obj)
+        if (obj.registrar.ticker === 'XAU') {
+          acc[obj.user].push(obj)
+        }
         return acc
       }, {})
       setSnapshots(filteredByUser)

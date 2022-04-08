@@ -368,6 +368,9 @@ export default function Trade() {
     if (!!getApproveButton()) {
       return null
     }
+    if (registrar && registrar.ticker === 'XAU') {
+      return <PrimaryButton disabled>Trading for XAU temporarily suspended</PrimaryButton>
+    }
     if (!marketIsOpen) {
       return <PrimaryButton disabled>Market is closed</PrimaryButton>
     }
@@ -380,7 +383,6 @@ export default function Trade() {
     if (!registrar) {
       return <PrimaryButton>Select an asset</PrimaryButton>
     }
-
     if (error === PrimaryError.BALANCE) {
       return <PrimaryButton disabled>Insufficient {currencies[0]?.symbol} Balance</PrimaryButton>
     }
