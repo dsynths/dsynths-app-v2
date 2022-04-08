@@ -25,7 +25,7 @@ const Wrapper = styled(Card)`
 `
 
 // toggle this flag and modify the contents to show a banner whenever desired
-export const DISPLAY_WARNING = true
+export const DISPLAY_WARNING = false
 
 export default function Warning() {
   const theme = useTheme()
@@ -33,8 +33,7 @@ export default function Warning() {
     <Wrapper>
       <AlertTriangle color={theme.red1} size="80px" />
       <div>
-        Trading on dSynths is temporarily suspended. Pricing at the time of maintenance will be honored and affected
-        users will be reimbursed if necessary. Please join{' '}
+        Trading on dSynths is temporarily suspended. Please join{' '}
         <ExternalLink href="https://t.me/dsynths" style={{ textDecoration: 'underline' }}>
           {' '}
           our Telegram
