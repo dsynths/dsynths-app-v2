@@ -365,8 +365,6 @@ export default function Trade() {
   }
 
   function getActionButton(): JSX.Element | null {
-    return <PrimaryButton disabled>Trading temporarily suspended</PrimaryButton>
-
     if (!!getApproveButton()) {
       return null
     }
