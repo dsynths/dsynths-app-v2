@@ -130,38 +130,12 @@ const ShutdownPricesMap: { [symbol: string]: string } = {
 export default function Reimburse() {
   const snapshots = useSnapShots()
   const conductPrices = useConductPrices()
-  const [amounts, setAmounts] = useState<{ [id: string]: BigNumber }>({})
-
-  const addAmount = (id: string, amount: BigNumber) => {
-    setAmounts((prev) => ({
-      ...prev,
-      [id]: amount,
-    }))
-  }
-
-  const amountPerUser = useMemo(() => {
-    return Object.entries(amounts).reduce((acc: { [user: string]: BigNumber }, [id, amount]) => {
-      const user = id.split('__')[0]
-      if (!acc[user]) {
-        acc[user] = new BigNumber('0')
-      }
-      acc[user] = acc[user].plus(amount)
-      return acc
-    }, {})
-  }, [amounts])
-
-  console.table(
-    Object.entries(amountPerUser).map(([user, amount]) => ({
-      user,
-      amount: amount.toFixed(),
-    }))
-  )
 
   return (
     <Container>
       <div>
-        Note: short prices are subjected to a short premium. They are derived from the long price at that moment in time
-        (which is shown in parenthesis).
+        UPDATE: reimbursements have already been sent out, and trading has resumed. This table has been modified since
+        the distribution, and now only serves for educational purposes.
       </div>
       <TableWrapper>
         <Head>
@@ -170,21 +144,13 @@ export default function Reimburse() {
             <Cell>Registrar</Cell>
             <Cell>Type</Cell>
             <Cell>Direction</Cell>
-            <Cell>Current Position Amount</Cell>
             <Cell>Price on March 25, 17:00 UTC</Cell>
             <Cell>Current price</Cell>
-            <Cell>Notional Delta</Cell>
-            <Cell>Eligible</Cell>
           </tr>
         </Head>
         <tbody>
           {Object.values(snapshots).map((userSnapshots, index) => (
-            <MemoSnapshotGroup
-              key={index}
-              userSnapshots={userSnapshots}
-              conductPrices={conductPrices}
-              addAmount={addAmount}
-            />
+            <MemoSnapshotGroup key={index} userSnapshots={userSnapshots} conductPrices={conductPrices} />
           ))}
         </tbody>
       </TableWrapper>
@@ -194,15 +160,7 @@ export default function Reimburse() {
 
 const MemoSnapshotGroup = React.memo(SnapshotGroup, areEqual)
 
-function SnapshotGroup({
-  userSnapshots,
-  conductPrices,
-  addAmount,
-}: {
-  userSnapshots: Snapshot[]
-  conductPrices: ConductPrices
-  addAmount: (id: string, amount: BigNumber) => void
-}) {
+function SnapshotGroup({ userSnapshots, conductPrices }: { userSnapshots: Snapshot[]; conductPrices: ConductPrices }) {
   const grouped = useMemo(
     () =>
       userSnapshots.reduce((acc: RegistrarUserSnapshots, obj) => {
@@ -232,10 +190,8 @@ function SnapshotGroup({
             key={index}
             user={results[0].user}
             contract={results[0].registrar.id}
-            amount={amount}
             last={last}
             conductPrices={conductPrices}
-            addAmount={addAmount}
           />
         )
       })}
@@ -246,19 +202,14 @@ function SnapshotGroup({
 function SnapshotRow({
   user,
   contract,
-  amount,
   last,
   conductPrices,
-  addAmount,
 }: {
   user: string
   contract: string
-  amount: string
   last: boolean
   conductPrices: ConductPrices
-  addAmount: (id: string, amount: BigNumber) => void
 }) {
-  const id = user.concat('__').concat(contract).concat(amount)
   const registrar = useRegistrarByContract(contract)
 
   const calculatePrice = useCallback(
@@ -272,38 +223,20 @@ function SnapshotRow({
     [conductPrices]
   )
 
-  const [oldPrice, oldPriceFormatted]: string[] = useMemo(() => {
-    if (!registrar || !(registrar.ticker in ShutdownPricesMap)) {
-      return ['0', '']
-    }
+  const oldPriceFormatted: string = useMemo(() => {
+    if (!registrar || !(registrar.ticker in ShutdownPricesMap)) return '0'
     const price = calculatePrice(registrar, ShutdownPricesMap[registrar.ticker])
-    const formatted =
-      registrar.direction === Direction.LONG
-        ? formatDollarAmount(parseFloat(price))
-        : `${formatDollarAmount(parseFloat(price))} (${formatDollarAmount(
-            parseFloat(ShutdownPricesMap[registrar.ticker])
-          )})`
-    return [price, formatted]
+    return registrar.direction === Direction.LONG
+      ? formatDollarAmount(parseFloat(price))
+      : `${formatDollarAmount(parseFloat(price))} (${formatDollarAmount(
+          parseFloat(ShutdownPricesMap[registrar.ticker])
+        )})`
   }, [registrar, calculatePrice])
 
-  const [currentPrice, currentPriceFormatted]: string[] = useMemo(() => {
-    if (!registrar || !parseFloat(registrar.price)) {
-      return ['0', '']
-    }
-    return [registrar.price, formatDollarAmount(parseFloat(registrar.price))]
+  const currentPriceFormatted: string = useMemo(() => {
+    if (!registrar || !parseFloat(registrar.price)) return '0'
+    return formatDollarAmount(parseFloat(registrar.price))
   }, [registrar])
-
-  const [deltaUSD, isNegative] = useMemo(() => {
-    if (!parseFloat(amount) || !parseFloat(currentPrice) || !parseFloat(oldPrice)) return [new BigNumber('0'), false]
-    const notionalThen = new BigNumber(oldPrice).times(amount)
-    const notionalNow = new BigNumber(currentPrice).times(amount)
-    const deltaUSD = notionalNow.minus(notionalThen)
-    return [deltaUSD, deltaUSD.isNegative()]
-  }, [currentPrice, oldPrice, amount])
-
-  useEffect(() => {
-    addAmount(id, deltaUSD)
-  }, [deltaUSD])
 
   return (
     <Row showBorder={last}>
@@ -311,11 +244,8 @@ function SnapshotRow({
       <Cell>{registrar?.ticker}</Cell>
       <Cell>{registrar?.sector}</Cell>
       <Cell red={registrar?.direction === Direction.SHORT}>{registrar?.direction}</Cell>
-      <Cell>{amount}</Cell>
       <Cell>{oldPriceFormatted}</Cell>
       <Cell>{currentPriceFormatted}</Cell>
-      <Cell red={parseFloat(deltaUSD.toFixed(2)) < 0}>${deltaUSD.toFixed(2)}</Cell>
-      <Cell>{isNegative ? 'yes' : ''}</Cell>
     </Row>
   )
 }
@@ -371,9 +301,7 @@ function useSnapShots() {
         if (!acc[obj.user]) {
           acc[obj.user] = []
         }
-        if (obj.registrar.ticker === 'XAU') {
-          acc[obj.user].push(obj)
-        }
+        acc[obj.user].push(obj)
         return acc
       }, {})
       setSnapshots(filteredByUser)

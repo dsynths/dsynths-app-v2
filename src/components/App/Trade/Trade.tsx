@@ -368,9 +368,6 @@ export default function Trade() {
     if (!!getApproveButton()) {
       return null
     }
-    if (registrar && registrar.ticker === 'XAU') {
-      return <PrimaryButton disabled>Trading for XAU temporarily suspended</PrimaryButton>
-    }
     if (!marketIsOpen) {
       return <PrimaryButton disabled>Market is closed</PrimaryButton>
     }
