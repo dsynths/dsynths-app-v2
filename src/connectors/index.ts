@@ -31,7 +31,7 @@ export const walletconnect = new WalletConnectConnector({
 
 export const walletlink = new WalletLinkConnector({
   url: NETWORK_URLS[FALLBACK_CHAIN_ID],
-  appName: 'DEI Finance',
+  appName: 'dSynths',
   appLogoUrl: require('/public/static/images/AppLogo.png'),
   supportedChainIds: SUPPORTED_CHAIN_IDS,
 })
