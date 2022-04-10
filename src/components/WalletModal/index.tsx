@@ -11,8 +11,7 @@ import usePrevious from 'hooks/usePrevious'
 import { useModalOpen, useWalletModalToggle } from 'state/application/hooks'
 import { ApplicationModal } from 'state/application/reducer'
 
-import { fortmatic, injected, portis } from '../../connectors'
-import { OVERLAY_READY } from '../../connectors/Fortmatic'
+import { injected } from '../../connectors'
 import { SUPPORTED_WALLETS } from 'constants/wallet'
 
 import Option from './Option'
@@ -113,13 +112,6 @@ export default function WalletModal({
     }
   }
 
-  // close wallet modal if fortmatic modal is active
-  useEffect(() => {
-    fortmatic.on(OVERLAY_READY, () => {
-      toggleWalletModal()
-    })
-  }, [toggleWalletModal])
-
   // get wallets user can switch too, depending on device/browser
   function getOptions() {
     const isMetamask = window.ethereum && window.ethereum.isMetaMask
@@ -127,11 +119,6 @@ export default function WalletModal({
       const option = SUPPORTED_WALLETS[key]
       // check for mobile options
       if (isMobile) {
-        //disable portis on mobile for now
-        if (option.connector === portis) {
-          return null
-        }
-
         if (!window.web3 && !window.ethereum && option.mobile) {
           return (
             <Option

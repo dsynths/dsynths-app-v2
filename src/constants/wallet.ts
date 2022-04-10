@@ -1,6 +1,6 @@
 import { AbstractConnector } from '@web3-react/abstract-connector'
 
-import { fortmatic, injected, portis, walletconnect, walletlink } from '../connectors'
+import { injected, walletconnect, walletlink } from '../connectors'
 
 interface WalletInfo {
   readonly connector?: AbstractConnector
@@ -44,21 +44,5 @@ export const SUPPORTED_WALLETS: { [key: string]: WalletInfo } = {
     iconURL: require('/public/static/images/wallets/coinbaseWalletIcon.png'),
     description: 'Use Coinbase Wallet app on mobile device',
     color: '#315CF5',
-  },
-  FORTMATIC: {
-    connector: fortmatic,
-    name: 'Fortmatic',
-    iconURL: require('/public/static/images/wallets/fortmaticIcon.png'),
-    description: 'Login using Fortmatic hosted wallet',
-    color: '#6748FF',
-    mobile: true,
-  },
-  PORTIS: {
-    connector: portis,
-    name: 'Portis',
-    iconURL: require('/public/static/images/wallets/portisIcon.png'),
-    description: 'Login using Portis hosted wallet',
-    color: '#4A6C9B',
-    mobile: true,
   },
 }

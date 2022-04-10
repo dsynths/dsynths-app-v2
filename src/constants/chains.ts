@@ -1,5 +1,3 @@
-import { INFURA_KEY } from './keys'
-
 export enum SupportedChainId {
   MAINNET = 1,
   ROPSTEN = 3,
@@ -52,6 +50,5 @@ export const SynchronizerChains = [SupportedChainId.FANTOM]
 export const FALLBACK_CHAIN_ID = SupportedChainId.FANTOM
 
 export const NETWORK_URLS: { [chainId: number]: string } = {
-  [SupportedChainId.RINKEBY]: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
   [SupportedChainId.FANTOM]: 'https://rpc.ftm.tools',
 }
