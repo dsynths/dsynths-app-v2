@@ -110,7 +110,7 @@ export default function useTradeCallback(
           if (call.error.message) {
             throw new Error(call.error.message)
           } else {
-            throw new Error('Unexpected error. Could not construct calldata.')
+            throw new Error(`Unexpected error, could not construct calldata: ${call.error}`)
           }
         }
 
@@ -128,19 +128,19 @@ export default function useTradeCallback(
             .then((result) => {
               console.debug('Unexpected successful call after failed estimate gas', call, gasError, result)
               return {
-                error: new Error('Unexpected issue with estimating the gas. Please try again.'),
+                error: gasError.message,
               }
             })
             .catch((callError) => {
               console.debug('Call threw an error', call, callError)
               return {
-                error: new Error(callError.message), // TODO make this human readable
+                error: tradeErrorToUserReadableMessage(callError),
               }
             })
         })
 
         if ('error' in estimatedGas) {
-          throw new Error('Unexpected error. Could not estimate gas for this transaction.')
+          throw new Error(estimatedGas.error)
         }
 
         return library
@@ -167,10 +167,32 @@ export default function useTradeCallback(
             } else {
               // otherwise, the error was unexpected and we need to convey that
               console.error(`Transaction failed`, error, address, calldata, value)
-              throw new Error(`Transaction failed: ${error.message}`) // TODO make this human readable, see: https://github.com/sushiswap/sushiswap-interface/blob/2082b7ded0162324e83aeffad261cc511441f00e/src/hooks/useSwapCallback.ts#L470
+              throw new Error(`Transaction failed: ${tradeErrorToUserReadableMessage(error)}`)
             }
           })
       },
     }
   }, [account, chainId, library, addTransaction, constructCall, Synchronizer, amountA, amountB, currencyA, currencyB])
+}
+
+export function tradeErrorToUserReadableMessage(error: any): string {
+  let reason: string | undefined
+
+  while (Boolean(error)) {
+    reason = error.reason ?? error.data?.message ?? error.message ?? reason
+    error = error.error ?? error.data?.originalError
+  }
+
+  if (reason?.indexOf('execution reverted: ') === 0) reason = reason.substring('execution reverted: '.length)
+
+  switch (reason) {
+    case 'Synchronizer: INVALID_PARTNER_ID':
+      return 'This transaction will not succeed due to an invalid partner ID. Try registering an address via PartnerManager.'
+    default:
+      if (reason?.indexOf('undefined is not an object') !== -1) {
+        console.error(error, reason)
+        return ': s'
+      }
+      return `Unknown error${reason ? `: "${reason}"` : ''}`
+  }
 }
