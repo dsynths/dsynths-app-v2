@@ -359,7 +359,7 @@ export default function Trade() {
       )
     }
     if (showApprove) {
-      return <PrimaryButton onClick={handleApprove}>Allow dSynths to spend your {currencies[0]?.symbol}</PrimaryButton>
+      return <PrimaryButton onClick={handleApprove}>Approve {currencies[0]?.symbol}</PrimaryButton>
     }
     return null
   }
