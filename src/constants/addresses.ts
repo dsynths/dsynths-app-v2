@@ -21,6 +21,10 @@ export const Synchronizer: AddressMap = {
   [SupportedChainId.FANTOM]: addresses.Synchronizer[SupportedChainId.FANTOM],
 }
 
+export const DeiMinter: AddressMap = {
+  [SupportedChainId.FANTOM]: '0x1B7879F4dB7980E464d6B92FDbf9DaA8F1E55073', // TODO: add to SDK
+}
+
 export const PartnerManager: AddressMap = {
   [SupportedChainId.FANTOM]: addresses.PartnerManager[SupportedChainId.FANTOM],
 }
