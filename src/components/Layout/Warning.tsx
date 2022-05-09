@@ -1,9 +1,8 @@
 import { Card } from 'components/Card'
 import React from 'react'
 import styled, { useTheme } from 'styled-components'
-import { AlertTriangle } from 'react-feather'
+import { Info } from 'react-feather'
 
-import { ExternalLink } from 'components/Link'
 import { Z_INDEX } from 'theme'
 
 const Wrapper = styled(Card)`
@@ -15,9 +14,10 @@ const Wrapper = styled(Card)`
   align-self: center;
   align-items: center;
   margin: 10px 0;
-  border: 1px solid ${({ theme }) => theme.red1};
+  border: 1px solid ${({ theme }) => theme.yellow1};
   font-size: 1rem;
   z-index: ${Z_INDEX.fixed};
+  padding: 0.25rem 1rem;
 
   ${({ theme }) => theme.mediaWidth.upToMedium`
     font-size: 0.7rem;
@@ -25,20 +25,17 @@ const Wrapper = styled(Card)`
 `
 
 // toggle this flag and modify the contents to show a banner whenever desired
-export const DISPLAY_WARNING = false
+export const DISPLAY_WARNING = true
 
 export default function Warning() {
   const theme = useTheme()
   return DISPLAY_WARNING ? (
     <Wrapper>
-      <AlertTriangle color={theme.red1} size="80px" />
+      <Info color={theme.yellow1} size="80px" />
       <div>
-        Trading on dSynths is temporarily suspended. Please join{' '}
-        <ExternalLink href="https://t.me/dsynths" style={{ textDecoration: 'underline' }}>
-          {' '}
-          our Telegram
-        </ExternalLink>{' '}
-        for more info. Thank you for your understanding.
+        All previous positions on dSynths were closed and the respective amounts were airdropped to wallets in DEI.
+        <br />
+        You can trade RUB, EUR until v3 is launched. Happy trading!
       </div>
     </Wrapper>
   ) : null
