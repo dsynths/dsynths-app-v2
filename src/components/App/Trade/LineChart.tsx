@@ -220,7 +220,7 @@ export default function LineChart() {
   )
 
   useEffect(() => {
-    const { name, ticker, sector } = registrar ?? { name: 'Tesla Inc.', ticker: 'TSLA', sector: Sector.STOCKS }
+    const { name, ticker, sector } = registrar ?? { name: 'Ruble', ticker: 'RUB', sector: Sector.STOCKS }
 
     setCachedTicker(ticker)
     setCachedName(name)

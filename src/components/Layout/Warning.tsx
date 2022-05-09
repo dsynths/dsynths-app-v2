@@ -25,7 +25,7 @@ const Wrapper = styled(Card)`
 `
 
 // toggle this flag and modify the contents to show a banner whenever desired
-export const DISPLAY_WARNING = true
+export const DISPLAY_WARNING = false
 
 export default function Warning() {
   const theme = useTheme()
