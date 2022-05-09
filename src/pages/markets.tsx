@@ -9,7 +9,7 @@ import useRpcChangerCallback from 'hooks/useRpcChangerCallback'
 import { ChainInfo } from 'constants/chainInfo'
 
 import { Modal, ModalHeader } from 'components/Modal'
-import { SectorButton, useSearch, InputField, Table, TrendingMarkets, SynchroniserStats } from 'components/App/Markets'
+import { SectorButton, useSearch, InputField, Table } from 'components/App/Markets'
 import { IconWrapper, Loader } from 'components/Icons'
 import { PrimaryButton } from 'components/Button'
 
