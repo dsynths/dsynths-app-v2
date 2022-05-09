@@ -14,7 +14,7 @@ export const Collateral: AddressMap = {
 }
 
 export const DefaultSynth: AddressMap = {
-  [SupportedChainId.FANTOM]: '0xD5725f2F5807B629d08eAdd8c2D65A85B64C64bA', // TSLA
+  [SupportedChainId.FANTOM]: '0xeb4395075d083a53221c85175d84D6B14359690D', // EUR
 }
 
 export const Synchronizer: AddressMap = {

@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { useAppDispatch } from 'state'
 import styled from 'styled-components'
 import { ZERO } from '@sushiswap/core-sdk'
-import { TrendingDown, TrendingUp } from 'react-feather'
+// import { TrendingDown, TrendingUp } from 'react-feather'
 
 import { useIsJadeTheme } from 'hooks/useTheme'
 import useWeb3React from 'hooks/useWeb3'
@@ -392,8 +392,8 @@ export default function Trade() {
 
   function getMainContent(): JSX.Element {
     return (
-      <>
-        <DirectionWrapper>
+      /* TODO:@coinlordd we only have LONG now. please check it doesn't have side effect on other parts */
+      /* <DirectionWrapper>
           <DirectionTab
             isLong
             active={direction === Direction.LONG}
@@ -410,30 +410,29 @@ export default function Trade() {
             {Direction.SHORT}
             <TrendingDown size={14} />
           </DirectionTab>
-        </DirectionWrapper>
-        <InputWrapper>
-          <InputBox
-            currency={currencies[0]}
-            value={formattedAmounts[0]}
-            showMax
-            showSelect={showSelectIn}
-            onChange={(value) =>
-              dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.A }))
-            }
-          />
-          <ArrowWrapper onClick={handleSwitchCurrencies}>
-            <ArrowBubble size={30} />
-          </ArrowWrapper>
-          <InputBox
-            currency={currencies[1]}
-            value={formattedAmounts[1]}
-            showSelect={showSelectOut}
-            onChange={(value) =>
-              dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.B }))
-            }
-          />
-        </InputWrapper>
-      </>
+        </DirectionWrapper>  */
+      <InputWrapper>
+        <InputBox
+          currency={currencies[0]}
+          value={formattedAmounts[0]}
+          showMax
+          showSelect={showSelectIn}
+          onChange={(value) =>
+            dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.A }))
+          }
+        />
+        <ArrowWrapper onClick={handleSwitchCurrencies}>
+          <ArrowBubble size={30} />
+        </ArrowWrapper>
+        <InputBox
+          currency={currencies[1]}
+          value={formattedAmounts[1]}
+          showSelect={showSelectOut}
+          onChange={(value) =>
+            dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.B }))
+          }
+        />
+      </InputWrapper>
     )
   }
 

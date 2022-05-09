@@ -172,8 +172,9 @@ export default function Markets() {
         <ModalHeader title={modalRegistrar?.name} onClose={onDismiss} />
         <ModalContent>{getModalContent()}</ModalContent>
       </Modal>
-      <SynchroniserStats />
-      <TrendingMarkets />
+      {/* TODO: Disabling these stats as they no longer are valid */}
+      {/* <SynchroniserStats />
+      <TrendingMarkets /> */}
       <SectorRow>
         {(Object.keys(Sector) as (keyof typeof Sector)[]).map((sector, index) => {
           if (sector === Sector.COMMODITIES || sector === Sector.MISC) return null
