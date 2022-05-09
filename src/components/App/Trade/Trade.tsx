@@ -244,8 +244,6 @@ export default function Trade() {
     }
   }, [registrar, direction])
 
-  console.log({ registrar })
-
   const handleSwitchCurrencies = useCallback(() => {
     dispatch(setTradeState({ ...tradeState, typedValue: '', typedField: TypedField.A }))
     setTradeType((prev) => (prev === TradeType.OPEN ? TradeType.CLOSE : TradeType.OPEN))
@@ -394,9 +392,8 @@ export default function Trade() {
 
   function getMainContent(): JSX.Element {
     return (
-      <>
-        {/* TODO:@coinlordd we only have LONG now. please check it doesn't have side effect on other parts */}
-        {/* <DirectionWrapper>
+      /* TODO:@coinlordd we only have LONG now. please check it doesn't have side effect on other parts */
+      /* <DirectionWrapper>
           <DirectionTab
             isLong
             active={direction === Direction.LONG}
@@ -413,30 +410,29 @@ export default function Trade() {
             {Direction.SHORT}
             <TrendingDown size={14} />
           </DirectionTab>
-        </DirectionWrapper>  */}
-        <InputWrapper>
-          <InputBox
-            currency={currencies[0]}
-            value={formattedAmounts[0]}
-            showMax
-            showSelect={showSelectIn}
-            onChange={(value) =>
-              dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.A }))
-            }
-          />
-          <ArrowWrapper onClick={handleSwitchCurrencies}>
-            <ArrowBubble size={30} />
-          </ArrowWrapper>
-          <InputBox
-            currency={currencies[1]}
-            value={formattedAmounts[1]}
-            showSelect={showSelectOut}
-            onChange={(value) =>
-              dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.B }))
-            }
-          />
-        </InputWrapper>
-      </>
+        </DirectionWrapper>  */
+      <InputWrapper>
+        <InputBox
+          currency={currencies[0]}
+          value={formattedAmounts[0]}
+          showMax
+          showSelect={showSelectIn}
+          onChange={(value) =>
+            dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.A }))
+          }
+        />
+        <ArrowWrapper onClick={handleSwitchCurrencies}>
+          <ArrowBubble size={30} />
+        </ArrowWrapper>
+        <InputBox
+          currency={currencies[1]}
+          value={formattedAmounts[1]}
+          showSelect={showSelectOut}
+          onChange={(value) =>
+            dispatch(setTradeState({ ...tradeState, typedValue: value || '', typedField: TypedField.B }))
+          }
+        />
+      </InputWrapper>
     )
   }
 
